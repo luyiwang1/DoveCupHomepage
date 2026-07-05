@@ -987,6 +987,7 @@ function render() {
   renderWaitlist();
   renderSummary();
   renderStats();
+  replaceLegacyLevelText();
   save();
 }
 
@@ -1080,164 +1081,6 @@ function renderSummary() {
   }
 }
 
-function personCard(p, rank, list) {
-  const av = avatarColor(p.name);
-  const init = initials(p.name);
-  const isJoined = list === 'joined';
-  const badges = isJoined ? `
-    <div class="badges">
-      <span class="badge badge-confirm ${p.confirmed ? '' : 'off'}" onclick="toggleConfirm(${p.id})">${p.confirmed ? '✅ 已确认' : '❓ 待确认'}</span>
-      <span class="badge badge-paid ${p.paid ? '' : 'off'}" onclick="togglePaid(${p.id})">${p.paid ? '💰 已付' : '💸 未付'}</span>
-    </div>
-  ` : `
-    <div class="badges">
-      <span class="badge badge-wait-promote" onclick="promoteOne(${p.id})">↑ 补位</span>
-      <span class="badge badge-cancel" onclick="removeFromWaitlist(${p.id})">✕</span>
-    </div>
-  `;
-
-  return `
-  <div class="person-card" id="card-${p.id}" ontouchstart="" >
-    <span class="rank-num ${rank <= 3 ? 'top' : ''}">${rank}</span>
-    <div class="avatar" style="background:${av}">${init}</div>
-    <div class="person-info">
-      <div class="person-name">${p.name}</div>
-      ${isJoined ? '' : `<div class="person-meta">排队中</div>`}
-    </div>
-    ${badges}
-    ${isJoined ? `<div class="delete-zone" onclick="removeJoined(${p.id})">退出</div>` : ''}
-  </div>`;
-}
-
-// ── Actions ──
-function addPerson(list) {
-  const name = document.getElementById('addName').value.trim();
-  const levelGroup = document.getElementById('addLevel').value === 'over3' ? 'over3' : 'under3';
-  if (!name) { showToast('请输入姓名'); return; }
-
-  if (list === 'joined') {
-    // check capacity
-    if (state.capacity && state.joined.length >= state.capacity) {
-      showToast(`名额已满！自动加入 Waitlist`);
-      list = 'waitlist';
-    }
-  }
-
-  const person = { id: newId(), name, confirmed: false, paid: false, ts: Date.now() };
-  if (list === 'joined') {
-    state.joined.push(person);
-    showToast(`✅ ${name} 已报名！`, 'green');
-  } else {
-    state.waitlist.push({ id: person.id, name, ts: person.ts });
-    showToast(`⏳ ${name} 已加入 Waitlist`);
-  }
-
-  closeModalById('addModal');
-  document.getElementById('addName').value = '';
-  render();
-  // switch to right tab
-  switchTab(list === 'joined' ? 'joined' : 'waitlist');
-}
-
-function toggleConfirm(id) {
-  const p = state.joined.find(x=>x.id===id);
-  if (!p) return;
-  p.confirmed = !p.confirmed;
-  showToast(p.confirmed ? `${p.name} 已确认参加` : `${p.name} 取消确认`, p.confirmed ? 'green' : '');
-  render();
-}
-
-function togglePaid(id) {
-  const p = state.joined.find(x=>x.id===id);
-  if (!p) return;
-  p.paid = !p.paid;
-  showToast(p.paid ? `${p.name} 已付款 💰` : `${p.name} 标记未付款`, p.paid ? 'green' : '');
-  render();
-}
-
-function removeJoined(id) {
-  const idx = state.joined.findIndex(x=>x.id===id);
-  if (idx === -1) return;
-  const name = state.joined[idx].name;
-  const card = document.getElementById('card-'+id);
-  if (card) {
-    card.classList.add('removing');
-    setTimeout(() => {
-      state.joined.splice(idx, 1);
-      autoPromote();
-      render();
-    }, 280);
-  } else {
-    state.joined.splice(idx, 1);
-    autoPromote();
-    render();
-  }
-  showToast(`${name} 已退出`);
-}
-
-function removeFromWaitlist(id) {
-  const idx = state.waitlist.findIndex(x=>x.id===id);
-  if (idx === -1) return;
-  const name = state.waitlist[idx].name;
-  state.waitlist.splice(idx, 1);
-  showToast(`${name} 已从 Waitlist 移除`);
-  render();
-}
-
-function promoteOne(id) {
-  if (state.capacity && state.joined.length >= state.capacity) {
-    showToast('名额已满，无法补位');
-    return;
-  }
-  const idx = state.waitlist.findIndex(x=>x.id===id);
-  if (idx === -1) return;
-  const w = state.waitlist[idx];
-  state.waitlist.splice(idx, 1);
-  state.joined.push({ id: w.id, name: w.name, confirmed: false, paid: false, ts: Date.now() });
-  showToast(`🎉 ${w.name} 已补位成功！`, 'green');
-  render();
-  // Animate the new card
-  setTimeout(() => {
-    const card = document.getElementById('card-'+w.id);
-    if (card) card.classList.add('promoting');
-  }, 50);
-  switchTab('joined');
-}
-
-function promoteAll() {
-  if (!state.capacity) return;
-  const slots = state.capacity - state.joined.length;
-  if (slots <= 0) { showToast('名额已满'); return; }
-  const toPromote = state.waitlist.splice(0, slots);
-  toPromote.forEach(w => {
-    state.joined.push({ id: w.id, name: w.name, confirmed: false, paid: false, ts: Date.now() });
-  });
-  showToast(`🎉 ${toPromote.length} 人已成功补位！`, 'green');
-  render();
-  switchTab('joined');
-}
-
-function autoPromote() {
-  if (!state.capacity || state.waitlist.length === 0) return;
-  if (state.joined.length < state.capacity) {
-    const w = state.waitlist.shift();
-    state.joined.push({ id: w.id, name: w.name, confirmed: false, paid: false, ts: Date.now() });
-    showToast(`🎉 ${w.name} 自动补位成功！`, 'green');
-    setTimeout(() => {
-      const card = document.getElementById('card-'+w.id);
-      if (card) card.classList.add('promoting');
-    }, 100);
-  }
-}
-
-function setCapacity() {
-  const val = parseInt(document.getElementById('capInput').value);
-  if (isNaN(val) || val < 1) { showToast('请输入有效名额'); return; }
-  state.capacity = val;
-  showToast(`名额上限设为 ${val} 人`, 'green');
-  render();
-}
-
 function copyList() {
   const title = state.title;
   const cap = state.capacity ? `（名额 ${state.joined.length}/${state.capacity}）` : `（共 ${state.joined.length} 人）`;
@@ -1287,18 +1130,6 @@ function switchTab(name) {
 function showAddModal() {
   document.getElementById('addModal').classList.add('open');
   setTimeout(() => document.getElementById('addName').focus(), 200);
-}
-function editTitle() {
-  document.getElementById('titleInput').value = state.title;
-  document.getElementById('titleModal').classList.add('open');
-  setTimeout(() => document.getElementById('titleInput').focus(), 200);
-}
-function saveTitle() {
-  const v = document.getElementById('titleInput').value.trim();
-  if (!v) return;
-  state.title = v;
-  closeModalById('titleModal');
-  render();
 }
 function closeModal(e, id) {
   if (e.target === document.getElementById(id)) closeModalById(id);
@@ -1521,6 +1352,17 @@ function saveTitle() {
   render();
 }
 
+function replaceLegacyLevelText() {
+  document.querySelectorAll('option, .level-section-title, .person-meta').forEach(el => {
+    el.childNodes.forEach(node => {
+      if (node.nodeType !== Node.TEXT_NODE) return;
+      node.nodeValue = node.nodeValue
+        .replace(/3\.0\s*以下/g, '和平鸽')
+        .replace(/3\.0\s*以上/g, '猛禽');
+    });
+  });
+}
+
 // Enter key support
 document.getElementById('addName').addEventListener('keydown', e => {
   if (e.key === 'Enter') addPerson('joined');
@@ -1531,28 +1373,6 @@ document.getElementById('titleInput').addEventListener('keydown', e => {
 document.getElementById('capInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') setCapacity();
 });
-
-// Init with sample data from the screenshot
-function initSampleData() {
-  const names = [
-    'Chris H','塔塔','Xavier','Andy','杨令','Alvin','老五','Melody🎶',
-    'young','bill','Rooney','GILL','Joyce','Joey','rachael','Harry Lyu',
-    'Steven','小梁','李子健 Jack','S','paul','Zack','JJ','B','RXH'
-  ];
-  state.capacity = 25;
-  state.joined = names.slice(0, 22).map((name, i) => ({
-    id: newId(),
-    name,
-    confirmed: Math.random() > 0.35,
-    paid: Math.random() > 0.45,
-    ts: Date.now() - (25 - i) * 60000
-  }));
-  state.waitlist = names.slice(22).map(name => ({
-    id: newId(),
-    name,
-    ts: Date.now()
-  }));
-}
 
 load();
 render();
