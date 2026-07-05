@@ -75,8 +75,8 @@ const COURTS_DB_PATH='doveCupWaitlistSystem/courtsPage';
 const SCORE_DB_PATH='doveCupWaitlistSystem/scores';
 const FIREBASE_CONFIG={apiKey:'AIzaSyBPTwRAkfHjCA_RCQu5t2udzllF3Rz_CCo',authDomain:'dovecupdatabase.firebaseapp.com',databaseURL:'https://dovecupdatabase-default-rtdb.firebaseio.com/',projectId:'dovecupdatabase',storageBucket:'dovecupdatabase.firebasestorage.app',messagingSenderId:'814970094950',appId:'1:814970094950:web:c061c00eaceed40125b4a7'};
 let courtCount=5,players=[],baseCourts=[],rounds=[],roundScores={},savedLayout=null,divisionRanges=[],remoteCourtsRef=null,scoreRef=null,scoreData={players:{},events:[]},usingManual=false,isAdminMode=sessionStorage.getItem(ADMIN_STORAGE)==='1',scoreSyncTimer=null;
-function goPage(page){location.href=`${page}?v=${SITE_VERSION}`}
-if(new URLSearchParams(location.search).get('v')!==SITE_VERSION){history.replaceState(null,'',`${location.pathname}?v=${SITE_VERSION}`)}
+function goPage(page){location.href=page}
+if(new URLSearchParams(location.search).has('v')){history.replaceState(null,'',location.pathname)}
 function renderAdmin(){document.body.classList.toggle('is-admin',isAdminMode);const btn=document.getElementById('adminBtn');if(btn)btn.textContent=isAdminMode?'Admin 已登录':'Admin';if(!isAdminMode)document.getElementById('manualBox').style.display='none'}
 function toggleAdmin(){if(isAdminMode){isAdminMode=false;sessionStorage.removeItem(ADMIN_STORAGE);renderAdmin();render();return}const pass=prompt('请输入管理员密码');if(pass===ADMIN_PASSWORD){isAdminMode=true;sessionStorage.setItem(ADMIN_STORAGE,'1');renderAdmin();render()}else if(pass!==null){alert('密码错误')}}
 function requireAdmin(){if(isAdminMode)return true;alert('只有管理员可以修改赛程');return false}
@@ -88,7 +88,7 @@ function scoreFor(round,court){return roundScores[scoreKey(round,court)]||{}}
 function hasScore(score){return Number.isFinite(Number(score.a))&&Number.isFinite(Number(score.b))}
 function pickCaptain(teamA,teamB,round,court){const all=teamA.concat(teamB);return all.length?all[(round+court)%all.length].key:null}
 function makeMatchFromPlayers(list,idx,round=0){const clean=list.filter(Boolean);const teamA=[];const teamB=[];clean.forEach((p,i)=>{if(clean.length>=4){(i===0||i===3?teamA:teamB).push(p)}else{(i%2===0?teamA:teamB).push(p)}});return{court:idx,teamA,teamB,captainKey:pickCaptain(teamA,teamB,round,idx)}}
-function levelLabel(level){return level==='over3'?'3.0 以上':level==='under3'?'3.0 以下':'未分级'}
+function levelLabel(level){return level==='over3'?'猛禽':level==='under3'?'和平鸽':'未分级'}
 function levelOrder(level){return level==='over3'?0:level==='under3'?1:2}
 function rebuildDivisionRanges(groups,allocations){divisionRanges=[];let start=0;groups.forEach(g=>{const count=allocations[g.level]||0;if(!count)return;divisionRanges.push({level:g.level,label:levelLabel(g.level),start,end:start+count-1,players:g.players.length});start+=count});courtCount=Math.max(1,start)}
 function allocateDivisionCourts(groups,total){const allocations={};if(!groups.length)return allocations;groups.forEach(g=>allocations[g.level]=1);let left=Math.max(groups.length,total)-groups.length;const sorted=[...groups].sort((a,b)=>b.players.length-a.players.length);while(left>0){sorted[(left-1)%sorted.length].level&&(allocations[sorted[(left-1)%sorted.length].level]++);left--}return allocations}

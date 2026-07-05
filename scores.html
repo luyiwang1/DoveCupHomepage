@@ -67,8 +67,8 @@ const SIGNUP_DB_PATH='doveCupWaitlistSystem/main';
 const SCORE_DB_PATH='doveCupWaitlistSystem/scores';
 const FIREBASE_CONFIG={apiKey:'AIzaSyBPTwRAkfHjCA_RCQu5t2udzllF3Rz_CCo',authDomain:'dovecupdatabase.firebaseapp.com',databaseURL:'https://dovecupdatabase-default-rtdb.firebaseio.com/',projectId:'dovecupdatabase',storageBucket:'dovecupdatabase.firebasestorage.app',messagingSenderId:'814970094950',appId:'1:814970094950:web:c061c00eaceed40125b4a7'};
 let scoreRef=null,signupRef=null,scoreData={players:{},events:[]},signupState={joined:[]},isAdminMode=sessionStorage.getItem(ADMIN_STORAGE)==='1';
-function goPage(page){location.href=`${page}?v=${SITE_VERSION}`}
-if(new URLSearchParams(location.search).get('v')!==SITE_VERSION){history.replaceState(null,'',`${location.pathname}?v=${SITE_VERSION}`)}
+function goPage(page){location.href=page}
+if(new URLSearchParams(location.search).has('v')){history.replaceState(null,'',location.pathname)}
 function keyForName(name){return name.trim().toLowerCase().replace(/[.#$/[\]]/g,'_')}
 function normalizeScoreData(data){const next=data||{};next.players=next.players&&typeof next.players==='object'?next.players:{};next.events=Array.isArray(next.events)?next.events:[];return next}
 function signupPlayers(){return Array.isArray(signupState.joined)?signupState.joined.filter(p=>p&&p.name):[]}

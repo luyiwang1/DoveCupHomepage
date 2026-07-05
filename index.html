@@ -758,8 +758,8 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
     <div class="modal-title">➕ 添加人员</div>
     <input class="modal-input" id="addName" placeholder="姓名 / 微信名" autocomplete="off">
     <select class="modal-input" id="addLevel">
-      <option value="under3">3.0以下</option>
-      <option value="over3">3.0以上</option>
+      <option value="under3">和平鸽</option>
+      <option value="over3">猛禽</option>
     </select>
     <div class="modal-btns">
       <button class="modal-btn cancel" onclick="closeModalById('addModal')">取消</button>
@@ -790,8 +790,8 @@ const ADMIN_PASSWORD = '8888';
 const SITE_VERSION = '30';
 const WAITLIST_CAPACITY = 24;
 const LEVEL_GROUPS = [
-  { key: 'under3', label: '3.0以下' },
-  { key: 'over3', label: '3.0以上' }
+  { key: 'under3', label: '和平鸽' },
+  { key: 'over3', label: '猛禽' }
 ];
 const DATA_STORAGE = 'signup_v3';
 const DB_PATH = 'doveCupWaitlistSystem/main';
@@ -829,10 +829,10 @@ let currentUserName = localStorage.getItem(USER_NAME_STORAGE) || '';
 let isAdminMode = sessionStorage.getItem(ADMIN_STORAGE) === '1';
 
 function goPage(page) {
-  location.href = `${page}?v=${SITE_VERSION}`;
+  location.href = page;
 }
-if (new URLSearchParams(location.search).get('v') !== SITE_VERSION) {
-  history.replaceState(null, '', `${location.pathname}?v=${SITE_VERSION}`);
+if (new URLSearchParams(location.search).has('v')) {
+  history.replaceState(null, '', location.pathname);
 }
 function newId() { return idSeq++; }
 function hasFirebaseConfig() {
