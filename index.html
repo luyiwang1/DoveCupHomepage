@@ -289,14 +289,14 @@ body {
 
 .app-section {
   background:
-    linear-gradient(180deg, #143323 0, #143323 210px, #f4ead1 210px),
-    #f4ead1;
-  padding: clamp(44px, 7vw, 84px) 16px 40px;
+    linear-gradient(180deg, #143323 0, #143323 310px, #fff8e7 310px),
+    #fff8e7;
+  padding: clamp(52px, 8vw, 104px) clamp(16px, 5vw, 72px);
 }
 
 .app-intro {
-  max-width: 960px;
-  margin: 0 auto 24px;
+  max-width: 1180px;
+  margin: 0 auto 28px;
   color: #f8efd7;
 }
 
@@ -314,14 +314,76 @@ body {
   line-height: 1.8;
 }
 
-.signup-phone {
-  max-width: 480px;
+.registration-console {
+  display: grid;
+  grid-template-columns: minmax(260px, 340px) minmax(0, 1fr);
+  max-width: 1180px;
   margin: 0 auto;
   overflow: hidden;
-  background: #f7f7f7;
+  background: #fffaf0;
   border: 1px solid rgba(20, 51, 35, .18);
-  border-radius: 28px;
-  box-shadow: 0 28px 70px rgba(37, 28, 16, .22);
+  border-radius: 8px;
+  box-shadow: 0 32px 86px rgba(37, 28, 16, .18);
+}
+
+.registration-side {
+  display: flex;
+  flex-direction: column;
+  gap: 22px;
+  min-height: 680px;
+  padding: clamp(24px, 3.5vw, 38px);
+  color: #f8efd7;
+  background:
+    linear-gradient(rgba(20, 51, 35, .86), rgba(20, 51, 35, .92)),
+    url("golden-dove-cup-hero.png") center / cover no-repeat;
+}
+
+.registration-side h3 {
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(34px, 4vw, 54px);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.registration-side p {
+  margin: 0;
+  color: rgba(248, 239, 215, .76);
+  line-height: 1.82;
+}
+
+.side-list {
+  display: grid;
+  gap: 1px;
+  margin-top: auto;
+  border: 1px solid rgba(248, 239, 215, .18);
+  background: rgba(248, 239, 215, .18);
+}
+
+.side-list a,
+.side-list div {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 16px;
+  color: #f8efd7;
+  background: rgba(20, 51, 35, .76);
+  text-decoration: none;
+}
+
+.side-list span {
+  color: #d5ab55;
+  font-weight: 900;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.signup-workspace {
+  position: relative;
+  min-width: 0;
+  background:
+    linear-gradient(180deg, rgba(199, 154, 61, .08), transparent 260px),
+    #fffaf0;
 }
 
 .tool-section {
@@ -372,6 +434,200 @@ body {
   color: #f8efd7;
   background: #10271e;
   font-size: 13px;
+}
+
+.registration-console .app-header {
+  position: static;
+  background: transparent;
+  padding: 28px 28px 0;
+  box-shadow: none;
+}
+
+.registration-console .header-top {
+  align-items: flex-start;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+
+.registration-console .event-title {
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(27px, 3vw, 40px);
+  font-weight: 500;
+  color: #143323;
+  letter-spacing: 0;
+  white-space: normal;
+}
+
+.registration-console .edit-title-btn,
+.registration-console .admin-btn {
+  min-height: 34px;
+  border-radius: 999px;
+  border: 1px solid rgba(20, 51, 35, .18);
+  background: rgba(255, 250, 240, .72);
+  color: #143323;
+  font-weight: 900;
+}
+
+.registration-console .admin-btn.active {
+  border-color: #c99a3c;
+  background: #143323;
+  color: #f8efd7;
+}
+
+.registration-console .stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+  padding-bottom: 22px;
+}
+
+.registration-console .stat-chip {
+  align-items: flex-start;
+  justify-content: space-between;
+  min-height: 76px;
+  padding: 14px;
+  border: 1px solid rgba(20, 51, 35, .14);
+  border-radius: 8px;
+  background: #fff3d7;
+  color: rgba(20, 51, 35, .68);
+}
+
+.registration-console .stat-chip .dot {
+  display: none;
+}
+
+.registration-console .stat-chip strong {
+  display: block;
+  margin-top: 22px;
+  color: #143323;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 28px;
+  line-height: 1;
+}
+
+.registration-console .tabs {
+  position: static;
+  margin: 0 28px;
+  overflow: hidden;
+  background: #efe0bf;
+  border: 1px solid rgba(20, 51, 35, .16);
+  border-radius: 999px;
+}
+
+.registration-console .tab-btn {
+  padding: 13px 10px;
+  color: rgba(20, 51, 35, .62);
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.registration-console .tab-btn.active {
+  color: #f8efd7;
+  background: #143323;
+}
+
+.registration-console .tab-btn.active::after {
+  display: none;
+}
+
+.registration-console .tab-count,
+.registration-console .tab-btn.active .tab-count {
+  background: rgba(248, 239, 215, .18);
+  color: inherit;
+}
+
+.registration-console .content {
+  padding: 22px 28px 92px;
+}
+
+.registration-console .capacity-bar-wrap,
+.registration-console .summary-card,
+.registration-console .person-card,
+.registration-console .waitlist-empty {
+  border: 1px solid rgba(20, 51, 35, .13);
+  border-radius: 8px;
+  background: rgba(255, 250, 240, .82);
+  box-shadow: none;
+}
+
+.registration-console .capacity-bar-wrap {
+  padding: 18px;
+}
+
+.registration-console .bar-track {
+  height: 8px;
+  background: #ead9b5;
+}
+
+.registration-console .bar-fill {
+  background: linear-gradient(90deg, #143323, #c99a3c);
+}
+
+.registration-console .section-label,
+.registration-console .level-section-title {
+  color: #9d5d35;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.registration-console .person-card {
+  min-height: 82px;
+  margin-bottom: 10px;
+  overflow: hidden;
+}
+
+.registration-console .avatar {
+  color: #f8efd7;
+  background: #143323 !important;
+  font-family: Georgia, "Times New Roman", serif;
+}
+
+.registration-console .person-name {
+  color: #143323;
+  font-weight: 900;
+}
+
+.registration-console .person-meta,
+.registration-console .capacity-label,
+.registration-console .summary-card h3 {
+  color: rgba(20, 51, 35, .68);
+}
+
+.registration-console .badge {
+  border-radius: 999px;
+}
+
+.registration-console .copy-btn,
+.registration-console .set-btn,
+.registration-console .modal-btn.confirm {
+  background: #143323;
+}
+
+.registration-console .fab {
+  position: absolute;
+  right: 28px;
+  bottom: 26px;
+  width: auto;
+  min-width: 150px;
+  height: 48px;
+  padding: 0 20px;
+  border-radius: 999px;
+  background: #143323;
+  color: #f8efd7;
+  box-shadow: 0 14px 30px rgba(20, 51, 35, .24);
+  font-size: 0;
+}
+
+.registration-console .fab::after {
+  content: "添加报名";
+  font-size: 14px;
+  font-weight: 900;
+  letter-spacing: .08em;
+}
+
+.modal-overlay {
+  z-index: 900;
 }
 
 /* ── Header ── */
@@ -982,8 +1238,34 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
   .vintage-hero h1 { font-size: clamp(64px, 24vw, 104px); }
   .event-ticker,
   .experience-section,
+  .registration-console,
   .tool-grid {
     grid-template-columns: 1fr;
+  }
+  .registration-side {
+    min-height: auto;
+  }
+  .registration-console .stats-row {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+  .registration-console .header-top {
+    flex-wrap: wrap;
+  }
+  .registration-console .app-header,
+  .registration-console .content {
+    padding-left: 16px;
+    padding-right: 16px;
+  }
+  .registration-console .tabs {
+    margin-left: 16px;
+    margin-right: 16px;
+  }
+  .registration-console .fab {
+    position: sticky;
+    right: auto;
+    bottom: 16px;
+    width: calc(100% - 32px);
+    margin: 0 16px 16px;
   }
   .event-ticker div {
     min-height: auto;
@@ -1046,9 +1328,20 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
   <div class="app-intro">
     <span class="section-kicker">Live registration</span>
     <h2>报名页</h2>
-    <p>这里保留原来的 Firebase 实时报名系统：报名、waitlist、付款确认、名额管理和名单复制都在这个模块里完成。</p>
+    <p>报名、waitlist、付款确认、名额管理和名单复制都在同一块赛事面板里完成，视觉和官网保持一致。</p>
   </div>
-  <div class="signup-phone">
+  <div class="registration-console">
+    <aside class="registration-side">
+      <span class="section-kicker">Cup desk</span>
+      <h3>从接龙到开赛，一张面板完成。</h3>
+      <p>玩家在这里报名；管理员在这里设置名额、确认付款、处理 waitlist。比赛当天，场地页会读取同一份名单生成三轮赛程，积分页继续同步赛果。</p>
+      <div class="side-list" aria-label="赛事工具入口">
+        <div><span>01</span><strong>实时报名</strong></div>
+        <a href="courts.html"><span>02</span><strong>场地分组</strong></a>
+        <a href="scores.html"><span>03</span><strong>积分榜</strong></a>
+      </div>
+    </aside>
+    <div class="signup-workspace">
 
 <!-- Header -->
 <div class="app-header">
@@ -1153,6 +1446,7 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
 <!-- FAB -->
 <button class="fab" onclick="showAddModal()" aria-label="添加人员">＋</button>
 
+    </div>
   </div>
 </section>
 
