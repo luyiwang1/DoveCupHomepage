@@ -3,7 +3,8 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>活动接龙</title>
+<title>金鸽杯 Golden Dove Cup</title>
+<meta name="description" content="金鸽杯 Golden Dove Cup 复古网球社交杯赛，集合报名、场地分组和积分榜。">
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -32,13 +33,345 @@
 html, body { height: 100%; }
 body {
   font-family: 'Noto Sans SC', -apple-system, sans-serif;
-  background: var(--gray-100);
+  background: #f4ead1;
   color: var(--ink);
-  max-width: 480px;
   margin: 0 auto;
   min-height: 100dvh;
+}
+
+.brand-shell {
+  min-height: 100dvh;
+  overflow: hidden;
+}
+
+.vintage-nav {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 500;
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 14px clamp(16px, 4vw, 54px);
+  color: #f8efd7;
+  background: rgba(18, 46, 34, .82);
+  border-bottom: 1px solid rgba(248, 239, 215, .18);
+  backdrop-filter: blur(16px);
+}
+
+.vintage-brand {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-width: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  letter-spacing: .08em;
+  text-transform: uppercase;
+}
+
+.brand-seal {
+  display: grid;
+  place-items: center;
+  width: 38px;
+  height: 38px;
+  flex: 0 0 auto;
+  border: 1px solid rgba(248, 239, 215, .62);
+  border-radius: 50%;
+  color: #d5ab55;
+  font-weight: 700;
+}
+
+.vintage-links {
+  display: flex;
+  align-items: center;
+  gap: clamp(12px, 2.5vw, 28px);
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .12em;
+  text-transform: uppercase;
+}
+
+.vintage-links a {
+  color: inherit;
+  text-decoration: none;
+}
+
+.vintage-links .nav-ticket {
+  padding: 10px 14px;
+  color: #143323;
+  background: #f8efd7;
+  border-radius: 999px;
+}
+
+.vintage-hero {
+  position: relative;
+  display: grid;
+  min-height: 92vh;
+  padding: 108px clamp(18px, 5vw, 72px) 42px;
+  color: #f8efd7;
+  isolation: isolate;
+}
+
+.vintage-hero::before {
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  background: url("golden-dove-cup-hero.png") center / cover no-repeat;
+  content: "";
+}
+
+.vintage-hero::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background:
+    linear-gradient(90deg, rgba(8, 24, 17, .9), rgba(8, 24, 17, .55) 45%, rgba(8, 24, 17, .12)),
+    linear-gradient(180deg, rgba(8, 24, 17, .16), rgba(8, 24, 17, .86));
+  content: "";
+}
+
+.hero-inner {
+  align-self: end;
+  max-width: 920px;
+}
+
+.eyebrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+  color: #eccd82;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .2em;
+  text-transform: uppercase;
+}
+
+.eyebrow::before {
+  width: 48px;
+  height: 1px;
+  background: #c99a3c;
+  content: "";
+}
+
+.vintage-hero h1 {
+  max-width: 760px;
+  margin: 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(70px, 14vw, 168px);
+  font-weight: 500;
+  line-height: .86;
+  letter-spacing: 0;
+}
+
+.hero-copy {
+  max-width: 680px;
+  margin-top: 24px;
+  color: rgba(248, 239, 215, .88);
+  font-size: clamp(17px, 2vw, 22px);
+  line-height: 1.85;
+}
+
+.hero-actions,
+.feature-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 28px;
+}
+
+.vintage-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 46px;
+  padding: 12px 18px;
+  color: #f8efd7;
+  border: 1px solid rgba(248, 239, 215, .52);
+  border-radius: 999px;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .1em;
+  text-decoration: none;
+  text-transform: uppercase;
+}
+
+.vintage-button.primary {
+  color: #143323;
+  background: #f8efd7;
+  border-color: #f8efd7;
+}
+
+.event-ticker {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  color: #f8efd7;
+  background: #143323;
+  border-top: 1px solid rgba(248, 239, 215, .18);
+}
+
+.event-ticker div {
+  min-height: 106px;
+  padding: 20px clamp(16px, 3vw, 32px);
+  border-right: 1px solid rgba(248, 239, 215, .14);
+}
+
+.event-ticker span {
+  display: block;
+  color: rgba(248, 239, 215, .62);
+  font-size: 11px;
+  font-weight: 900;
+  letter-spacing: .16em;
+  text-transform: uppercase;
+}
+
+.event-ticker strong {
+  display: block;
+  margin-top: 9px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(22px, 2.8vw, 34px);
+  font-weight: 500;
+}
+
+.experience-section,
+.tool-section {
+  padding: clamp(56px, 8vw, 104px) clamp(18px, 5vw, 72px);
+}
+
+.experience-section {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(280px, .75fr);
+  gap: clamp(28px, 6vw, 80px);
+  align-items: end;
+  background: #fff8e7;
+}
+
+.section-kicker {
+  color: #9d5d35;
+  font-size: 12px;
+  font-weight: 900;
+  letter-spacing: .18em;
+  text-transform: uppercase;
+}
+
+.experience-section h2,
+.tool-section h2 {
+  margin: 12px 0 0;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(38px, 6vw, 82px);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.experience-section p {
+  margin: 0;
+  color: rgba(26, 26, 26, .72);
+  font-size: 17px;
+  line-height: 1.9;
+}
+
+.quote-card {
+  padding: clamp(24px, 4vw, 36px);
+  color: #f8efd7;
+  background: #143323;
+  border-radius: 8px;
+  box-shadow: 0 30px 72px rgba(20, 51, 35, .2);
+}
+
+.quote-card p {
+  color: #f8efd7;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(25px, 3vw, 42px);
+  line-height: 1.16;
+}
+
+.app-section {
+  background:
+    linear-gradient(180deg, #143323 0, #143323 210px, #f4ead1 210px),
+    #f4ead1;
+  padding: clamp(44px, 7vw, 84px) 16px 40px;
+}
+
+.app-intro {
+  max-width: 960px;
+  margin: 0 auto 24px;
+  color: #f8efd7;
+}
+
+.app-intro h2 {
+  margin: 10px 0 8px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(38px, 6vw, 74px);
+  font-weight: 500;
+  line-height: 1;
+}
+
+.app-intro p {
+  max-width: 620px;
+  color: rgba(248, 239, 215, .72);
+  line-height: 1.8;
+}
+
+.signup-phone {
+  max-width: 480px;
+  margin: 0 auto;
+  overflow: hidden;
+  background: #f7f7f7;
+  border: 1px solid rgba(20, 51, 35, .18);
+  border-radius: 28px;
+  box-shadow: 0 28px 70px rgba(37, 28, 16, .22);
+}
+
+.tool-section {
+  color: #f8efd7;
+  background: #143323;
+}
+
+.tool-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 1px;
+  margin-top: 36px;
+  background: rgba(248, 239, 215, .18);
+  border: 1px solid rgba(248, 239, 215, .18);
+}
+
+.tool-card {
+  min-height: 286px;
+  padding: clamp(22px, 3vw, 34px);
+  color: #f8efd7;
+  background: #143323;
+  text-decoration: none;
+}
+
+.tool-card .num {
+  color: #c99a3c;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: 54px;
+}
+
+.tool-card h3 {
+  margin: 48px 0 12px;
+  font-family: Georgia, "Times New Roman", serif;
+  font-size: clamp(25px, 3vw, 38px);
+  font-weight: 500;
+}
+
+.tool-card p {
+  color: rgba(248, 239, 215, .72);
+  line-height: 1.75;
+}
+
+.brand-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 14px;
+  padding: 30px clamp(18px, 5vw, 72px);
+  color: #f8efd7;
+  background: #10271e;
+  font-size: 13px;
 }
 
 /* ── Header ── */
@@ -641,9 +974,81 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
   line-height: 1;
 }
 .fab:active { transform: scale(0.9); box-shadow: 0 2px 10px rgba(7,193,96,0.3); }
+
+@media (max-width: 860px) {
+  .vintage-nav { position: absolute; }
+  .vintage-links a:not(.nav-ticket) { display: none; }
+  .vintage-hero { min-height: 86vh; }
+  .vintage-hero h1 { font-size: clamp(64px, 24vw, 104px); }
+  .event-ticker,
+  .experience-section,
+  .tool-grid {
+    grid-template-columns: 1fr;
+  }
+  .event-ticker div {
+    min-height: auto;
+    border-right: 0;
+    border-bottom: 1px solid rgba(248, 239, 215, .14);
+  }
+  .brand-footer { flex-direction: column; }
+}
 </style>
 </head>
 <body>
+
+<div class="brand-shell">
+<nav class="vintage-nav" aria-label="金鸽杯导航">
+  <a class="vintage-brand" href="#top">
+    <span class="brand-seal">GD</span>
+    <span>Golden Dove Cup</span>
+  </a>
+  <div class="vintage-links">
+    <a href="#experience">Experience</a>
+    <a href="#signup">Sign Up</a>
+    <a href="courts.html">Courts</a>
+    <a href="scores.html">Scores</a>
+    <a class="nav-ticket" href="#signup">Register</a>
+  </div>
+</nav>
+
+<header id="top" class="vintage-hero">
+  <div class="hero-inner">
+    <div class="eyebrow">Vintage Tennis Social</div>
+    <h1>金鸽杯</h1>
+    <p class="hero-copy">一场更有仪式感的周末网球杯赛。把报名、场地分组、实时积分和复古俱乐部氛围放在同一个入口，让每一次发球都像收到一封漂亮邀请函。</p>
+    <div class="hero-actions">
+      <a class="vintage-button primary" href="#signup">立即报名</a>
+      <a class="vintage-button" href="courts.html">查看场地</a>
+      <a class="vintage-button" href="scores.html">积分榜</a>
+    </div>
+  </div>
+</header>
+
+<section class="event-ticker" aria-label="赛事摘要">
+  <div><span>City</span><strong>Toronto</strong></div>
+  <div><span>Level</span><strong>和平鸽 / 猛禽</strong></div>
+  <div><span>Format</span><strong>三轮升降级</strong></div>
+  <div><span>System</span><strong>Live Sync</strong></div>
+</section>
+
+<section id="experience" class="experience-section">
+  <div>
+    <span class="section-kicker">The invitation</span>
+    <h2>不只是打一场球，是加入一个周末俱乐部。</h2>
+  </div>
+  <div class="quote-card">
+    <p>Play with elegance. Compete with warmth. Leave with new partners.</p>
+  </div>
+  <p>金鸽杯为想认真打球、也想认识同频朋友的人设计。你可以直接报名，管理员可以设置名额、确认付款、维护 waitlist；比赛当天再进入场地页生成三轮赛程，赛后积分自动同步到排行榜。</p>
+</section>
+
+<section id="signup" class="app-section">
+  <div class="app-intro">
+    <span class="section-kicker">Live registration</span>
+    <h2>报名页</h2>
+    <p>这里保留原来的 Firebase 实时报名系统：报名、waitlist、付款确认、名额管理和名单复制都在这个模块里完成。</p>
+  </div>
+  <div class="signup-phone">
 
 <!-- Header -->
 <div class="app-header">
@@ -748,6 +1153,36 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
 <!-- FAB -->
 <button class="fab" onclick="showAddModal()" aria-label="添加人员">＋</button>
 
+  </div>
+</section>
+
+<section class="tool-section" id="tools">
+  <span class="section-kicker">Tournament tools</span>
+  <h2>报名、场地、积分已经放在同一个赛事系统里。</h2>
+  <div class="tool-grid">
+    <a class="tool-card" href="#signup">
+      <div class="num">01</div>
+      <h3>报名页</h3>
+      <p>参赛名单、waitlist、名额上限、付款状态和一键复制接龙文本。</p>
+    </a>
+    <a class="tool-card" href="courts.html">
+      <div class="num">02</div>
+      <h3>场地页面</h3>
+      <p>读取报名名单，生成三轮升降级赛程，管理员可调整场地和录入比分。</p>
+    </a>
+    <a class="tool-card" href="scores.html">
+      <div class="num">03</div>
+      <h3>积分页面</h3>
+      <p>参赛、赢局和场地比分同步到 Firebase，形成实时排行榜。</p>
+    </a>
+  </div>
+</section>
+
+<footer class="brand-footer">
+  <span>Golden Dove Cup / 金鸽杯</span>
+  <span>Vintage tennis social with live registration, courts and scores.</span>
+</footer>
+
 <!-- Toast -->
 <div id="toast"></div>
 
@@ -780,6 +1215,8 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
       <button class="modal-btn confirm" onclick="saveTitle()">保存</button>
     </div>
   </div>
+</div>
+
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
