@@ -792,6 +792,7 @@ const COLORS = ['#07C160','#10AEFF','#FF8C00','#FA5151','#9B59B6','#E67E22','#2E
 const ADMIN_PASSWORD = '8888';
 const SITE_VERSION = '30';
 const WAITLIST_CAPACITY = 24;
+const LEVEL_CAPACITY = 4;
 const LEVEL_GROUPS = [
   { key: 'u20', label: '2.0-' },
   { key: '20_25', label: '2.0-2.5' },
@@ -866,7 +867,7 @@ function normalizeState(input) {
   const next = Object.assign(defaultState(), input || {});
   next.joined = Array.isArray(next.joined) ? next.joined : [];
   next.waitlist = Array.isArray(next.waitlist) ? next.waitlist : [];
-  return next;
+  return enforceLevelCapacityForState(next);
 }
 function levelKeyOf(p) {
   const raw = p && p.levelGroup;
@@ -882,6 +883,49 @@ function groupedByLevel(list) {
     ...group,
     people: list.filter(p => levelKeyOf(p) === group.key)
   }));
+}
+function enforceLevelCapacityForState(nextState) {
+  const counts = {};
+  const overflow = [];
+  nextState.joined = nextState.joined.filter(p => {
+    const key = levelKeyOf(p);
+    p.levelGroup = key;
+    counts[key] = counts[key] || 0;
+    if (counts[key] >= LEVEL_CAPACITY) {
+      overflow.push({
+        id: p.id,
+        name: p.name,
+        levelGroup: key,
+        ownerKey: p.ownerKey,
+        ts: p.ts || Date.now()
+      });
+      return false;
+    }
+    counts[key] += 1;
+    return true;
+  });
+  nextState.waitlist = overflow.concat(nextState.waitlist.map(p => Object.assign({}, p, {
+    levelGroup: levelKeyOf(p)
+  })));
+  return nextState;
+}
+function joinedCountForLevel(levelKey) {
+  return state.joined.filter(p => levelKeyOf(p) === levelKey).length;
+}
+function openSlotsForLevel(levelKey) {
+  const levelSlots = Math.max(0, LEVEL_CAPACITY - joinedCountForLevel(levelKey));
+  const globalSlots = state.capacity ? Math.max(0, state.capacity - state.joined.length) : levelSlots;
+  return Math.min(levelSlots, globalSlots);
+}
+function canJoinLevel(levelKey) {
+  return openSlotsForLevel(levelKey) > 0;
+}
+function waitlistIndexForOpenLevel(preferredLevel) {
+  if (preferredLevel && canJoinLevel(preferredLevel)) {
+    const preferredIdx = state.waitlist.findIndex(p => levelKeyOf(p) === preferredLevel);
+    if (preferredIdx !== -1) return preferredIdx;
+  }
+  return state.waitlist.findIndex(p => canJoinLevel(levelKeyOf(p)));
 }
 function escapeHtml(v) {
   return String(v).replace(/[&<>"']/g, ch => ({
@@ -1042,7 +1086,7 @@ function renderJoined() {
       : `<div class="waitlist-empty"><p>暂无报名</p></div>`;
     return `
       <section class="level-section">
-        <div class="level-section-title">${group.label}<span>${group.people.length} 人</span></div>
+        <div class="level-section-title">${group.label}<span>${group.people.length} / ${LEVEL_CAPACITY} 人</span></div>
         ${cards}
       </section>`;
   }).join('');
@@ -1050,16 +1094,16 @@ function renderJoined() {
 
 function renderWaitlist() {
   const el = document.getElementById('waitlistContent');
-  const slots = state.capacity ? Math.max(0, state.capacity - state.joined.length) : null;
+  const slots = LEVEL_GROUPS.reduce((sum, group) => sum + openSlotsForLevel(group.key), 0);
 
   if (!state.waitlist.length) {
-    el.innerHTML = `<div class="waitlist-empty"><div class="icon">⏳</div><p>Waitlist 暂时为空<br>最多 ${WAITLIST_CAPACITY} 人，有人取消时会自动补位</p></div>`;
+    el.innerHTML = `<div class="waitlist-empty"><div class="icon">⏳</div><p>Waitlist 暂时为空<br>每个分级最多 ${LEVEL_CAPACITY} 人，有人取消时会按同分级自动补位</p></div>`;
     return;
   }
 
   let html = `<div class="section-label">等待补位 · ${state.waitlist.length} / ${WAITLIST_CAPACITY} 人</div>`;
 
-  if (isAdminMode && slots && slots > 0) {
+  if (isAdminMode && slots > 0) {
     html += `<button class="promote-all-btn" onclick="promoteAll()">🎉 有 ${slots} 个空位！一键补位前 ${Math.min(slots, state.waitlist.length)} 人</button>`;
   }
 
@@ -1098,7 +1142,7 @@ function copyList() {
   let text = `${title} ${cap}\n\n`;
   text += `📋 报名名单：\n`;
   groupedByLevel(state.joined).forEach(group => {
-    text += `\n【${group.label}】${group.people.length} 人\n`;
+    text += `\n【${group.label}】${group.people.length}/${LEVEL_CAPACITY} 人\n`;
     group.people.forEach((p, i) => {
       const confirm = p.confirmed ? '✅' : '❓';
       const paid = p.paid ? '💰' : '  ';
@@ -1217,12 +1261,12 @@ function addPerson(list) {
   const levelGroup = LEVEL_GROUPS.some(group => group.key === selectedLevel) ? selectedLevel : '20_25';
   if (!name) { showToast('请输入姓名'); return; }
 
-  if (list === 'joined' && state.capacity && state.joined.length >= state.capacity) {
+  if (list === 'joined' && (!canJoinLevel(levelGroup) || (state.capacity && state.joined.length >= state.capacity))) {
     if (state.waitlist.length >= WAITLIST_CAPACITY) {
       showToast(`名额已满，Waitlist 也已满（最多 ${WAITLIST_CAPACITY} 人）`);
       return;
     }
-    showToast('名额已满，已加入 Waitlist');
+    showToast(`${levelLabelOf({ levelGroup })} 已满，已加入 Waitlist`);
     list = 'waitlist';
   }
 
@@ -1285,13 +1329,13 @@ function removeFromWaitlist(id) {
 
 function promoteOne(id) {
   if (!requireAdmin()) return;
-  if (state.capacity && state.joined.length >= state.capacity) {
-    showToast('名额已满，无法补位');
-    return;
-  }
   const idx = state.waitlist.findIndex(x=>x.id===id);
   if (idx === -1) return;
   const w = state.waitlist[idx];
+  if (!canJoinLevel(levelKeyOf(w))) {
+    showToast(`${levelLabelOf(w)} 已满，无法补位`);
+    return;
+  }
   state.waitlist.splice(idx, 1);
   state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
   showToast(`${w.name} 已补位成功`, 'green');
@@ -1301,25 +1345,28 @@ function promoteOne(id) {
 
 function promoteAll() {
   if (!requireAdmin()) return;
-  if (!state.capacity) return;
-  const slots = state.capacity - state.joined.length;
+  const slots = LEVEL_GROUPS.reduce((sum, group) => sum + openSlotsForLevel(group.key), 0);
   if (slots <= 0) { showToast('名额已满'); return; }
-  const toPromote = state.waitlist.splice(0, slots);
-  toPromote.forEach(w => {
+  let promoted = 0;
+  let idx = waitlistIndexForOpenLevel();
+  while (idx !== -1 && promoted < slots) {
+    const w = state.waitlist.splice(idx, 1)[0];
     state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
-  });
-  showToast(`${toPromote.length} 人已成功补位`, 'green');
+    promoted += 1;
+    idx = waitlistIndexForOpenLevel();
+  }
+  showToast(`${promoted} 人已成功补位`, 'green');
   render();
   switchTab('joined');
 }
 
 function autoPromote() {
-  if (!state.capacity || state.waitlist.length === 0) return;
-  if (state.joined.length < state.capacity) {
-    const w = state.waitlist.shift();
-    state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
-    showToast(`${w.name} 自动补位成功`, 'green');
-  }
+  if (state.waitlist.length === 0) return;
+  const idx = waitlistIndexForOpenLevel();
+  if (idx === -1) return;
+  const w = state.waitlist.splice(idx, 1)[0];
+  state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+  showToast(`${w.name} 自动补位成功`, 'green');
 }
 
 function setCapacity() {

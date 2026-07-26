@@ -12,6 +12,7 @@ Page({
       { key: '30_plus', label: '3.0+' }
     ],
     levelIndex: 1,
+    levelCapacity: 4,
     capacityInput: '',
     isAdmin: false,
     userKey: ''
@@ -107,7 +108,40 @@ Page({
       levelGroup: this.normalizeLevel(p.levelGroup),
       levelLabel: this.levelLabel(p.levelGroup)
     })) : [];
+    const counts = {};
+    const overflow = [];
+    next.joined = next.joined.filter(p => {
+      const key = this.normalizeLevel(p.levelGroup);
+      counts[key] = counts[key] || 0;
+      if (counts[key] >= this.data.levelCapacity) {
+        overflow.push(Object.assign({}, p, { levelGroup: key, ts: p.ts || Date.now() }));
+        return false;
+      }
+      counts[key] += 1;
+      return true;
+    });
+    next.waitlist = overflow.concat(next.waitlist);
     return next;
+  },
+
+  joinedCountForLevel(state, levelGroup) {
+    const key = this.normalizeLevel(levelGroup);
+    return (state.joined || []).filter(p => this.normalizeLevel(p.levelGroup) === key).length;
+  },
+
+  canJoinLevel(state, levelGroup) {
+    const key = this.normalizeLevel(levelGroup);
+    const levelOpen = this.joinedCountForLevel(state, key) < this.data.levelCapacity;
+    const globalOpen = !state.capacity || state.joined.length < state.capacity;
+    return levelOpen && globalOpen;
+  },
+
+  waitlistIndexForOpenLevel(state, preferredLevel) {
+    if (preferredLevel && this.canJoinLevel(state, preferredLevel)) {
+      const preferredIdx = state.waitlist.findIndex(p => this.normalizeLevel(p.levelGroup) === this.normalizeLevel(preferredLevel));
+      if (preferredIdx !== -1) return preferredIdx;
+    }
+    return state.waitlist.findIndex(p => this.canJoinLevel(state, p.levelGroup));
   },
 
   onNameInput(e) { this.setData({ nameInput: e.detail.value }); },
@@ -123,7 +157,10 @@ Page({
     const state = JSON.parse(JSON.stringify(this.data.state));
     let idSeq = this.data.idSeq + 1;
     const levelGroup = this.data.levelGroups[this.data.levelIndex].key;
-    if (list === 'joined' && state.capacity && state.joined.length >= state.capacity) list = 'waitlist';
+    if (list === 'joined' && !this.canJoinLevel(state, levelGroup)) {
+      list = 'waitlist';
+      wx.showToast({ title: `${this.levelLabel(levelGroup)} 已满，已进 Waitlist`, icon: 'none' });
+    }
     const person = { id: idSeq, name, levelGroup, ownerKey: this.data.userKey, confirmed: false, paid: false, ts: Date.now() };
     if (list === 'joined') state.joined.push(person);
     else state.waitlist.push({ id: person.id, name, levelGroup, ownerKey: person.ownerKey, ts: person.ts });
@@ -173,8 +210,10 @@ Page({
     const idx = state.joined.findIndex(p => String(p.id) === String(e.currentTarget.dataset.id));
     if (idx < 0 || !this.canEdit(state.joined[idx])) return;
     state.joined.splice(idx, 1);
-    if (state.capacity && state.waitlist.length && state.joined.length < state.capacity) {
-      const next = state.waitlist.shift();
+    if (state.waitlist.length) {
+      const openIdx = this.waitlistIndexForOpenLevel(state);
+      if (openIdx === -1) return this.saveState(state);
+      const next = state.waitlist.splice(openIdx, 1)[0];
       state.joined.push({ id: next.id, name: next.name, levelGroup: this.normalizeLevel(next.levelGroup), ownerKey: next.ownerKey, confirmed: false, paid: false, ts: Date.now() });
     }
     this.saveState(state);
@@ -191,10 +230,11 @@ Page({
   promoteOne(e) {
     if (!this.data.isAdmin) return;
     const state = JSON.parse(JSON.stringify(this.data.state));
-    if (state.capacity && state.joined.length >= state.capacity) return wx.showToast({ title: '名额已满', icon: 'none' });
     const idx = state.waitlist.findIndex(p => String(p.id) === String(e.currentTarget.dataset.id));
     if (idx < 0) return;
-    const next = state.waitlist.splice(idx, 1)[0];
+    const next = state.waitlist[idx];
+    if (!this.canJoinLevel(state, next.levelGroup)) return wx.showToast({ title: `${this.levelLabel(next.levelGroup)} 已满`, icon: 'none' });
+    state.waitlist.splice(idx, 1);
     state.joined.push({ id: next.id, name: next.name, levelGroup: this.normalizeLevel(next.levelGroup), ownerKey: next.ownerKey, confirmed: false, paid: false, ts: Date.now() });
     this.saveState(state);
   }
