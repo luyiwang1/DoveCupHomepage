@@ -12,7 +12,7 @@ Page({
       { key: '30_plus', label: '3.0+' }
     ],
     levelIndex: 1,
-    levelCapacity: 4,
+    levelCapacity: 8,
     capacityInput: '',
     isAdmin: false,
     userKey: ''
