@@ -1,3 +1,9 @@
 .input {
   flex: 1;
 }
+
+.level-picker {
+  margin-bottom: 16rpx;
+  color: #059A4A;
+  font-weight: 900;
+}

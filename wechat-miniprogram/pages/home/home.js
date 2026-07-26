@@ -5,6 +5,13 @@ Page({
     state: { title: 'Dove Cup', capacity: null, joined: [], waitlist: [] },
     idSeq: 1,
     nameInput: '',
+    levelGroups: [
+      { key: 'u20', label: '2.0-' },
+      { key: '20_25', label: '2.0-2.5' },
+      { key: '25_30', label: '2.5-3.0' },
+      { key: '30_plus', label: '3.0+' }
+    ],
+    levelIndex: 1,
     capacityInput: '',
     isAdmin: false,
     userKey: ''
@@ -34,7 +41,7 @@ Page({
     db.getMain()
       .then(main => {
         this.setData({
-          state: main.state,
+          state: this.decorateState(main.state),
           idSeq: main.idSeq,
           capacityInput: main.state.capacity || ''
         });
@@ -44,8 +51,19 @@ Page({
   },
 
   saveState(nextState, nextIdSeq) {
-    const payload = { state: nextState, idSeq: nextIdSeq || this.data.idSeq };
-    this.setData({ state: nextState, idSeq: payload.idSeq });
+    const cleanState = JSON.parse(JSON.stringify(nextState));
+    cleanState.joined = (cleanState.joined || []).map(p => {
+      const next = Object.assign({}, p);
+      delete next.levelLabel;
+      return next;
+    });
+    cleanState.waitlist = (cleanState.waitlist || []).map(p => {
+      const next = Object.assign({}, p);
+      delete next.levelLabel;
+      return next;
+    });
+    const payload = { state: cleanState, idSeq: nextIdSeq || this.data.idSeq };
+    this.setData({ state: this.decorateState(cleanState), idSeq: payload.idSeq });
     return db.saveMain(payload).catch(() => wx.showToast({ title: '保存失败', icon: 'none' }));
   },
 
@@ -68,7 +86,32 @@ Page({
     });
   },
 
+  normalizeLevel(level) {
+    const legacy = { under3: '20_25', over3: '30_plus' };
+    const key = this.data.levelGroups.some(g => g.key === level) ? level : legacy[level] || '20_25';
+    return key;
+  },
+
+  levelLabel(level) {
+    const key = this.normalizeLevel(level);
+    return (this.data.levelGroups.find(g => g.key === key) || this.data.levelGroups[1]).label;
+  },
+
+  decorateState(state) {
+    const next = JSON.parse(JSON.stringify(state || { title: 'Dove Cup', capacity: null, joined: [], waitlist: [] }));
+    next.joined = Array.isArray(next.joined) ? next.joined.map(p => Object.assign({}, p, {
+      levelGroup: this.normalizeLevel(p.levelGroup),
+      levelLabel: this.levelLabel(p.levelGroup)
+    })) : [];
+    next.waitlist = Array.isArray(next.waitlist) ? next.waitlist.map(p => Object.assign({}, p, {
+      levelGroup: this.normalizeLevel(p.levelGroup),
+      levelLabel: this.levelLabel(p.levelGroup)
+    })) : [];
+    return next;
+  },
+
   onNameInput(e) { this.setData({ nameInput: e.detail.value }); },
+  onLevelChange(e) { this.setData({ levelIndex: Number(e.detail.value) || 0 }); },
   onCapacityInput(e) { this.setData({ capacityInput: e.detail.value }); },
 
   addJoined() { this.addPerson('joined'); },
@@ -79,10 +122,11 @@ Page({
     if (!name) return wx.showToast({ title: '请输入姓名', icon: 'none' });
     const state = JSON.parse(JSON.stringify(this.data.state));
     let idSeq = this.data.idSeq + 1;
+    const levelGroup = this.data.levelGroups[this.data.levelIndex].key;
     if (list === 'joined' && state.capacity && state.joined.length >= state.capacity) list = 'waitlist';
-    const person = { id: idSeq, name, ownerKey: this.data.userKey, confirmed: false, paid: false, ts: Date.now() };
+    const person = { id: idSeq, name, levelGroup, ownerKey: this.data.userKey, confirmed: false, paid: false, ts: Date.now() };
     if (list === 'joined') state.joined.push(person);
-    else state.waitlist.push({ id: person.id, name, ownerKey: person.ownerKey, ts: person.ts });
+    else state.waitlist.push({ id: person.id, name, levelGroup, ownerKey: person.ownerKey, ts: person.ts });
     this.setData({ nameInput: '' });
     this.saveState(state, idSeq);
   },
@@ -95,7 +139,7 @@ Page({
     state.capacity = capacity;
     if (state.joined.length > capacity) {
       const overflow = state.joined.splice(capacity);
-      state.waitlist = overflow.map(p => ({ id: p.id, name: p.name, ownerKey: p.ownerKey, ts: Date.now() })).concat(state.waitlist);
+      state.waitlist = overflow.map(p => ({ id: p.id, name: p.name, levelGroup: this.normalizeLevel(p.levelGroup), ownerKey: p.ownerKey, ts: Date.now() })).concat(state.waitlist);
     }
     this.saveState(state);
   },
@@ -131,7 +175,7 @@ Page({
     state.joined.splice(idx, 1);
     if (state.capacity && state.waitlist.length && state.joined.length < state.capacity) {
       const next = state.waitlist.shift();
-      state.joined.push({ id: next.id, name: next.name, ownerKey: next.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+      state.joined.push({ id: next.id, name: next.name, levelGroup: this.normalizeLevel(next.levelGroup), ownerKey: next.ownerKey, confirmed: false, paid: false, ts: Date.now() });
     }
     this.saveState(state);
   },
@@ -151,7 +195,7 @@ Page({
     const idx = state.waitlist.findIndex(p => String(p.id) === String(e.currentTarget.dataset.id));
     if (idx < 0) return;
     const next = state.waitlist.splice(idx, 1)[0];
-    state.joined.push({ id: next.id, name: next.name, ownerKey: next.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+    state.joined.push({ id: next.id, name: next.name, levelGroup: this.normalizeLevel(next.levelGroup), ownerKey: next.ownerKey, confirmed: false, paid: false, ts: Date.now() });
     this.saveState(state);
   }
 });

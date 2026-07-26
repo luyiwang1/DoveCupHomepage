@@ -10,6 +10,9 @@
   </view>
 
   <view class="card">
+    <picker mode="selector" range="{{levelGroups}}" range-key="label" value="{{levelIndex}}" bindchange="onLevelChange">
+      <view class="input level-picker">分级：{{levelGroups[levelIndex].label}}</view>
+    </picker>
     <view class="row">
       <input class="input" style="flex:1" placeholder="姓名 / 微信名" value="{{nameInput}}" bindinput="onNameInput" />
       <button class="btn" bindtap="addJoined">报名</button>
@@ -32,6 +35,7 @@
       <view>
         <view style="font-size:30rpx;font-weight:900">{{index + 1}}. {{item.name}}</view>
         <view class="row" style="margin-top:12rpx">
+          <text class="pill">{{item.levelLabel}}</text>
           <text class="pill">{{item.confirmed ? '已确认' : '待确认'}}</text>
           <text class="pill">{{item.paid ? '已付款' : '未付款'}}</text>
         </view>
@@ -48,7 +52,10 @@
   <view wx:if="{{!state.waitlist.length}}" class="card empty">Waitlist 暂时为空</view>
   <view wx:for="{{state.waitlist}}" wx:key="id" class="card">
     <view class="row-between">
-      <view style="font-size:30rpx;font-weight:900">{{index + 1}}. {{item.name}}</view>
+      <view>
+        <view style="font-size:30rpx;font-weight:900">{{index + 1}}. {{item.name}}</view>
+        <view class="row" style="margin-top:12rpx"><text class="pill">{{item.levelLabel}}</text></view>
+      </view>
       <view class="row">
         <button wx:if="{{isAdmin}}" class="btn secondary" size="mini" data-id="{{item.id}}" bindtap="promoteOne">补位</button>
         <button wx:if="{{isAdmin || item.ownerKey === userKey}}" class="btn danger" size="mini" data-id="{{item.id}}" bindtap="removeWaitlist">退出</button>

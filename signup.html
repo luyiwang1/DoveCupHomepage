@@ -759,8 +759,10 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
     <div class="modal-title">➕ 添加人员</div>
     <input class="modal-input" id="addName" placeholder="姓名 / 微信名" autocomplete="off">
     <select class="modal-input" id="addLevel">
-      <option value="under3">和平鸽</option>
-      <option value="over3">猛禽</option>
+      <option value="u20">2.0-</option>
+      <option value="20_25">2.0-2.5</option>
+      <option value="25_30">2.5-3.0</option>
+      <option value="30_plus">3.0+</option>
     </select>
     <div class="modal-btns">
       <button class="modal-btn cancel" onclick="closeModalById('addModal')">取消</button>
@@ -791,9 +793,15 @@ const ADMIN_PASSWORD = '8888';
 const SITE_VERSION = '30';
 const WAITLIST_CAPACITY = 24;
 const LEVEL_GROUPS = [
-  { key: 'under3', label: '和平鸽' },
-  { key: 'over3', label: '猛禽' }
+  { key: 'u20', label: '2.0-' },
+  { key: '20_25', label: '2.0-2.5' },
+  { key: '25_30', label: '2.5-3.0' },
+  { key: '30_plus', label: '3.0+' }
 ];
+const LEGACY_LEVEL_MAP = {
+  under3: '20_25',
+  over3: '30_plus'
+};
 const DATA_STORAGE = 'signup_v3';
 const DB_PATH = 'doveCupWaitlistSystem/main';
 const FIREBASE_CONFIG = {
@@ -861,7 +869,9 @@ function normalizeState(input) {
   return next;
 }
 function levelKeyOf(p) {
-  return p && p.levelGroup === 'over3' ? 'over3' : 'under3';
+  const raw = p && p.levelGroup;
+  if (LEVEL_GROUPS.some(group => group.key === raw)) return raw;
+  return LEGACY_LEVEL_MAP[raw] || '20_25';
 }
 function levelLabelOf(p) {
   const key = levelKeyOf(p);
@@ -1203,7 +1213,8 @@ function personCard(p, rank, list) {
 
 function addPerson(list) {
   const name = document.getElementById('addName').value.trim();
-  const levelGroup = document.getElementById('addLevel').value === 'over3' ? 'over3' : 'under3';
+  const selectedLevel = document.getElementById('addLevel').value;
+  const levelGroup = LEVEL_GROUPS.some(group => group.key === selectedLevel) ? selectedLevel : '20_25';
   if (!name) { showToast('请输入姓名'); return; }
 
   if (list === 'joined' && state.capacity && state.joined.length >= state.capacity) {
@@ -1232,7 +1243,7 @@ function addPerson(list) {
 
   closeModalById('addModal');
   document.getElementById('addName').value = '';
-  document.getElementById('addLevel').value = 'under3';
+  document.getElementById('addLevel').value = '20_25';
   render();
   switchTab(list === 'joined' ? 'joined' : 'waitlist');
 }
@@ -1358,8 +1369,10 @@ function replaceLegacyLevelText() {
     el.childNodes.forEach(node => {
       if (node.nodeType !== Node.TEXT_NODE) return;
       node.nodeValue = node.nodeValue
-        .replace(/3\.0\s*以下/g, '和平鸽')
-        .replace(/3\.0\s*以上/g, '猛禽');
+        .replace(/和平鸽/g, '2.0-2.5')
+        .replace(/猛禽/g, '3.0+')
+        .replace(/3\.0\s*以下/g, '2.0-2.5')
+        .replace(/3\.0\s*以上/g, '3.0+');
     });
   });
 }

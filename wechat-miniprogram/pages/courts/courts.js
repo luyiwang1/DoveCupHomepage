@@ -1,4 +1,5 @@
 const db = require('../../utils/db');
+const LEVEL_VERSION = '4-level-v1';
 
 Page({
   data: {
@@ -6,6 +7,7 @@ Page({
     courtCount: 5,
     courtCountInput: 5,
     baseCourts: [],
+    divisionRanges: [],
     rounds: [],
     roundScores: {},
     isAdmin: false
@@ -33,11 +35,12 @@ Page({
         const joined = main.state.joined || [];
         const players = joined
           .filter(p => p && p.name)
-          .map((p, i) => ({ key: String(p.id || `${p.name}-${i}`), name: p.name }));
-        const courtCount = Number(layout && layout.courtCount) || this.data.courtCount || 5;
-        const roundScores = layout && layout.roundScores && typeof layout.roundScores === 'object' ? layout.roundScores : {};
+          .map((p, i) => ({ key: String(p.id || `${p.name}-${i}`), name: p.name, levelGroup: this.normalizeLevel(p.levelGroup) }));
+        const validLayout = layout && layout.levelVersion === LEVEL_VERSION ? layout : {};
+        const courtCount = Number(validLayout && validLayout.courtCount) || this.data.courtCount || 5;
+        const roundScores = validLayout && validLayout.roundScores && typeof validLayout.roundScores === 'object' ? validLayout.roundScores : {};
         this.setData({ players, courtCount, courtCountInput: courtCount, roundScores }, () => {
-          this.applySavedLayout(layout || {});
+          this.applySavedLayout(validLayout);
         });
       })
       .catch(() => wx.showToast({ title: '同步失败', icon: 'none' }))
@@ -69,7 +72,34 @@ Page({
     return Array.from({ length: this.data.courtCount }, () => []);
   },
 
+  levelGroups() {
+    return [
+      { key: '30_plus', label: '3.0+' },
+      { key: '25_30', label: '2.5-3.0' },
+      { key: '20_25', label: '2.0-2.5' },
+      { key: 'u20', label: '2.0-' }
+    ];
+  },
+
+  normalizeLevel(level) {
+    const legacy = { over3: '30_plus', under3: '20_25' };
+    const groups = this.levelGroups();
+    return groups.some(g => g.key === level) ? level : legacy[level] || '20_25';
+  },
+
+  levelOrder(level) {
+    const key = this.normalizeLevel(level);
+    const idx = this.levelGroups().findIndex(g => g.key === key);
+    return idx === -1 ? this.levelGroups().length : idx;
+  },
+
+  levelLabel(level) {
+    const key = this.normalizeLevel(level);
+    return (this.levelGroups().find(g => g.key === key) || this.levelGroups()[2]).label;
+  },
+
   applySavedLayout(layout) {
+    const fallback = this.splitInitialCourts(this.data.players);
     const byKey = new Map(this.data.players.map(p => [p.key, p]));
     const used = new Set();
     const baseCourts = this.emptyCourts();
@@ -87,11 +117,12 @@ Page({
     }
     this.data.players.forEach(player => {
       if (used.has(player.key)) return;
-      let target = 0;
-      for (let i = 1; i < baseCourts.length; i++) if (baseCourts[i].length < baseCourts[target].length) target = i;
+      const division = this.divisionForLevel(player.levelGroup) || { start: 0, end: baseCourts.length - 1 };
+      let target = division.start;
+      for (let i = division.start + 1; i <= division.end; i++) if (baseCourts[i].length < baseCourts[target].length) target = i;
       baseCourts[target].push(player);
     });
-    this.setData({ baseCourts }, () => this.buildRounds());
+    this.setData({ baseCourts: used.size ? baseCourts : fallback }, () => this.buildRounds());
   },
 
   shuffle(list) {
@@ -104,9 +135,45 @@ Page({
   },
 
   splitInitialCourts(list) {
-    const courts = this.emptyCourts();
-    list.forEach((p, i) => courts[i % courts.length].push(p));
-    return courts;
+    const groups = Object.values(list.reduce((acc, player) => {
+      const level = this.normalizeLevel(player.levelGroup);
+      player.levelGroup = level;
+      acc[level] = acc[level] || { level, players: [] };
+      acc[level].players.push(player);
+      return acc;
+    }, {})).sort((a, b) => this.levelOrder(a.level) - this.levelOrder(b.level));
+    const allocations = {};
+    groups.forEach(group => { allocations[group.level] = 1; });
+    let left = Math.max(groups.length, this.data.courtCount) - groups.length;
+    const sorted = [...groups].sort((a, b) => b.players.length - a.players.length);
+    while (left > 0 && sorted.length) {
+      allocations[sorted[(left - 1) % sorted.length].level] += 1;
+      left -= 1;
+    }
+    const divisionRanges = [];
+    const result = [];
+    let start = 0;
+    groups.forEach(group => {
+      const count = allocations[group.level] || 1;
+      const courts = Array.from({ length: count }, () => []);
+      group.players.forEach((player, i) => courts[i % count].push(player));
+      result.push(...courts);
+      divisionRanges.push({ level: group.level, label: this.levelLabel(group.level), start, end: start + count - 1 });
+      start += count;
+    });
+    this.data.courtCount = Math.max(1, result.length);
+    this.data.divisionRanges = divisionRanges;
+    this.setData({ courtCount: this.data.courtCount, divisionRanges });
+    return result.length ? result : this.emptyCourts();
+  },
+
+  divisionForLevel(level) {
+    const key = this.normalizeLevel(level);
+    return this.data.divisionRanges.find(d => d.level === key);
+  },
+
+  divisionForCourt(idx) {
+    return this.data.divisionRanges.find(d => idx >= d.start && idx <= d.end) || { start: 0, end: this.data.courtCount - 1, label: '全部' };
   },
 
   makeMatch(list, courtIndex, roundIndex) {
@@ -122,7 +189,7 @@ Page({
     const bWin = scored && Number(score.b) > Number(score.a);
     return {
       courtIndex,
-      courtName: `Court ${courtIndex + 1}`,
+      courtName: `${this.divisionForCourt(courtIndex).label} · Court ${courtIndex + 1}`,
       teamA,
       teamB,
       captainKey: this.pickCaptain(teamA, teamB, roundIndex, courtIndex),
@@ -130,7 +197,7 @@ Page({
       scoreB: score.b === undefined ? '' : score.b,
       aWin,
       bWin,
-      moveText: `胜→Court ${Math.max(1, courtIndex)} / 负→Court ${Math.min(this.data.courtCount, courtIndex + 2)}`
+      moveText: `胜→Court ${this.winnerCourt(courtIndex)} / 负→Court ${this.loserCourt(courtIndex)}`
     };
   },
 
@@ -141,6 +208,16 @@ Page({
 
   addSplitPair(bucket, team) {
     team.forEach((p, i) => bucket[i % 2 === 0 ? 'a' : 'b'].push(p));
+  },
+
+  winnerCourt(idx) {
+    const division = this.divisionForCourt(idx);
+    return Math.max(division.start + 1, idx);
+  },
+
+  loserCourt(idx) {
+    const division = this.divisionForCourt(idx);
+    return Math.min(division.end + 1, idx + 2);
   },
 
   buildRounds() {
@@ -157,8 +234,9 @@ Page({
           win = match.teamB;
           lose = match.teamA;
         }
-        this.addSplitPair(buckets[Math.max(0, idx - 1)], win);
-        this.addSplitPair(buckets[Math.min(this.data.courtCount - 1, idx + 1)], lose);
+        const division = this.divisionForCourt(idx);
+        this.addSplitPair(buckets[Math.max(division.start, idx - 1)], win);
+        this.addSplitPair(buckets[Math.min(division.end, idx + 1)], lose);
       });
       current = buckets.map((bucket, idx) => this.makeMatch(bucket.a.concat(bucket.b), idx, r + 1));
       current = buckets.map((bucket, idx) => {
@@ -221,6 +299,7 @@ Page({
 
   saveLayout() {
     const data = {
+      levelVersion: LEVEL_VERSION,
       courtCount: this.data.courtCount,
       courts: this.data.baseCourts.map(court => court.map(p => p.key)),
       roundScores: this.data.roundScores
