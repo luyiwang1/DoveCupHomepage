@@ -94,6 +94,7 @@ body {
 .admin-only { display: none !important; }
 body.is-admin .admin-only { display: inline-flex !important; }
 body.is-admin .capacity-edit.admin-only { display: flex !important; }
+body.is-admin .summary-card.admin-only { display: block !important; }
 .owner-note {
   font-size: 11px;
   color: var(--green-dark);
@@ -537,6 +538,81 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
   padding: 2px 8px;
   font-weight: 700;
 }
+.weekly-reset-note {
+  margin-top: 9px;
+  color: var(--gray-500);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.admin-history-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.admin-history-metric {
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.admin-history-metric strong {
+  display: block;
+  color: var(--green-dark);
+  font-size: 20px;
+  line-height: 1.2;
+}
+.admin-history-metric span { color: var(--gray-500); font-size: 11px; }
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+.admin-signup-table {
+  width: 100%;
+  min-width: 500px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.admin-signup-table th,
+.admin-signup-table td {
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+.admin-signup-table th { color: var(--gray-500); background: var(--gray-100); }
+.admin-signup-table tr:last-child td { border-bottom: 0; }
+.signup-count { color: var(--green-dark); font-size: 16px; font-weight: 900; }
+.current-week-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  color: var(--green-dark);
+  background: var(--green-light);
+  font-weight: 700;
+}
+.current-week-tag.waiting { color: var(--orange); background: var(--orange-light); }
+.archive-heading {
+  margin: 16px 0 8px;
+  color: var(--gray-700);
+  font-size: 12px;
+  font-weight: 700;
+}
+.archive-week { border-top: 1px solid var(--gray-200); padding: 9px 0; }
+.archive-week summary {
+  cursor: pointer;
+  color: var(--gray-700);
+  font-size: 12px;
+  font-weight: 700;
+}
+.archive-week-body {
+  margin-top: 8px;
+  color: var(--gray-500);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.admin-data-empty { color: var(--gray-500); font-size: 12px; line-height: 1.7; padding: 8px 0; }
 
 /* ── Toast ── */
 #toast {
@@ -704,6 +780,7 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
         <input type="number" id="capInput" placeholder="25" min="1" max="999">
         <button class="set-btn" onclick="setCapacity()">设置</button>
       </div>
+      <div class="weekly-reset-note">报名表每周六 20:00（多伦多时间）归档并更新为空。</div>
     </div>
     <div class="section-label">报名列表</div>
     <div id="joinedList"></div>
@@ -740,6 +817,10 @@ body.is-admin .capacity-edit.admin-only { display: flex !important; }
     <div class="summary-card" id="unpaidSection" style="display:none">
       <h3>⏳ 未付款名单</h3>
       <div class="unpaid-list" id="unpaidList"></div>
+    </div>
+    <div class="summary-card admin-only" id="adminHistorySection">
+      <h3>报名历史 · 仅管理员</h3>
+      <div id="adminHistoryContent" class="admin-data-empty">正在同步历史数据…</div>
     </div>
     <button class="copy-btn" onclick="copyList()">📋 复制接龙文本</button>
   </div>
@@ -805,6 +886,8 @@ const LEGACY_LEVEL_MAP = {
 };
 const DATA_STORAGE = 'signup_v3';
 const DB_PATH = 'doveCupWaitlistSystem/main';
+const SIGNUP_STATS_DB_PATH = 'doveCupWaitlistSystem/signupStats';
+const SIGNUP_HISTORY_DB_PATH = 'doveCupWaitlistSystem/signupHistory';
 const FIREBASE_CONFIG = {
   apiKey: 'AIzaSyBPTwRAkfHjCA_RCQu5t2udzllF3Rz_CCo',
   authDomain: 'dovecupdatabase.firebaseapp.com',
@@ -830,6 +913,12 @@ let remoteRef = null;
 let remoteReady = false;
 let applyingRemote = false;
 let remoteSaveTimer = null;
+let adminStatsRef = null;
+let adminHistoryRef = null;
+let adminSignupStats = {};
+let adminSignupHistory = {};
+let adminStatsLoaded = false;
+let adminHistoryLoaded = false;
 let currentUserKey = localStorage.getItem(USER_KEY_STORAGE);
 if (!currentUserKey) {
   currentUserKey = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
@@ -868,6 +957,9 @@ function normalizeState(input) {
   next.joined = Array.isArray(next.joined) ? next.joined : [];
   next.waitlist = Array.isArray(next.waitlist) ? next.waitlist : [];
   return enforceLevelCapacityForState(next);
+}
+function normalizePersonName(name) {
+  return String(name || '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-CA');
 }
 function levelKeyOf(p) {
   const raw = p && p.levelGroup;
@@ -1030,9 +1122,42 @@ function initRealtimeDatabase() {
     }, () => {
       showToast('无法连接实时数据库');
     });
+    if (isAdminMode) startAdminDataSync();
   } catch(e) {
     showToast('Firebase 配置无效');
   }
+}
+
+function startAdminDataSync() {
+  if (!isAdminMode || adminStatsRef || !window.firebase || !firebase.database) return;
+  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  adminStatsLoaded = false;
+  adminHistoryLoaded = false;
+  adminStatsRef = firebase.database().ref(SIGNUP_STATS_DB_PATH);
+  adminHistoryRef = firebase.database().ref(SIGNUP_HISTORY_DB_PATH);
+  adminStatsRef.on('value', snapshot => {
+    const value = snapshot.val();
+    adminSignupStats = value && typeof value === 'object' ? value : {};
+    adminStatsLoaded = true;
+    renderAdminHistory();
+  });
+  adminHistoryRef.on('value', snapshot => {
+    const value = snapshot.val();
+    adminSignupHistory = value && typeof value === 'object' ? value : {};
+    adminHistoryLoaded = true;
+    renderAdminHistory();
+  });
+}
+
+function stopAdminDataSync() {
+  if (adminStatsRef) adminStatsRef.off();
+  if (adminHistoryRef) adminHistoryRef.off();
+  adminStatsRef = null;
+  adminHistoryRef = null;
+  adminSignupStats = {};
+  adminSignupHistory = {};
+  adminStatsLoaded = false;
+  adminHistoryLoaded = false;
 }
 
 // ── Render ──
@@ -1042,6 +1167,7 @@ function render() {
   renderWaitlist();
   renderSummary();
   renderStats();
+  renderAdminHistory();
   replaceLegacyLevelText();
   save();
 }
@@ -1136,6 +1262,102 @@ function renderSummary() {
   }
 }
 
+function formatAdminDate(timestamp) {
+  if (!Number(timestamp)) return '—';
+  return new Date(Number(timestamp)).toLocaleDateString('zh-CN', {
+    timeZone: 'America/Toronto',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+function renderAdminHistory() {
+  const el = document.getElementById('adminHistoryContent');
+  if (!el || !isAdminMode) return;
+  if (!adminStatsLoaded || !adminHistoryLoaded) {
+    el.className = 'admin-data-empty';
+    el.textContent = '正在同步历史数据…';
+    return;
+  }
+
+  const players = new Map();
+  Object.values(adminSignupStats).forEach(player => {
+    if (!player || !player.name) return;
+    const normalizedName = player.normalizedName || normalizePersonName(player.name);
+    players.set(normalizedName, {
+      name: player.name,
+      archivedCount: Number(player.signupCount) || 0,
+      waitlistCount: Number(player.waitlistCount) || 0,
+      lastSignupAt: Number(player.lastSignupAt) || 0,
+      current: ''
+    });
+  });
+
+  state.joined.forEach(person => {
+    const key = normalizePersonName(person.name);
+    const row = players.get(key) || { name: person.name, archivedCount: 0, waitlistCount: 0, lastSignupAt: 0, current: '' };
+    row.name = person.name;
+    row.current = 'joined';
+    row.currentAt = Number(person.ts) || 0;
+    players.set(key, row);
+  });
+  state.waitlist.forEach(person => {
+    const key = normalizePersonName(person.name);
+    const row = players.get(key) || { name: person.name, archivedCount: 0, waitlistCount: 0, lastSignupAt: 0, current: '' };
+    row.name = person.name;
+    if (!row.current) row.current = 'waitlist';
+    row.currentAt = Number(person.ts) || 0;
+    players.set(key, row);
+  });
+
+  const playerRows = Array.from(players.values()).map(player => ({
+    ...player,
+    totalCount: player.archivedCount + (player.current === 'joined' ? 1 : 0)
+  })).sort((a, b) => b.totalCount - a.totalCount || a.name.localeCompare(b.name, 'zh-CN'));
+  const archives = Object.values(adminSignupHistory)
+    .filter(archive => archive && archive.resetId)
+    .sort((a, b) => String(b.resetId).localeCompare(String(a.resetId)));
+
+  const rowsHtml = playerRows.length ? `
+    <div class="admin-table-wrap">
+      <table class="admin-signup-table">
+        <thead><tr><th>姓名</th><th>报名次数</th><th>本周</th><th>最近报名</th><th>Waitlist 周次</th></tr></thead>
+        <tbody>${playerRows.map(player => `
+          <tr>
+            <td><strong>${escapeHtml(player.name)}</strong></td>
+            <td><span class="signup-count">${player.totalCount}</span></td>
+            <td>${player.current === 'joined'
+              ? '<span class="current-week-tag">已报名</span>'
+              : player.current === 'waitlist'
+                ? '<span class="current-week-tag waiting">Waitlist</span>'
+                : '—'}</td>
+            <td>${formatAdminDate(player.currentAt || player.lastSignupAt)}</td>
+            <td>${player.waitlistCount}</td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>` : '<div class="admin-data-empty">还没有可统计的报名记录。</div>';
+
+  const archiveHtml = archives.length ? archives.slice(0, 12).map(archive => {
+    const joinedNames = (Array.isArray(archive.joined) ? archive.joined : []).map(person => escapeHtml(person.name)).join('、') || '无';
+    const waitlistNames = (Array.isArray(archive.waitlist) ? archive.waitlist : []).map(person => escapeHtml(person.name)).join('、') || '无';
+    return `<details class="archive-week">
+      <summary>${escapeHtml(archive.resetId)} · 报名 ${Number(archive.joinedCount) || 0} 人 · Waitlist ${Number(archive.waitlistCount) || 0} 人</summary>
+      <div class="archive-week-body"><strong>报名：</strong>${joinedNames}<br><strong>Waitlist：</strong>${waitlistNames}</div>
+    </details>`;
+  }).join('') : '<div class="admin-data-empty">第一次周六归档后，历史名单会显示在这里。</div>';
+
+  el.className = '';
+  el.innerHTML = `
+    <div class="admin-history-summary">
+      <div class="admin-history-metric"><strong>${playerRows.length}</strong><span>累计记录人数</span></div>
+      <div class="admin-history-metric"><strong>${archives.length}</strong><span>已归档周次</span></div>
+    </div>
+    ${rowsHtml}
+    <div class="archive-heading">每周历史名单</div>
+    ${archiveHtml}`;
+}
+
 function copyList() {
   const title = state.title;
   const cap = state.capacity ? `（名额 ${state.joined.length}/${state.capacity}）` : `（共 ${state.joined.length} 人）`;
@@ -1206,6 +1428,7 @@ function toggleAdmin() {
   if (isAdminMode) {
     isAdminMode = false;
     sessionStorage.removeItem(ADMIN_STORAGE);
+    stopAdminDataSync();
     showToast('管理员已退出');
     render();
     return;
@@ -1214,6 +1437,7 @@ function toggleAdmin() {
   if (pass === ADMIN_PASSWORD) {
     isAdminMode = true;
     sessionStorage.setItem(ADMIN_STORAGE, '1');
+    startAdminDataSync();
     showToast('管理员已登录', 'green');
     render();
   } else if (pass !== null) {

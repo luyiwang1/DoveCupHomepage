@@ -7,3 +7,21 @@
   color: #059A4A;
   font-weight: 900;
 }
+
+.weekly-reset-note { margin-top: 16rpx; color: #777; font-size: 22rpx; line-height: 1.6; }
+
+.admin-stat-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20rpx;
+  padding: 18rpx 0;
+  border-bottom: 1rpx solid #E5E7EB;
+}
+
+.admin-stat-name { font-size: 28rpx; font-weight: 900; }
+.admin-stat-meta { margin-top: 6rpx; color: #777; font-size: 22rpx; }
+.admin-stat-count { color: #059A4A; font-size: 32rpx; font-weight: 900; white-space: nowrap; }
+.admin-week { padding: 18rpx 0; border-top: 1rpx solid #E5E7EB; }
+.admin-week-title { font-size: 25rpx; font-weight: 900; }
+.admin-week-names { margin-top: 8rpx; color: #777; font-size: 22rpx; line-height: 1.6; }

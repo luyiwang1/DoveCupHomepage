@@ -1,0 +1,39 @@
+name: Weekly signup archive and reset
+
+on:
+  schedule:
+    - cron: '0 20 * * 6'
+      timezone: 'America/Toronto'
+  workflow_dispatch:
+    inputs:
+      reset_id:
+        description: 'Saturday archive date (YYYY-MM-DD); blank uses the latest eligible Saturday'
+        required: false
+        type: string
+      dry_run:
+        description: 'Preview without changing Firebase'
+        required: true
+        default: true
+        type: boolean
+
+permissions:
+  contents: read
+
+concurrency:
+  group: weekly-signup-reset
+  cancel-in-progress: false
+
+jobs:
+  archive-and-reset:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out site
+        uses: actions/checkout@v4
+
+      - name: Archive the current signup list and start a new week
+        env:
+          FIREBASE_DATABASE_URL: https://dovecupdatabase-default-rtdb.firebaseio.com/doveCupWaitlistSystem.json
+          RESET_ID: ${{ inputs.reset_id || '' }}
+          DRY_RUN: ${{ github.event_name == 'workflow_dispatch' && inputs.dry_run || false }}
+        run: node scripts/weekly-reset.mjs

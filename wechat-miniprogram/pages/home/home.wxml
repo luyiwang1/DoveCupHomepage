@@ -18,6 +18,7 @@
       <button class="btn" bindtap="addJoined">报名</button>
     </view>
     <button class="btn secondary" style="margin-top:16rpx;width:100%" bindtap="addWaitlist">加入 Waitlist</button>
+    <view class="weekly-reset-note">每周六 20:00（多伦多时间）归档并更新报名表。</view>
   </view>
 
   <view wx:if="{{isAdmin}}" class="card">
@@ -25,6 +26,26 @@
     <view class="row">
       <input class="input" style="flex:1" type="number" placeholder="总名额" value="{{capacityInput}}" bindinput="onCapacityInput" />
       <button class="btn" bindtap="saveCapacity">保存</button>
+    </view>
+  </view>
+
+  <view wx:if="{{isAdmin}}" class="card">
+    <view class="section-title" style="margin-top:0">报名历史 · 仅管理员</view>
+    <view wx:if="{{!adminPlayerStats.length}}" class="empty">第一次周六归档后会开始累计；本周报名也会显示在这里。</view>
+    <view wx:for="{{adminPlayerStats}}" wx:key="name" class="admin-stat-row">
+      <view>
+        <view class="admin-stat-name">{{item.name}}</view>
+        <view class="admin-stat-meta">{{item.current || '本周未报名'}} · 最近 {{item.lastSignupDate}}</view>
+      </view>
+      <view class="admin-stat-count">{{item.totalCount}} 次</view>
+    </view>
+
+    <view class="section-title">每周历史名单</view>
+    <view wx:if="{{!adminHistoryWeeks.length}}" class="empty">暂无已归档周次</view>
+    <view wx:for="{{adminHistoryWeeks}}" wx:key="resetId" class="admin-week">
+      <view class="admin-week-title">{{item.resetId}} · 报名 {{item.joinedCount}} · Waitlist {{item.waitlistCount}}</view>
+      <view class="admin-week-names">报名：{{item.joinedNames}}</view>
+      <view class="admin-week-names">Waitlist：{{item.waitlistNames}}</view>
     </view>
   </view>
 

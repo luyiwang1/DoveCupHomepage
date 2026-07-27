@@ -44,6 +44,8 @@ function normalizeScores(data) {
 module.exports = {
   getMain: () => request('GET', 'main').then(normalizeMain),
   saveMain: (main) => request('PUT', 'main', Object.assign({}, normalizeMain(main), { updatedAt: Date.now() })),
+  getSignupStats: () => request('GET', 'signupStats').then(data => data && typeof data === 'object' ? data : {}),
+  getSignupHistory: () => request('GET', 'signupHistory').then(data => data && typeof data === 'object' ? data : {}),
   getCourts: () => request('GET', 'courtsPage'),
   saveCourts: (data) => request('PUT', 'courtsPage', Object.assign({}, data, { updatedAt: Date.now() })),
   getScores: () => request('GET', 'scores').then(normalizeScores),

@@ -15,7 +15,9 @@ Page({
     levelCapacity: 8,
     capacityInput: '',
     isAdmin: false,
-    userKey: ''
+    userKey: '',
+    adminPlayerStats: [],
+    adminHistoryWeeks: []
   },
 
   onLoad() {
@@ -30,6 +32,7 @@ Page({
 
   onShow() {
     this.loadData();
+    if (this.data.isAdmin) this.loadAdminData();
     this.timer = setInterval(() => this.loadData(false), 3000);
   },
 
@@ -46,9 +49,80 @@ Page({
           idSeq: main.idSeq,
           capacityInput: main.state.capacity || ''
         });
+        if (this.data.isAdmin) this.refreshAdminView();
       })
       .catch(() => wx.showToast({ title: '同步失败', icon: 'none' }))
       .finally(() => showLoading && wx.hideLoading());
+  },
+
+  loadAdminData() {
+    if (!this.data.isAdmin) return;
+    Promise.all([db.getSignupStats(), db.getSignupHistory()])
+      .then(([stats, history]) => {
+        this.adminStats = stats;
+        this.adminHistory = history;
+        this.refreshAdminView();
+      })
+      .catch(() => wx.showToast({ title: '历史数据同步失败', icon: 'none' }));
+  },
+
+  normalizePersonName(name) {
+    const raw = String(name || '');
+    return (raw.normalize ? raw.normalize('NFKC') : raw).trim().replace(/\s+/g, ' ').toLowerCase();
+  },
+
+  refreshAdminView() {
+    if (!this.data.isAdmin) return;
+    const players = {};
+    Object.values(this.adminStats || {}).forEach(player => {
+      if (!player || !player.name) return;
+      const key = player.normalizedName || this.normalizePersonName(player.name);
+      players[key] = {
+        name: player.name,
+        archivedCount: Number(player.signupCount) || 0,
+        waitlistCount: Number(player.waitlistCount) || 0,
+        lastSignupAt: Number(player.lastSignupAt) || 0,
+        current: ''
+      };
+    });
+    (this.data.state.joined || []).forEach(person => {
+      const key = this.normalizePersonName(person.name);
+      const row = players[key] || { name: person.name, archivedCount: 0, waitlistCount: 0, lastSignupAt: 0, current: '' };
+      row.name = person.name;
+      row.current = '本周已报名';
+      row.currentAt = Number(person.ts) || 0;
+      players[key] = row;
+    });
+    (this.data.state.waitlist || []).forEach(person => {
+      const key = this.normalizePersonName(person.name);
+      const row = players[key] || { name: person.name, archivedCount: 0, waitlistCount: 0, lastSignupAt: 0, current: '' };
+      row.name = person.name;
+      if (!row.current) row.current = 'Waitlist';
+      row.currentAt = Number(person.ts) || 0;
+      players[key] = row;
+    });
+
+    const adminPlayerStats = Object.values(players).map(player => ({
+      ...player,
+      totalCount: player.archivedCount + (player.current === '本周已报名' ? 1 : 0),
+      lastSignupDate: Number(player.currentAt || player.lastSignupAt)
+        ? new Date(Number(player.currentAt || player.lastSignupAt)).toLocaleDateString('zh-CN')
+        : '—'
+    })).sort((a, b) => b.totalCount - a.totalCount || a.name.localeCompare(b.name));
+
+    const adminHistoryWeeks = Object.values(this.adminHistory || {})
+      .filter(archive => archive && archive.resetId)
+      .sort((a, b) => String(b.resetId).localeCompare(String(a.resetId)))
+      .slice(0, 12)
+      .map(archive => ({
+        resetId: archive.resetId,
+        joinedCount: Number(archive.joinedCount) || 0,
+        waitlistCount: Number(archive.waitlistCount) || 0,
+        joinedNames: (Array.isArray(archive.joined) ? archive.joined : []).map(person => person.name).join('、') || '无',
+        waitlistNames: (Array.isArray(archive.waitlist) ? archive.waitlist : []).map(person => person.name).join('、') || '无'
+      }));
+
+    this.setData({ adminPlayerStats, adminHistoryWeeks });
   },
 
   saveState(nextState, nextIdSeq) {
@@ -71,7 +145,9 @@ Page({
   toggleAdmin() {
     if (this.data.isAdmin) {
       wx.removeStorageSync('dove_admin');
-      this.setData({ isAdmin: false });
+      this.adminStats = {};
+      this.adminHistory = {};
+      this.setData({ isAdmin: false, adminPlayerStats: [], adminHistoryWeeks: [] });
       return;
     }
     wx.showModal({
@@ -81,7 +157,7 @@ Page({
       success: (res) => {
         if (res.confirm && res.content === getApp().globalData.adminPassword) {
           wx.setStorageSync('dove_admin', '1');
-          this.setData({ isAdmin: true });
+          this.setData({ isAdmin: true }, () => this.loadAdminData());
         } else if (res.confirm) wx.showToast({ title: '密码错误', icon: 'none' });
       }
     });
