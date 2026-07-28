@@ -6,7 +6,7 @@ Page({
     idSeq: 1,
     nameInput: '',
     levelGroups: [
-      { key: 'u20', label: '2.0-' },
+      { key: 'u20', label: '新手场 · 2.0-' },
       { key: '20_25', label: '2.0-2.5' },
       { key: '25_30', label: '2.5-3.0' },
       { key: '30_plus', label: '3.0+' }

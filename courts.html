@@ -89,7 +89,7 @@ function hasScore(score){return Number.isFinite(Number(score.a))&&Number.isFinit
 function pickCaptain(teamA,teamB,round,court){const all=teamA.concat(teamB);return all.length?all[(round+court)%all.length].key:null}
 function makeMatchFromPlayers(list,idx,round=0){const clean=list.filter(Boolean);const teamA=[];const teamB=[];clean.forEach((p,i)=>{if(clean.length>=4){(i===0||i===3?teamA:teamB).push(p)}else{(i%2===0?teamA:teamB).push(p)}});return{court:idx,teamA,teamB,captainKey:pickCaptain(teamA,teamB,round,idx)}}
 const LEVEL_VERSION='4-level-v1';
-const LEVEL_GROUPS=[{key:'30_plus',label:'3.0+'},{key:'25_30',label:'2.5-3.0'},{key:'20_25',label:'2.0-2.5'},{key:'u20',label:'2.0-'}];
+const LEVEL_GROUPS=[{key:'30_plus',label:'3.0+'},{key:'25_30',label:'2.5-3.0'},{key:'20_25',label:'2.0-2.5'},{key:'u20',label:'新手场 · 2.0-'}];
 const LEGACY_LEVEL_MAP={over3:'30_plus',under3:'20_25'};
 function normalizeLevel(level){return LEVEL_GROUPS.some(g=>g.key===level)?level:(LEGACY_LEVEL_MAP[level]||'20_25')}
 function levelLabel(level){const key=normalizeLevel(level);return(LEVEL_GROUPS.find(g=>g.key===key)||LEVEL_GROUPS[2]).label}
