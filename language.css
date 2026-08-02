@@ -1,0 +1,98 @@
+.dove-language-switch {
+  position: fixed;
+  left: max(14px, env(safe-area-inset-left));
+  bottom: max(14px, env(safe-area-inset-bottom));
+  z-index: 10000;
+  display: flex;
+  align-items: center;
+  padding: 4px;
+  color: #f8efd7;
+  background: rgba(16, 39, 30, .94);
+  border: 1px solid rgba(248, 239, 215, .42);
+  border-radius: 999px;
+  box-shadow: 0 10px 30px rgba(8, 24, 17, .26);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+}
+
+.dove-language-toggle {
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(2, 48px);
+  width: 96px;
+  height: 36px;
+  padding: 0;
+  overflow: hidden;
+  color: inherit;
+  background: transparent;
+  border: 0;
+  border-radius: 999px;
+  cursor: pointer;
+  font: 800 12px/1 "Avenir Next", "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+  letter-spacing: 0;
+}
+
+.dove-language-thumb {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 48px;
+  height: 36px;
+  background: #f8efd7;
+  border-radius: 999px;
+  box-shadow: 0 3px 10px rgba(0, 0, 0, .2);
+  transition: transform .24s cubic-bezier(.2, .8, .2, 1);
+}
+
+.dove-language-toggle[data-language="en"] .dove-language-thumb {
+  transform: translateX(48px);
+}
+
+.dove-language-label {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  place-items: center;
+  transition: color .2s ease;
+}
+
+.dove-language-toggle[data-language="zh"] .dove-language-label-zh,
+.dove-language-toggle[data-language="en"] .dove-language-label-en {
+  color: #143323;
+}
+
+.dove-language-toggle[data-language="zh"] .dove-language-label-en,
+.dove-language-toggle[data-language="en"] .dove-language-label-zh {
+  color: rgba(248, 239, 215, .72);
+}
+
+.dove-language-toggle:focus-visible {
+  outline: 3px solid #d5ab55;
+  outline-offset: 3px;
+}
+
+@media (max-width: 560px) {
+  .dove-language-switch {
+    left: 10px;
+    bottom: max(10px, env(safe-area-inset-bottom));
+  }
+
+  .dove-language-toggle {
+    grid-template-columns: repeat(2, 43px);
+    width: 86px;
+    height: 34px;
+  }
+
+  .dove-language-thumb {
+    width: 43px;
+    height: 34px;
+  }
+
+  .dove-language-toggle[data-language="en"] .dove-language-thumb {
+    transform: translateX(43px);
+  }
+}
+
+@media print {
+  .dove-language-switch { display: none !important; }
+}

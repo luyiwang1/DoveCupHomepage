@@ -1,0 +1,545 @@
+(function (root, factory) {
+  const api = factory();
+  if (typeof module === 'object' && module.exports) module.exports = api;
+  if (root) root.DoveLanguage = api;
+  if (typeof document !== 'undefined') api.init();
+}(typeof window !== 'undefined' ? window : globalThis, function () {
+  'use strict';
+
+  const STORAGE_KEY = 'dove_cup_language';
+  const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
+  const entries = [];
+  const add = (source, zh, en) => entries.push({ source, zh, en });
+
+  // Shared navigation, labels, and mixed-language sports terms.
+  add('Golden Dove Cup / 金鸽杯', '金鸽杯', 'Golden Dove Cup');
+  add('Golden Dove Cup · Team Special', '金鸽杯 · 团体特别赛', 'Golden Dove Cup · Team Special');
+  add('Golden Dove Cup', '金鸽杯', 'Golden Dove Cup');
+  add('金鸽杯', '金鸽杯', 'Golden Dove Cup');
+  add('Dove Cup Calendar', '金鸽杯活动日历', 'Dove Cup Calendar');
+  add('Dove Cup', '金鸽杯', 'Dove Cup');
+  add('About', '关于', 'About');
+  add('Events', '活动', 'Events');
+  add('Format', '赛制', 'Format');
+  add('Join', '参与', 'Join');
+  add('Register', '报名', 'Register');
+  add('Home', '主页', 'Home');
+  add('首页', '首页', 'Home');
+  add('活动', '活动', 'Events');
+  add('到场', '到场', 'Attendance');
+  add('Admin', '管理员', 'Admin');
+  add('Admin 已登录', '管理员已登录', 'Admin signed in');
+  add('Venue', '场地', 'Venue');
+  add('City', '城市', 'City');
+  add('Toronto', '多伦多', 'Toronto');
+  add('Level', '分级', 'Level');
+  add('Tools', '工具', 'Tools');
+  add('Waitlist', '候补名单', 'Waitlist');
+  add('Court', '场地', 'Court');
+  add('Game 比分', '局数比分', 'Game Score');
+  add('Total Games', '总局数', 'Total Games');
+  add('Team Score', '团队计分', 'Team Score');
+  add('Mixed Doubles', '混双', 'Mixed Doubles');
+  add('Team Special', '团体特别赛', 'Team Special');
+  add('FULL SET WITH AD', '完整一盘 · 占先计分', 'FULL SET WITH AD');
+  add('Live Team Result', '实时团队赛果', 'Live Team Result');
+  add('Match Rules', '比赛规则', 'Match Rules');
+  add('Fixed Partnerships', '固定搭档', 'Fixed Partnerships');
+  add('Admin Setup', '管理员设置', 'Admin Setup');
+  add('Tournament Desk', '赛事中心', 'Tournament Desk');
+  add('Event Archive', '活动档案', 'Event Archive');
+  add('Upcoming & Past', '即将举行与往期活动', 'Upcoming & Past');
+  add('Special Events', '特别活动', 'Special Events');
+  add('The invitation', '邀请', 'The Invitation');
+  add('Cup format', '杯赛赛制', 'Cup Format');
+  add('Sign Up', '报名', 'Sign Up');
+  add('Golden Sets', '金球赛制', 'Golden Sets');
+  add('Dove Attendance', '金鸽到场记录', 'Dove Attendance');
+  add('Details', '详情', 'Details');
+  add('Vintage Tennis Social', '复古网球社交赛', 'Vintage Tennis Social');
+  add('Play with elegance. Compete with warmth. Leave with new partners.', '优雅上场，热情竞争，带着新搭档离开。', 'Play with elegance. Compete with warmth. Leave with new partners.');
+  add('Vintage tennis social for the weekend court crowd.', '为周末球场上的朋友而设的复古网球社交赛。', 'Vintage tennis social for the weekend court crowd.');
+  add('Toronto tennis events and team specials.', '多伦多网球活动与团体特别赛。', 'Toronto tennis events and team specials.');
+  add('MRTC · Toronto · August 08, 2026', 'MRTC · 多伦多 · 2026年8月8日', 'MRTC · Toronto · August 08, 2026');
+  add('MRTC · Toronto', 'MRTC · 多伦多', 'MRTC · Toronto');
+  add('AUG 08 · SATURDAY', '8月8日 · 周六', 'AUG 08 · SATURDAY');
+  add('August 08 · Team Special · MRTC', '8月8日 · 团体特别赛 · MRTC', 'August 08 · Team Special · MRTC');
+  add('Team Special · Mixed Doubles', '团体特别赛 · 混双', 'Team Special · Mixed Doubles');
+  add('4 Courts · Mixed Doubles · Team Score', '4 片场地 · 混双 · 团队计分', '4 Courts · Mixed Doubles · Team Score');
+  add('AUG', '8月', 'AUG');
+
+  // Promotional homepage and activities archive.
+  add('金鸽杯 Golden Dove Cup', '金鸽杯', 'Golden Dove Cup');
+  add('金鸽杯 Golden Dove Cup 是一场复古俱乐部气质的网球社交杯赛。', '金鸽杯是一场具有复古俱乐部气质的网球社交杯赛。', 'Golden Dove Cup is a vintage club-style social tennis tournament.');
+  add('一场更有仪式感的周末网球杯赛。复古俱乐部氛围、轻竞技轮转、赛后社交和长期到场记录，给多伦多的网球周末一个漂亮入口。', '一场更有仪式感的周末网球杯赛。复古俱乐部氛围、轻竞技轮转、赛后社交和长期到场记录，给多伦多的网球周末一个漂亮入口。', 'A weekend tennis cup with a sense of occasion: vintage club atmosphere, friendly competition, post-match social time, and long-term attendance records for Toronto players.');
+  add('新手场（2.0-） · 2.0-2.5 · 2.5-3.0 · 3.0+', '新手场（2.0-） · 2.0-2.5 · 2.5-3.0 · 3.0+', 'Beginner (under 2.0) · 2.0-2.5 · 2.5-3.0 · 3.0+');
+  add('活动 · 报名 · 场地 · 到场', '活动 · 报名 · 场地 · 到场', 'Events · Registration · Courts · Attendance');
+  add('三轮升降级', '三轮升降级', 'Three-round promotion and relegation');
+  add('进入报名页', '进入报名页', 'Registration');
+  add('最新活动', '最新活动', 'Latest Event');
+  add('赛事入口', '赛事入口', 'Tournament Tools');
+  add('报名 / Waitlist', '报名 / 候补名单', 'Registration / Waitlist');
+  add('三轮场地分组', '三轮场地分组', 'Three-Round Court Assignments');
+  add('每周到场记录', '每周到场记录', 'Weekly Attendance');
+  add('特别活动与赛果', '特别活动与赛果', 'Special Events and Results');
+  add('场地页面', '场地页面', 'Courts');
+  add('巡回赛之外，偶尔来一场特别的。', '巡回赛之外，偶尔来一场特别的。', 'Beyond the weekly tour, something special now and then.');
+  add('不只是打一场球，是加入一个周末俱乐部。', '不只是打一场球，是加入一个周末俱乐部。', 'More than a match. Join a weekend tennis club.');
+  add('金鸽杯为想认真打球、也想认识同频朋友的人设计。你可以带搭档，也可以单人报名；现场会安排轻竞技轮转、分级对局、合影和赛后交流，让比赛有张力，周末有余韵。', '金鸽杯为想认真打球、也想认识同频朋友的人设计。你可以带搭档，也可以单人报名；现场会安排轻竞技轮转、分级对局、合影和赛后交流，让比赛有张力，周末有余韵。', 'Golden Dove Cup is for people who want serious tennis and good company. Bring a partner or register solo; the day includes friendly rotations, level-based matches, photos, and post-match social time.');
+  add('复古一点，讲究一点，也好玩一点。', '复古一点，讲究一点，也好玩一点。', 'A little vintage, a little refined, and a lot of fun.');
+  add('报名系统独立运行，支持名额上限、waitlist、付款确认和名单复制。主页只负责介绍，报名页负责行动。', '报名系统独立运行，支持名额上限、候补名单、付款确认和名单复制。主页只负责介绍，报名页负责行动。', 'The registration system handles capacity, waitlist, payment confirmation, and roster copying. The homepage introduces the event; registration happens separately.');
+  add('比赛当天进入场地页，读取报名名单，生成三轮升降级赛程。管理员可以调整场地、录入比分。', '比赛当天进入场地页，读取报名名单，生成三轮升降级赛程。管理员可以调整场地、录入比分。', 'On match day, the courts page reads the roster and builds three promotion-and-relegation rounds. Admins can adjust courts and enter scores.');
+  add('每周名单归档后自动记录实际到场次数，不计算胜局和积分，长期参加一目了然。', '每周名单归档后自动记录实际到场次数，不计算胜局和积分，长期参加一目了然。', 'Each weekly archive records actual attendance only, without wins or points, so long-term participation stays easy to see.');
+  add('主页负责心动，工具页负责办赛。', '主页负责心动，工具页负责办赛。', 'The homepage sets the mood. The tools run the tournament.');
+  add('你可以把这个页面发给新朋友看活动质感；真正要报名、排场地、看出勤时，再进入对应工具页。这样宣传和管理分开，观感就不会互相打架。', '你可以把这个页面发给新朋友看活动质感；真正要报名、排场地、看出勤时，再进入对应工具页。这样宣传和管理分开，观感就不会互相打架。', 'Share this page to introduce the event. When it is time to register, assign courts, or check attendance, use the dedicated tools so promotion and administration stay cleanly separated.');
+  add('不需要。活动设有新手场（2.0-）、2.0-2.5、2.5-3.0、3.0+ 四个分级，每个分级最多 8 人，核心是有质量地打球和认识新朋友。', '不需要。活动设有新手场（2.0-）、2.0-2.5、2.5-3.0、3.0+ 四个分级，每个分级最多 8 人，核心是有质量地打球和认识新朋友。', 'No. There are four divisions: beginner (under 2.0), 2.0-2.5, 2.5-3.0, and 3.0+, with up to eight players in each. The goal is quality tennis and meeting good people.');
+  add('点击“进入报名页”会打开独立的报名接龙系统，那里可以报名、进入 waitlist，也能由管理员确认付款。', '点击“进入报名页”会打开独立的报名接龙系统，那里可以报名、进入候补名单，也能由管理员确认付款。', 'Select “Registration” to open the separate signup system, where players can register, join the waitlist, and have payment confirmed by an admin.');
+  add('场地页面和到场记录是单独工具页，比赛当天使用，不会干扰这个宣传主页的观感。', '场地页面和到场记录是单独工具页，比赛当天使用，不会干扰这个宣传主页的观感。', 'Court assignments and attendance are separate tools used on match day, keeping this promotional homepage focused.');
+  add('可以。当前部署在 GitHub Pages，后续可以绑定自定义域名，也可以继续替换日期、地点、价格和社媒链接。', '可以。当前部署在 GitHub Pages，后续可以绑定自定义域名，也可以继续替换日期、地点、价格和社媒链接。', 'Yes. The site is currently on GitHub Pages and can later use a custom domain, with dates, venues, prices, and social links updated anytime.');
+  add('需要很强才能参加吗？', '需要很强才能参加吗？', 'Do I need to be an advanced player?');
+  add('报名在哪里？', '报名在哪里？', 'Where do I register?');
+  add('场地和到场记录在哪里？', '场地和到场记录在哪里？', 'Where are court assignments and attendance?');
+  add('之后能接正式域名吗？', '之后能接正式域名吗？', 'Can this use a custom domain later?');
+  add('团体赛、主题赛和下一站巡回活动都会保留在这里。每一场比赛结束后，也会成为金鸽杯的赛事档案。', '团体赛、主题赛和下一站巡回活动都会保留在这里。每一场比赛结束后，也会成为金鸽杯的赛事档案。', 'Team competitions, themed events, and future tour stops all live here. After each event, the page becomes part of the Golden Dove Cup archive.');
+  add('两支队伍、四片室内场地、固定混双搭档。每一场胜利都为团队带回 1 分。', '两支队伍、四片室内场地、固定混双搭档。每一场胜利都为团队带回 1 分。', 'Two teams, four indoor courts, and fixed mixed-doubles partners. Every match win earns one team point.');
+  add('新的特别活动正在准备中。', '新的特别活动正在准备中。', 'A new special event is being prepared.');
+  add('即将开始', '即将开始', 'Coming Soon');
+  add('查看全部活动', '查看全部活动', 'View All Events');
+  add('进入活动页面', '进入活动页面', 'Open Event');
+  add('查看活动', '查看活动', 'View Event');
+  add('返回主页', '返回主页', 'Back to Home');
+
+  // Team event page.
+  add('8.8 混双团体赛 · 金鸽杯', '8.8 混双团体赛 · 金鸽杯', 'Aug 8 Mixed Doubles Team Event · Golden Dove Cup');
+  add('金鸽杯 8 月 8 日凤凰与狮鹫混双团体赛，实时阵容、比分和团队结果。', '金鸽杯 8 月 8 日凤凰与狮鹫混双团体赛，实时阵容、比分和团队结果。', 'Golden Dove Cup mixed doubles team event on August 8, with live lineups, scores, and team results.');
+  add('凤凰 vs 狮鹫', '凤凰 对阵 狮鹫', 'Phoenix vs Griffin');
+  add('凤凰 Phoenix', '凤凰', 'Phoenix');
+  add('狮鹫 Griffin', '狮鹫', 'Griffin');
+  add('凤凰固定搭档', '凤凰固定搭档', 'Phoenix Fixed Pair');
+  add('狮鹫固定搭档', '狮鹫固定搭档', 'Griffin Fixed Pair');
+  add('凤凰 game 数', '凤凰局数', 'Phoenix games');
+  add('狮鹫 game 数', '狮鹫局数', 'Griffin games');
+  add('四片室内场地同时开赛。八组固定混双以团队之名出战，每一场胜利都将为队伍带回 1 分。', '四片室内场地同时开赛。八组固定混双以团队之名出战，每一场胜利都将为队伍带回 1 分。', 'Four indoor courts start together. Eight fixed mixed-doubles pairs compete for their teams, and every match win earns one point.');
+  add('每一局都算数，每一场都为了团队。', '每一局都算数，每一场都为了团队。', 'Every game counts. Every match is for the team.');
+  add('四组固定混双每轮全部上场。队长决定每轮的出战顺序和 Court 安排，搭档在整场活动中保持不变。', '四组固定混双每轮全部上场。队长决定每轮的出战顺序和场地安排，搭档在整场活动中保持不变。', 'All four fixed mixed-doubles pairs play every round. Captains choose the order and court assignments, while partners remain fixed throughout the event.');
+  add('完整一盘', '完整一盘', 'Full Set');
+  add('正常一盘先到 6 个 game，采用 Advantage scoring，有 AD。5-5 时直接进行 7 分抢七。', '正常一盘先到 6 局，采用占先计分。5-5 时直接进行 7 分抢七。', 'Play one full set to six games with advantage scoring. At 5-5, play a seven-point tiebreak.');
+  add('35 分钟', '35 分钟', '35 Minutes');
+  add('每场限时 35 分钟。时间到时按已完成 game 的局数领先者获胜；提前结束可以自由活动。', '每场限时 35 分钟。时间到时按已完成局数的领先者获胜；提前结束可以自由活动。', 'Each match is capped at 35 minutes. At time, the team leading in completed games wins; early finishers have free court time.');
+  add('一场一分', '一场一分', 'One Point per Match');
+  add('每一场混双胜方所属队伍获得 1 个团队积分。局数相同的场次由赛事负责人指定决胜方。', '每一场混双胜方所属队伍获得 1 个团队积分。局数相同的场次由赛事负责人指定决胜方。', 'The winning pair earns one point for its team. If the game score is tied at time, the tournament director selects the match winner.');
+  add('决定冠军', '决定冠军', 'Deciding the Champion');
+  add('全部比赛结束后先比较团队积分；团队积分相同，再比较两队累计赢得的总 game 数。', '全部比赛结束后先比较团队积分；团队积分相同，再比较两队累计赢得的总局数。', 'After all matches, compare team points first. If tied, compare total games won.');
+  add('两支队伍，八组固定混双。', '两支队伍，八组固定混双。', 'Two teams. Eight fixed mixed-doubles pairs.');
+  add('每位球员每轮都会上场。队长负责决定组合在四片场地上的顺序，而不是决定谁休息。', '每位球员每轮都会上场。队长负责决定组合在四片场地上的顺序，而不是决定谁休息。', 'Every player competes in every round. Captains decide the order across four courts; no one sits out.');
+  add('录入队长与固定搭档。', '录入队长与固定搭档。', 'Enter captains and fixed partners.');
+  add('姓名修改后会实时同步到所有人的页面，并自动更新下方每一轮的出战选择。', '姓名修改后会实时同步到所有人的页面，并自动更新下方每一轮的出战选择。', 'Name changes sync live for everyone and update each round lineup below.');
+  add('录入说明：抢七获胜请把最终局数记为 6-5。35 分钟结束时若局数不同，系统自动判定领先方；若局数相同，请在“同局决胜方”中选择现场获胜队伍。未填完的比赛不会计入团队积分。', '录入说明：抢七获胜请把最终局数记为 6-5。35 分钟结束时若局数不同，系统自动判定领先方；若局数相同，请在“同局决胜方”中选择现场获胜队伍。未填完的比赛不会计入团队积分。', 'Scoring: record a tiebreak win as 6-5. At 35 minutes, the system awards a game-score leader automatically. If games are tied, select the on-site winner under “Tied-score winner.” Incomplete matches do not count.');
+  add('团队总比分', '团队总比分', 'Overall Team Score');
+  add('团队积分', '团队积分', 'Team Points');
+  add('比赛成绩与胜负', '比赛成绩与胜负', 'Match Scores and Results');
+  add('查看实时赛果', '查看实时赛果', 'View Live Results');
+  add('比赛规则', '比赛规则', 'Rules');
+  add('全部活动', '全部活动', 'All Events');
+  add('主页', '主页', 'Home');
+  add('新增轮次', '新增轮次', 'Add Round');
+  add('清空比分', '清空比分', 'Clear Scores');
+  add('队长 ·', '队长 ·', 'Captain ·');
+  add('队长', '队长', 'Captain');
+  add('待选举', '待选举', 'To Be Elected');
+  add('输入队长姓名', '输入队长姓名', 'Enter captain name');
+  add('球员 A', '球员 A', 'Player A');
+  add('球员 B', '球员 B', 'Player B');
+  add('同局决胜方', '同局决胜方', 'Tied-score Winner');
+  add('本场结果', '本场结果', 'Match Result');
+  add('自动判定', '自动判定', 'Automatic');
+  add('等待决胜', '等待决胜', 'Winner Needed');
+  add('待录入', '待录入', 'Pending');
+  add('比赛进行中', '比赛进行中', 'Matches in Progress');
+  add('等待比赛开始', '等待比赛开始', 'Waiting to Start');
+  add('完全打平', '完全打平', 'Overall Tie');
+  add('以团队积分胜出', '以团队积分胜出', 'Won on team points');
+  add('团队积分相同，以总 game 数胜出', '团队积分相同，以总局数胜出', 'Team points tied; won on total games');
+  add('团队积分及总 game 数均相同，需要加赛', '团队积分及总局数均相同，需要加赛', 'Team points and total games are tied; a playoff is required');
+  add('阵容有重复或遗漏', '阵容有重复或遗漏', 'lineup has a duplicate or missing pair');
+  add('实时数据库尚未连接', '实时数据库尚未连接', 'Live database is not connected');
+  add('正在连接实时数据', '正在连接实时数据', 'Connecting to live data');
+  add('实时同步中', '实时同步中', 'Live Sync');
+  add('正在保存', '正在保存', 'Saving');
+  add('已实时保存', '已实时保存', 'Saved Live');
+  add('保存失败，请检查网络', '保存失败，请检查网络', 'Save failed. Check your connection.');
+  add('实时数据读取失败', '实时数据读取失败', 'Unable to read live data');
+  add('Firebase 加载失败', 'Firebase 加载失败', 'Firebase failed to load');
+  add('确定清空所有轮次的比分吗？固定搭档和出战顺序会保留。', '确定清空所有轮次的比分吗？固定搭档和出战顺序会保留。', 'Clear all round scores? Fixed partners and lineup order will be kept.');
+  add('请输入管理员密码', '请输入管理员密码', 'Enter the admin password');
+  add('密码错误', '密码错误', 'Incorrect password');
+
+  // Registration page.
+  add('金鸽杯报名接龙', '金鸽杯报名接龙', 'Golden Dove Cup Registration');
+  add('活动接龙', '活动接龙', 'Event Registration');
+  add('报名接龙', '报名接龙', 'Registration');
+  add('✏️ 改名', '✏️ 改名', '✏️ Rename');
+  add('名额', '名额', 'Capacity');
+  add('已报名', '已报名', 'Registered');
+  add('已付', '已付', 'Paid');
+  add('报名', '报名', 'Register');
+  add('汇总', '汇总', 'Summary');
+  add('名额占用', '名额占用', 'Capacity Used');
+  add('总名额上限', '总名额上限', 'Total Capacity');
+  add('设置', '设置', 'Set');
+  add('报名表每周六 20:00（多伦多时间）归档并更新为空。', '报名表每周六 20:00（多伦多时间）归档并更新为空。', 'The registration form archives and resets every Saturday at 8:00 PM Toronto time.');
+  add('报名列表', '报名列表', 'Registration List');
+  add('📊 报名概况', '📊 报名概况', '📊 Registration Summary');
+  add('报名概况', '报名概况', 'Registration Summary');
+  add('已付款', '已付款', 'Paid');
+  add('未付款', '未付款', 'Unpaid');
+  add('⏳ 未付款名单', '⏳ 未付款名单', '⏳ Unpaid Players');
+  add('未付款名单', '未付款名单', 'Unpaid Players');
+  add('报名历史 · 仅管理员', '报名历史 · 仅管理员', 'Registration History · Admin Only');
+  add('正在同步历史数据…', '正在同步历史数据…', 'Syncing history…');
+  add('📋 复制接龙文本', '📋 复制接龙文本', '📋 Copy Registration List');
+  add('➕ 添加人员', '➕ 添加人员', '➕ Add Player');
+  add('添加人员', '添加人员', 'Add Player');
+  add('新手场 · 2.0-', '新手场 · 2.0-', 'Beginner · Under 2.0');
+  add('取消', '取消', 'Cancel');
+  add('加 Waitlist', '加入候补名单', 'Join Waitlist');
+  add('直接报名', '直接报名', 'Register Now');
+  add('✏️ 修改活动名称', '✏️ 修改活动名称', '✏️ Edit Event Name');
+  add('修改活动名称', '修改活动名称', 'Edit Event Name');
+  add('保存', '保存', 'Save');
+  add('姓名 / 微信名', '姓名 / 微信名', 'Name / WeChat Name');
+  add('姓名', '姓名', 'Name');
+  add('微信名', '微信名', 'WeChat Name');
+  add('输入姓名', '输入姓名', 'Enter name');
+  add('例：5月羽毛球活动', '例：5月羽毛球活动', 'Example: May Tennis Event');
+  add('不限', '不限', 'No Limit');
+  add('全部', '全部', 'All');
+  add('未录入', '未录入', 'Not Entered');
+  add('已确认', '已确认', 'Confirmed');
+  add('已确认参加', '已确认参加', 'Confirmed');
+  add('待确认', '待确认', 'Pending Confirmation');
+  add('排队中', '排队中', 'Waiting');
+  add('未付款', '未付款', 'Unpaid');
+  add('标记未付款', '标记未付款', 'Mark Unpaid');
+  add('取消确认', '取消确认', 'Undo Confirmation');
+  add('补位', '补位', 'Promote');
+  add('这是你', '这是你', 'You');
+  add('暂无报名', '暂无报名', 'No Registrations');
+  add('还没有人报名', '还没有人报名', 'No one has registered yet');
+  add('点击右下角 + 添加', '点击右下角 + 添加', 'Use the + button to add a player');
+  add('还没有可统计的报名记录。', '还没有可统计的报名记录。', 'No registration history is available yet.');
+  add('第一次周六归档后，历史名单会显示在这里。', '第一次周六归档后，历史名单会显示在这里。', 'Weekly history will appear after the first Saturday archive.');
+  add('只有管理员可以操作', '只有管理员可以操作', 'Only an admin can perform this action');
+  add('你只能修改自己的状态', '你只能修改自己的状态', 'You can only edit your own status');
+  add('管理员密码错误', '管理员密码错误', 'Incorrect admin password');
+  add('管理员已登录', '管理员已登录', 'Admin signed in');
+  add('管理员已退出', '管理员已退出', 'Admin signed out');
+  add('已复制到剪贴板！', '已复制到剪贴板！', 'Copied to clipboard!');
+  add('加载失败，请刷新页面', '加载失败，请刷新页面', 'Loading failed. Refresh the page.');
+  add('需要配置 Firebase 才能多人实时共享', '需要配置 Firebase 才能多人实时共享', 'Firebase must be configured for live multi-user sharing');
+  add('无法连接实时数据库', '无法连接实时数据库', 'Unable to connect to the live database');
+  add('正在连接实时数据', '正在连接实时数据', 'Connecting to live data');
+  add('直接生成赛程。', '直接生成赛程。', 'Generate the schedule directly.');
+
+  // Courts page.
+  add('Dove Cup 三轮升降级赛程', '金鸽杯三轮升降级赛程', 'Dove Cup Three-Round Court Schedule');
+  add('三轮升降级赛程', '三轮升降级赛程', 'Three-Round Court Schedule');
+  add('正在读取接龙报名名单...', '正在读取接龙报名名单...', 'Loading the registration list...');
+  add('🎲 重新生成首轮', '🎲 重新生成首轮', '🎲 Regenerate Round 1');
+  add('重新生成首轮', '重新生成首轮', 'Regenerate Round 1');
+  add('💾 保存赛程和比分', '💾 保存赛程和比分', '💾 Save Schedule and Scores');
+  add('保存赛程和比分', '保存赛程和比分', 'Save Schedule and Scores');
+  add('📋 复制三轮表格', '📋 复制三轮表格', '📋 Copy Three-Round Table');
+  add('复制三轮表格', '复制三轮表格', 'Copy Three-Round Table');
+  add('报名页', '报名页', 'Registration');
+  add('场地分组', '场地分组', 'Court Assignments');
+  add('特别活动', '特别活动', 'Special Events');
+  add('✍️ 手动输入名单', '✍️ 手动输入名单', '✍️ Enter Roster Manually');
+  add('手动输入名单', '手动输入名单', 'Enter Roster Manually');
+  add('报名人数', '报名人数', 'Registered Players');
+  add('场地数', '场地数', 'Courts');
+  add('轮数', '轮数', 'Rounds');
+  add('已录比分', '已录比分', 'Scores Entered');
+  add('第 1 轮就是首轮位置，直接看自己在哪个 Court。每轮打完录入比分后，系统会自动生成下一轮；详细升降级去向在底部总表里。', '第 1 轮就是首轮位置，直接看自己在哪个场地。每轮打完录入比分后，系统会自动生成下一轮；详细升降级去向在底部总表里。', 'Round 1 shows the starting positions. After each round, enter scores and the system will generate the next round. Detailed movements appear in the summary table below.');
+  add('场地数量', '场地数量', 'Number of Courts');
+  add('保存场地数', '保存场地数', 'Save Court Count');
+  add('清空三轮比分', '清空三轮比分', 'Clear Three-Round Scores');
+  add('使用这份名单生成赛程', '使用这份名单生成赛程', 'Generate Schedule from This Roster');
+  add('清空', '清空', 'Clear');
+  add('正在快速读取接龙名单...', '正在快速读取接龙名单...', 'Quickly loading the registration list...');
+  add('三轮总表', '三轮总表', 'Three-Round Summary');
+  add('方便截图/打印', '方便截图/打印', 'Ready for screenshots or printing');
+  add('轮次', '轮次', 'Round');
+  add('分级', '分级', 'Division');
+  add('场地', '场地', 'Court');
+  add('A 队', 'A 队', 'Team A');
+  add('B 队', 'B 队', 'Team B');
+  add('比分', '比分', 'Score');
+  add('胜方去向', '胜方去向', 'Winner Moves To');
+  add('负方去向', '负方去向', 'Loser Moves To');
+  add('首轮按当前报名名单分组', '首轮按当前报名名单分组', 'Round 1 uses the current registration list');
+  add('胜方', '胜方', 'Winner');
+  add('负方', '负方', 'Loser');
+  add('可拖拽调整', '可拖拽调整', 'Drag to Adjust');
+  add('Admin 可拖拽调整', '管理员可拖拽调整', 'Admin Can Drag to Adjust');
+  add('空位', '空位', 'Open Spot');
+  add('手动名单 · 三轮升降级赛程', '手动名单 · 三轮升降级赛程', 'Manual Roster · Three-Round Schedule');
+  add('手动模式', '手动模式', 'Manual Mode');
+  add('自动读取报名名单', '自动读取报名名单', 'Automatically Loading Registration List');
+  add('读取失败', '读取失败', 'Loading Failed');
+  add('读取接龙数据失败。管理员可以点“手动输入名单”直接生成赛程。', '读取接龙数据失败。管理员可以点“手动输入名单”直接生成赛程。', 'Unable to load registration data. An admin can use “Enter Roster Manually” to generate the schedule.');
+  add('只有管理员可以修改赛程', '只有管理员可以修改赛程', 'Only an admin can edit the schedule');
+  add('请输入 1-20 的场地数量', '请输入 1-20 的场地数量', 'Enter a court count from 1 to 20');
+  add('只能在同一个分级里调整场地', '只能在同一个分级里调整场地', 'Players can only move within the same division');
+  add('赛程和比分已保存', '赛程和比分已保存', 'Schedule and scores saved');
+  add('赛程保存失败，请检查网络', '赛程保存失败，请检查网络', 'Schedule save failed. Check your connection.');
+  add('确定清空三轮比分吗？', '确定清空三轮比分吗？', 'Clear all three rounds of scores?');
+
+  // Attendance page.
+  add('Dove Cup 到场记录', '金鸽杯到场记录', 'Dove Cup Attendance');
+  add('到场记录', '到场记录', 'Attendance');
+  add('这里只记录每个人实际到场的次数。每周六晚 8 点归档后自动更新，不再记录胜局和积分。', '这里只记录每个人实际到场的次数。每周六晚 8 点归档后自动更新，不再记录胜局和积分。', 'This page records actual attendance only. It updates after the Saturday 8:00 PM archive and does not track wins or points.');
+  add('到场人员', '到场人员', 'Players Attended');
+  add('累计到场', '累计到场', 'Total Attendances');
+  add('最多到场', '最多到场', 'Most Attendances');
+  add('已记录周数', '已记录周数', 'Weeks Recorded');
+  add('管理员补录到场', '管理员补录到场', 'Admin Attendance Adjustment');
+  add('记录当前名单到场一次', '记录当前名单到场一次', 'Record Current Roster Once');
+  add('人员姓名', '人员姓名', 'Player Name');
+  add('单独记录此人到场一次', '单独记录此人到场一次', 'Record This Player Once');
+  add('删除此人到场记录', '删除此人到场记录', 'Delete This Player\'s Attendance');
+  add('清空全部到场记录', '清空全部到场记录', 'Clear All Attendance');
+  add('周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。', '周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。', 'The Saturday archive records the official roster automatically. Use this area only for admin corrections.');
+  add('到场次数', '到场次数', 'Attendances');
+  add('排名', '排名', 'Rank');
+  add('最近到场', '最近到场', 'Last Attendance');
+  add('状态', '状态', 'Status');
+  add('操作', '操作', 'Actions');
+  add('还没有到场记录。首次周六归档后，这里会自动显示。', '还没有到场记录。首次周六归档后，这里会自动显示。', 'No attendance has been recorded yet. It will appear after the first Saturday archive.');
+  add('最近更新', '最近更新', 'Recent Updates');
+  add('到场记录实时同步中', '到场记录实时同步中', 'Attendance Syncing Live');
+  add('已报名，暂未到场', '已报名，暂未到场', 'Registered, Not Yet Attended');
+  add('已记录', '已记录', 'Recorded');
+  add('报名名单', '报名名单', 'Registration List');
+  add('暂无更新记录', '暂无更新记录', 'No Recent Updates');
+  add('记录到场：', '记录到场：', 'Attendance recorded:');
+  add('记录到场一次', '记录到场一次', 'attendance recorded once');
+  add('到场记录已删除', '到场记录已删除', 'attendance record deleted');
+  add('全部到场记录已清空', '全部到场记录已清空', 'All attendance records cleared');
+  add('到场记录已更新', '到场记录已更新', 'Attendance updated');
+  add('已切换为只记录到场次数', '已切换为只记录到场次数', 'Switched to attendance-only tracking');
+  add('自动记录到场：', '自动记录到场：', 'Attendance recorded automatically:');
+  add('只有管理员可以更新到场记录', '只有管理员可以更新到场记录', 'Only an admin can update attendance');
+  add('当前报名名单为空', '当前报名名单为空', 'The current registration list is empty');
+  add('请输入姓名', '请输入姓名', 'Enter a name');
+  add('请输入要删除的姓名', '请输入要删除的姓名', 'Enter the name to delete');
+  add('到场记录里找不到这个人', '到场记录里找不到这个人', 'This player was not found in attendance records');
+  add('确定清空全部到场记录吗？', '确定清空全部到场记录吗？', 'Clear all attendance records?');
+  add('云端保存失败，请检查网络', '云端保存失败，请检查网络', 'Cloud save failed. Check your connection.');
+  add('删除', '删除', 'Delete');
+
+  const exact = { zh: new Map(), en: new Map() };
+  entries.forEach((entry) => {
+    exact.zh.set(entry.source, entry.zh);
+    exact.en.set(entry.source, entry.en);
+  });
+  const fragments = entries.slice().sort((a, b) => b.source.length - a.source.length);
+  const textSources = new WeakMap();
+  const attrSources = new WeakMap();
+  let currentLanguage = 'zh';
+  let observer = null;
+  let initialized = false;
+
+  function normalizeLanguage(value) {
+    return value === 'en' ? 'en' : 'zh';
+  }
+
+  function translatePatterns(text, language) {
+    let next = text;
+    if (language === 'en') {
+      next = next
+        .replace(/第\s*(\d+)\s*轮结果决定本轮场地/g, 'Round $1 results determine this round\'s courts')
+        .replace(/第\s*(\d+)\s*轮/g, 'Round $1')
+        .replace(/(\d+)\s*\/\s*(\d+)\s*场已完成/g, '$1 / $2 matches completed')
+        .replace(/(\d+)\s*\/\s*(\d+)\s*完成/g, '$1 / $2 completed')
+        .replace(/已同步\s*(\d+)\s*人\s*·\s*(\d+)\s*个分级/g, '$1 players synced · $2 divisions')
+        .replace(/凤凰组合\s*(\d+)/g, 'Phoenix Pair $1')
+        .replace(/狮鹫组合\s*(\d+)/g, 'Griffin Pair $1')
+        .replace(/凤凰\s*(\d+)\s*分/g, 'Phoenix $1 pts')
+        .replace(/狮鹫\s*(\d+)\s*分/g, 'Griffin $1 pts')
+        .replace(/(\d+)\s*个分级/g, '$1 divisions')
+        .replace(/(\d+)\s*个空位/g, '$1 spots left')
+        .replace(/(\d+)\s*人/g, '$1 players')
+        .replace(/(\d+)\s*次/g, '$1 times')
+        .replace(/(\d+)\s*周/g, '$1 weeks')
+        .replace(/(\d+)\s*分(?!钟)/g, '$1 pts');
+    } else {
+      next = next
+        .replace(/Round\s*(\d+)/gi, '第 $1 轮')
+        .replace(/Court\s*(\d+)/gi, '场地 $1')
+        .replace(/(\d+)\s*COURTS?/gi, '$1 片场地')
+        .replace(/(\d+)\s*ROUNDS?/gi, '$1 轮')
+        .replace(/(\d+)\s*MIN\s*\/\s*MATCH/gi, '每场 $1 分钟')
+        .replace(/(\d+)\s*EVENTS?/gi, '$1 场活动');
+    }
+    return next;
+  }
+
+  function localizeCore(text, language) {
+    const lang = normalizeLanguage(language);
+    if (exact[lang].has(text)) return exact[lang].get(text);
+    let next = translatePatterns(text, lang);
+    fragments.forEach((entry) => {
+      if (next.includes(entry.source)) next = next.split(entry.source).join(entry[lang]);
+    });
+    return next;
+  }
+
+  function localizeText(value, language) {
+    const text = String(value == null ? '' : value);
+    const match = text.match(/^(\s*)([\s\S]*?)(\s*)$/);
+    if (!match || !match[2]) return text;
+    return match[1] + localizeCore(match[2], language) + match[3];
+  }
+
+  function isSkipped(node) {
+    const parent = node.nodeType === 1 ? node : node.parentElement;
+    return !parent || SKIP_TAGS.has(parent.tagName) || Boolean(parent.closest('[data-dove-no-translate]'));
+  }
+
+  function translateTextNode(node, refreshSource) {
+    if (isSkipped(node) || !node.nodeValue || !node.nodeValue.trim()) return;
+    const stored = textSources.get(node);
+    if (refreshSource || stored == null) textSources.set(node, node.nodeValue);
+    const source = textSources.get(node);
+    const translated = localizeText(source, currentLanguage);
+    if (node.nodeValue !== translated) node.nodeValue = translated;
+  }
+
+  function translateAttributes(element, refreshSource) {
+    if (isSkipped(element)) return;
+    const names = ['placeholder', 'title', 'aria-label'];
+    const saved = attrSources.get(element) || {};
+    names.forEach((name) => {
+      if (!element.hasAttribute(name)) return;
+      const current = element.getAttribute(name);
+      if (refreshSource || saved[name] == null) saved[name] = current;
+      const translated = localizeText(saved[name], currentLanguage);
+      if (current !== translated) element.setAttribute(name, translated);
+    });
+    attrSources.set(element, saved);
+  }
+
+  function translateTree(rootNode, refreshSource) {
+    if (!rootNode) return;
+    if (rootNode.nodeType === 3) {
+      translateTextNode(rootNode, refreshSource);
+      return;
+    }
+    if (rootNode.nodeType !== 1 && rootNode.nodeType !== 9) return;
+    if (rootNode.nodeType === 1) translateAttributes(rootNode, refreshSource);
+    const walker = document.createTreeWalker(rootNode, NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_TEXT);
+    let node = walker.nextNode();
+    while (node) {
+      if (node.nodeType === 3) translateTextNode(node, refreshSource);
+      else translateAttributes(node, refreshSource);
+      node = walker.nextNode();
+    }
+  }
+
+  function translateDocument() {
+    document.documentElement.lang = currentLanguage === 'en' ? 'en' : 'zh-CN';
+    if (document.title) {
+      const titleElement = document.querySelector('title');
+      if (titleElement) translateTextNode(titleElement.firstChild, false);
+    }
+    document.querySelectorAll('meta[name="description"]').forEach((meta) => {
+      const saved = attrSources.get(meta) || {};
+      if (saved.content == null) saved.content = meta.getAttribute('content') || '';
+      meta.setAttribute('content', localizeText(saved.content, currentLanguage));
+      attrSources.set(meta, saved);
+    });
+    translateTree(document.body, false);
+    updateToggle();
+  }
+
+  function updateToggle() {
+    const toggle = document.querySelector('.dove-language-toggle');
+    if (!toggle) return;
+    toggle.dataset.language = currentLanguage;
+    toggle.setAttribute('aria-checked', String(currentLanguage === 'en'));
+    toggle.setAttribute('aria-label', currentLanguage === 'en' ? 'Switch to Chinese' : '切换为英文');
+  }
+
+  function createToggle() {
+    if (!document.body || document.querySelector('.dove-language-switch')) return;
+    const wrapper = document.createElement('div');
+    wrapper.className = 'dove-language-switch';
+    wrapper.setAttribute('data-dove-no-translate', '');
+    wrapper.innerHTML = '<button class="dove-language-toggle" type="button" role="switch"><span class="dove-language-thumb" aria-hidden="true"></span><span class="dove-language-label dove-language-label-zh">中</span><span class="dove-language-label dove-language-label-en">EN</span></button>';
+    wrapper.querySelector('button').addEventListener('click', () => {
+      setLanguage(currentLanguage === 'zh' ? 'en' : 'zh');
+    });
+    document.body.appendChild(wrapper);
+    updateToggle();
+  }
+
+  function setLanguage(language) {
+    currentLanguage = normalizeLanguage(language);
+    try { localStorage.setItem(STORAGE_KEY, currentLanguage); } catch (error) {}
+    if (typeof document !== 'undefined' && document.body) translateDocument();
+    if (typeof window !== 'undefined') {
+      window.dispatchEvent(new CustomEvent('dove:languagechange', { detail: { language: currentLanguage } }));
+    }
+    return currentLanguage;
+  }
+
+  function installDialogTranslation() {
+    if (typeof window === 'undefined' || window.__doveDialogsLocalized) return;
+    window.__doveDialogsLocalized = true;
+    const originalAlert = window.alert.bind(window);
+    const originalConfirm = window.confirm.bind(window);
+    const originalPrompt = window.prompt.bind(window);
+    window.alert = (message) => originalAlert(localizeText(message, currentLanguage));
+    window.confirm = (message) => originalConfirm(localizeText(message, currentLanguage));
+    window.prompt = (message, value) => originalPrompt(localizeText(message, currentLanguage), value);
+  }
+
+  function startObserver() {
+    if (observer || !document.body) return;
+    observer = new MutationObserver((mutations) => {
+      mutations.forEach((mutation) => {
+        if (mutation.type === 'characterData') {
+          const source = textSources.get(mutation.target);
+          const expected = source == null ? null : localizeText(source, currentLanguage);
+          translateTextNode(mutation.target, source == null || mutation.target.nodeValue !== expected);
+          return;
+        }
+        mutation.addedNodes.forEach((node) => translateTree(node, true));
+      });
+    });
+    observer.observe(document.body, { childList: true, characterData: true, subtree: true });
+  }
+
+  function ready() {
+    createToggle();
+    translateDocument();
+    startObserver();
+  }
+
+  function init() {
+    if (initialized) return;
+    initialized = true;
+    try { currentLanguage = normalizeLanguage(localStorage.getItem(STORAGE_KEY)); } catch (error) {}
+    installDialogTranslation();
+    if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready, { once: true });
+    else ready();
+  }
+
+  return {
+    init,
+    getLanguage: () => currentLanguage,
+    setLanguage,
+    localizeText
+  };
+}));
