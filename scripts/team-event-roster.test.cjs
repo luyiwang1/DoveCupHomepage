@@ -114,6 +114,18 @@ test('chooses when to generate, adopt, or keep saved pairings', () => {
   assert.equal(roster.pairingSyncMode(registrations, 'older-roster', true), 'generate');
 });
 
+test('swaps unlocked same-gender pair slots and rejects fixed pairs', () => {
+  const pairs = [
+    { id: 'p1', player1: 'Locked Man', player2: 'Locked Woman', lockedGroupId: 'fixed-1' },
+    { id: 'p2', player1: 'Man A', player2: 'Woman A', lockedGroupId: '' },
+    { id: 'p3', player1: 'Man B', player2: '', lockedGroupId: '' }
+  ];
+  const swapped = roster.swapUnlockedPlayers(pairs, 1, 2, 'player1');
+  assert.deepEqual(swapped.map(pair => pair.player1), ['Locked Man', 'Man B', 'Man A']);
+  assert.equal(roster.swapUnlockedPlayers(pairs, 0, 2, 'player1'), null);
+  assert.equal(roster.swapUnlockedPlayers(pairs, 1, 2, 'captain'), null);
+});
+
 test('derives a compatible signup list from legacy fixed pairs', () => {
   const registrations = roster.deriveRegistrations({
     phoenix: { pairs: [{ player1: 'Alex', player2: 'Amy' }] },

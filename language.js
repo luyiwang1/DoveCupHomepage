@@ -122,6 +122,7 @@
   add('自动生成 8 组混双', '自动生成 8 组混双', 'Generate 8 Mixed Pairs');
   add('系统按报名顺序将每队男、女球员配成四组。管理员也可以用下拉菜单调整搭档并选择队长，不需要重复输入姓名。', '系统按报名顺序将每队男、女球员配成四组。管理员也可以用下拉菜单调整搭档并选择队长，不需要重复输入姓名。', 'The system pairs each team’s men and women in signup order. Admins can adjust partners and select captains from dropdowns without retyping names.');
   add('固定搭档会优先生成并锁定；剩余单人球员再配成混双。管理员只能调整未锁定的组合，并可以从名单中选择队长。', '固定搭档会优先生成并锁定；剩余单人球员再配成混双。管理员只能调整未锁定的组合，并可以从名单中选择队长。', 'Fixed partners are generated and locked first; remaining solo players are then paired. Admins can adjust only unlocked pairs and select captains from the roster.');
+  add('固定搭档会优先生成并锁定。拖动未锁定球员即可互换搭档；手机上也可以依次点选两个同队、同性别位置。', '固定搭档会优先生成并锁定。拖动未锁定球员即可互换搭档；手机上也可以依次点选两个同队、同性别位置。', 'Fixed partners are generated and locked first. Drag unlocked players to swap partners; on mobile, tap two slots on the same team and of the same gender.');
   add('团体赛接龙', '团体赛接龙', 'Team Event Signup');
   add('姓名 / 微信名', '姓名 / 微信名', 'Name / WeChat Name');
   add('报名方式', '报名方式', 'Signup Mode');
@@ -146,6 +147,13 @@
   add('选择女球员', '选择女球员', 'Select Female Player');
   add('男球员', '男球员', 'Male Player');
   add('女球员', '女球员', 'Female Player');
+  add('男球员位置', '男球员位置', 'Male Player Slot');
+  add('女球员位置', '女球员位置', 'Female Player Slot');
+  add('待补男球员', '待补男球员', 'Waiting for Male Player');
+  add('待补女球员', '待补女球员', 'Waiting for Female Player');
+  add('拖拽互换搭档', '拖拽互换搭档', 'Drag to Swap Partners');
+  add('只能互换同队同性别球员', '只能互换同队同性别球员', 'Only same-team players of the same gender can be swapped');
+  add('搭档已互换', '搭档已互换', 'Partners swapped');
   add('男', '男', 'Male');
   add('女', '女', 'Female');
   add('还没有人接龙', '还没有人接龙', 'No signups yet');

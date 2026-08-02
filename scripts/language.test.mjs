@@ -46,6 +46,8 @@ test('translates automatic pairing feedback', () => {
     localizeText('名单尚未满，已先生成现有搭档', 'en'),
     'The roster is incomplete; available pairs were generated'
   );
+  assert.equal(localizeText('搭档已互换', 'en'), 'Partners swapped');
+  assert.equal(localizeText('待补男球员', 'en'), 'Waiting for Male Player');
 });
 
 test('translates fixed partner and round deletion confirmations', () => {

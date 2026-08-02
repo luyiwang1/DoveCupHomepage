@@ -185,6 +185,21 @@
     return 'generate';
   }
 
+  function swapUnlockedPlayers(pairs, fromIndex, toIndex, field) {
+    const source = Array.isArray(pairs) ? pairs : [];
+    if (!['player1', 'player2'].includes(field)) return null;
+    if (!Number.isInteger(fromIndex) || !Number.isInteger(toIndex)) return null;
+    if (fromIndex < 0 || toIndex < 0 || fromIndex >= source.length || toIndex >= source.length) return null;
+    if (fromIndex === toIndex || source[fromIndex].lockedGroupId || source[toIndex].lockedGroupId) return null;
+    const next = source.map(pair => ({ ...pair }));
+    const player = next[fromIndex][field] || '';
+    next[fromIndex][field] = next[toIndex][field] || '';
+    next[toIndex][field] = player;
+    next[fromIndex].pairName = '';
+    next[toIndex].pairName = '';
+    return next;
+  }
+
   function deriveRegistrations(teams) {
     const registrations = [];
     TEAMS.forEach(team => {
@@ -228,6 +243,7 @@
     registrationGroups,
     rosterSignature,
     slotCount,
+    swapUnlockedPlayers,
     teamPlayers
   };
 }));
