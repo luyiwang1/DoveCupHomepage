@@ -161,6 +161,30 @@
       .flatMap(group => group.members.map(item => item.name)));
   }
 
+  function rosterSignature(registrations) {
+    return JSON.stringify(normalizeRegistrations(registrations)
+      .sort((a, b) => a.id.localeCompare(b.id))
+      .map(item => [
+        item.id,
+        item.name,
+        item.team,
+        item.gender,
+        item.signupMode,
+        item.groupId,
+        item.pairName,
+        item.joinedAt
+      ]));
+  }
+
+  function pairingSyncMode(registrations, storedSignature, hasExistingPairs) {
+    const normalized = normalizeRegistrations(registrations);
+    if (!normalized.length) return 'none';
+    const signature = rosterSignature(normalized);
+    if (String(storedSignature || '') === signature) return 'none';
+    if (!storedSignature && hasExistingPairs) return 'adopt';
+    return 'generate';
+  }
+
   function deriveRegistrations(teams) {
     const registrations = [];
     TEAMS.forEach(team => {
@@ -200,7 +224,9 @@
     lockedPlayerNames,
     nameKey,
     normalizeRegistrations,
+    pairingSyncMode,
     registrationGroups,
+    rosterSignature,
     slotCount,
     teamPlayers
   };

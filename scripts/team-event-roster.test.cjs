@@ -91,6 +91,29 @@ test('removes a fixed signup as one linked group', () => {
   );
 });
 
+test('creates a stable roster signature and changes it when pairing data changes', () => {
+  const first = player('A', 'phoenix', 'male', 1);
+  const second = player('B', 'griffin', 'female', 2);
+  assert.equal(
+    roster.rosterSignature([first, second]),
+    roster.rosterSignature([second, first])
+  );
+  assert.notEqual(
+    roster.rosterSignature([first, second]),
+    roster.rosterSignature([first, { ...second, team: 'phoenix' }])
+  );
+});
+
+test('chooses when to generate, adopt, or keep saved pairings', () => {
+  const registrations = [player('A', 'phoenix', 'male', 1)];
+  const signature = roster.rosterSignature(registrations);
+  assert.equal(roster.pairingSyncMode([], '', false), 'none');
+  assert.equal(roster.pairingSyncMode(registrations, signature, true), 'none');
+  assert.equal(roster.pairingSyncMode(registrations, '', true), 'adopt');
+  assert.equal(roster.pairingSyncMode(registrations, '', false), 'generate');
+  assert.equal(roster.pairingSyncMode(registrations, 'older-roster', true), 'generate');
+});
+
 test('derives a compatible signup list from legacy fixed pairs', () => {
   const registrations = roster.deriveRegistrations({
     phoenix: { pairs: [{ player1: 'Alex', player2: 'Amy' }] },

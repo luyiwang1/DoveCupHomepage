@@ -169,6 +169,8 @@
   add('已按接龙顺序生成固定混双', '已按接龙顺序生成固定混双', 'Fixed mixed pairs generated in signup order');
   add('已按接龙顺序生成 8 组固定混双', '已按接龙顺序生成 8 组固定混双', 'Eight fixed mixed pairs generated in signup order');
   add('名单尚未满，已先生成现有搭档', '名单尚未满，已先生成现有搭档', 'The roster is incomplete; available pairs were generated');
+  add('正在生成搭档', '正在生成搭档', 'Generating pairs');
+  add('自动生成搭档失败，请检查网络', '自动生成搭档失败，请检查网络', 'Automatic pairing failed. Check your connection.');
   add('删除轮次', '删除轮次', 'Delete Round');
   add('至少保留一个轮次', '至少保留一个轮次', 'Keep at least one round');
   add('基础轮次', '基础轮次', 'Base Round');
