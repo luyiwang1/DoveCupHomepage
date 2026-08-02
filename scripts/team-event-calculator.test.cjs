@@ -61,3 +61,24 @@ test('detects repeated or missing fixed pairs in a round', () => {
   }));
   assert.deepEqual(calculator.lineupIssues({ matches }, ['p1', 'p2', 'p3', 'p4']), ['phoenix']);
 });
+
+test('reuses a deleted matchup rotation for the next round', () => {
+  const pairIds = ['p1', 'p2', 'p3', 'p4'];
+  const rounds = [0, 2, 3].map(offset => ({
+    matches: [{ phoenixPairId: 'p1', griffinPairId: pairIds[offset] }]
+  }));
+  assert.equal(calculator.nextRoundRotation(rounds, pairIds), 1);
+});
+
+test('deletes one round, preserves other matches, and renumbers labels', () => {
+  const rounds = [1, 2, 3, 4].map(number => ({
+    id: `round-${number}`,
+    name: `第 ${number} 轮`,
+    matches: [{ phoenixGames: number, griffinGames: 0 }]
+  }));
+  const result = calculator.removeRound(rounds, 1);
+  assert.deepEqual(result.map(item => item.id), ['round-1', 'round-3', 'round-4']);
+  assert.deepEqual(result.map(item => item.name), ['第 1 轮', '第 2 轮', '第 3 轮']);
+  assert.deepEqual(result.map(item => item.matches[0].phoenixGames), [1, 3, 4]);
+  assert.equal(calculator.removeRound([rounds[0]], 0), null);
+});

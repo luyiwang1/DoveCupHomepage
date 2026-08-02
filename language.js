@@ -117,16 +117,31 @@
   add('＋ 接龙报名', '＋ 接龙报名', '＋ Join the Signup');
   add('接龙报名', '接龙报名', 'Join the Signup');
   add('输入一次姓名，选择性别与队伍即可。每队 4 男 4 女；选择“自动分配”时，系统会优先补到人数较少的一队。', '输入一次姓名，选择性别与队伍即可。每队 4 男 4 女；选择“自动分配”时，系统会优先补到人数较少的一队。', 'Enter your name once, then choose a gender and team. Each team has four men and four women; automatic assignment fills the team with fewer players first.');
+  add('可以单人报名，也可以两人一起锁定为固定搭档。系统会平衡人数并随机分队；固定搭档始终同队、全程不拆分。', '可以单人报名，也可以两人一起锁定为固定搭档。系统会平衡人数并随机分队；固定搭档始终同队、全程不拆分。', 'Register solo or lock in with a fixed partner. The system balances and randomizes teams; fixed partners always stay together.');
   add('从接龙名单直接生成搭档。', '从接龙名单直接生成搭档。', 'Create fixed partners directly from the signup list.');
   add('自动生成 8 组混双', '自动生成 8 组混双', 'Generate 8 Mixed Pairs');
   add('系统按报名顺序将每队男、女球员配成四组。管理员也可以用下拉菜单调整搭档并选择队长，不需要重复输入姓名。', '系统按报名顺序将每队男、女球员配成四组。管理员也可以用下拉菜单调整搭档并选择队长，不需要重复输入姓名。', 'The system pairs each team’s men and women in signup order. Admins can adjust partners and select captains from dropdowns without retyping names.');
+  add('固定搭档会优先生成并锁定；剩余单人球员再配成混双。管理员只能调整未锁定的组合，并可以从名单中选择队长。', '固定搭档会优先生成并锁定；剩余单人球员再配成混双。管理员只能调整未锁定的组合，并可以从名单中选择队长。', 'Fixed partners are generated and locked first; remaining solo players are then paired. Admins can adjust only unlocked pairs and select captains from the roster.');
   add('团体赛接龙', '团体赛接龙', 'Team Event Signup');
   add('姓名 / 微信名', '姓名 / 微信名', 'Name / WeChat Name');
+  add('报名方式', '报名方式', 'Signup Mode');
+  add('单人报名', '单人报名', 'Solo Signup');
+  add('固定搭档报名', '固定搭档报名', 'Fixed Partner Signup');
   add('性别', '性别', 'Gender');
   add('队伍', '队伍', 'Team');
   add('自动分配', '自动分配', 'Auto Assign');
   add('加入接龙', '加入接龙', 'Join Signup');
   add('每支队伍最多 4 男 4 女。你可以删除自己在本设备上的报名；管理员可以管理全部名单。', '每支队伍最多 4 男 4 女。你可以删除自己在本设备上的报名；管理员可以管理全部名单。', 'Each team allows up to four men and four women. You can remove your own signup on this device; admins can manage the full list.');
+  add('男球员姓名', '男球员姓名', 'Male Player Name');
+  add('女球员姓名', '女球员姓名', 'Female Player Name');
+  add('输入男球员姓名', '输入男球员姓名', 'Enter male player name');
+  add('输入女球员姓名', '输入女球员姓名', 'Enter female player name');
+  add('组合名称（可选）', '组合名称（可选）', 'Pair Name (Optional)');
+  add('例如：啊对对队', '例如：啊对对队', 'Example: Ace Duo');
+  add('系统会平衡人数并随机分配凤凰或狮鹫。固定搭档一定进入同一队，并在所有轮次保持同一组合。', '系统会平衡人数并随机分配凤凰或狮鹫。固定搭档一定进入同一队，并在所有轮次保持同一组合。', 'The system balances and randomizes Phoenix or Griffin. Fixed partners always join the same team and remain paired in every round.');
+  add('每支队伍最多 4 男 4 女。固定搭档按整组加入或退出；管理员可以管理全部名单。', '每支队伍最多 4 男 4 女。固定搭档按整组加入或退出；管理员可以管理全部名单。', 'Each team allows up to four men and four women. Fixed partners join or leave together; admins can manage the full list.');
+  add('固定搭档', '固定搭档', 'Fixed Pair');
+  add('固定', '固定', 'Locked');
   add('选择男球员', '选择男球员', 'Select Male Player');
   add('选择女球员', '选择女球员', 'Select Female Player');
   add('男球员', '男球员', 'Male Player');
@@ -139,6 +154,12 @@
   add('请选择性别', '请选择性别', 'Select a gender');
   add('这个名字已经接龙', '这个名字已经接龙', 'This name is already registered');
   add('这个组别已经报满', '这个组别已经报满', 'This team group is full');
+  add('请输入两位固定搭档的姓名', '请输入两位固定搭档的姓名', 'Enter both fixed partners');
+  add('固定搭档不能使用相同姓名', '固定搭档不能使用相同姓名', 'Fixed partners must use different names');
+  add('其中一个名字已经接龙', '其中一个名字已经接龙', 'One of these names is already registered');
+  add('目前没有队伍能同时容纳这组固定搭档', '目前没有队伍能同时容纳这组固定搭档', 'Neither team currently has room for both fixed partners');
+  add('这个性别组别已经报满', '这个性别组别已经报满', 'This gender group is full');
+  add('固定搭档不能拆分', '固定搭档不能拆分', 'Fixed partners cannot be separated');
   add('报名保存失败，请检查网络', '报名保存失败，请检查网络', 'Signup failed. Check your connection.');
   add('报名没有保存', '报名没有保存', 'Signup was not saved');
   add('已加入团体赛', '已加入团体赛', 'joined the team event');
@@ -148,6 +169,10 @@
   add('已按接龙顺序生成固定混双', '已按接龙顺序生成固定混双', 'Fixed mixed pairs generated in signup order');
   add('已按接龙顺序生成 8 组固定混双', '已按接龙顺序生成 8 组固定混双', 'Eight fixed mixed pairs generated in signup order');
   add('名单尚未满，已先生成现有搭档', '名单尚未满，已先生成现有搭档', 'The roster is incomplete; available pairs were generated');
+  add('删除轮次', '删除轮次', 'Delete Round');
+  add('至少保留一个轮次', '至少保留一个轮次', 'Keep at least one round');
+  add('轮次已删除', '轮次已删除', 'Round deleted');
+  add('该轮比分会一起删除，且无法恢复。', '该轮比分会一起删除，且无法恢复。', 'Its scores will also be deleted and cannot be restored.');
   add('Game', '局', 'Game');
   add('VS', '对阵', 'VS');
   add('金鸽杯 8 月 8 日凤凰与狮鹫混双团体赛，实时阵容、比分和团队结果。', '金鸽杯 8 月 8 日凤凰与狮鹫混双团体赛，实时阵容、比分和团队结果。', 'Golden Dove Cup mixed doubles team event on August 8, with live lineups, scores, and team results.');
@@ -400,7 +425,9 @@
       next = next
         .replace(/^男\s*(\d+\s*\/\s*\d+)$/, 'Men $1')
         .replace(/^女\s*(\d+\s*\/\s*\d+)$/, 'Women $1')
+        .replace(/^确定移除固定搭档\s+(.+)\s+吗？两个人会一起退出。$/, 'Remove fixed partners $1? Both players will leave.')
         .replace(/^确定移除\s+(.+)\s+的团体赛报名吗？$/, 'Remove $1 from the team event?')
+        .replace(/^确定删除第\s*(\d+)\s*轮吗？该轮比分会一起删除，且无法恢复。$/, 'Delete Round $1? Its scores will also be deleted and cannot be restored.')
         .replace(/第\s*(\d+)\s*轮结果决定本轮场地/g, 'Round $1 results determine this round\'s courts')
         .replace(/第\s*(\d+)\s*轮/g, 'Round $1')
         .replace(/(\d+)\s*\/\s*(\d+)\s*场已完成/g, '$1 / $2 matches completed')

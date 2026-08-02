@@ -47,3 +47,14 @@ test('translates automatic pairing feedback', () => {
     'The roster is incomplete; available pairs were generated'
   );
 });
+
+test('translates fixed partner and round deletion confirmations', () => {
+  assert.equal(
+    localizeText('确定移除固定搭档 Wyman + Linda 吗？两个人会一起退出。', 'en'),
+    'Remove fixed partners Wyman + Linda? Both players will leave.'
+  );
+  assert.equal(
+    localizeText('确定删除第 4 轮吗？该轮比分会一起删除，且无法恢复。', 'en'),
+    'Delete Round 4? Its scores will also be deleted and cannot be restored.'
+  );
+});

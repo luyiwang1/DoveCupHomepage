@@ -78,5 +78,32 @@
     return issues;
   }
 
-  return { calculate, cleanGame, lineupIssues, matchWinner };
+  function roundRotation(round, pairIds) {
+    const ids = Array.isArray(pairIds) ? pairIds : [];
+    const match = round && Array.isArray(round.matches) ? round.matches[0] : null;
+    const phoenix = match ? ids.indexOf(match.phoenixPairId) : -1;
+    const griffin = match ? ids.indexOf(match.griffinPairId) : -1;
+    return phoenix >= 0 && griffin >= 0
+      ? (griffin - phoenix + ids.length) % ids.length
+      : null;
+  }
+
+  function nextRoundRotation(rounds, pairIds) {
+    const ids = Array.isArray(pairIds) ? pairIds : [];
+    if (!ids.length) return 0;
+    const used = new Set((Array.isArray(rounds) ? rounds : [])
+      .map(round => roundRotation(round, ids))
+      .filter(value => value !== null));
+    const available = ids.map((_, index) => index).find(index => !used.has(index));
+    return available === undefined ? (Array.isArray(rounds) ? rounds.length : 0) % ids.length : available;
+  }
+
+  function removeRound(rounds, index) {
+    const source = Array.isArray(rounds) ? rounds : [];
+    if (source.length <= 1 || !Number.isInteger(index) || index < 0 || index >= source.length) return null;
+    return source.filter((_, roundIndex) => roundIndex !== index)
+      .map((round, roundIndex) => ({ ...round, name: `第 ${roundIndex + 1} 轮` }));
+  }
+
+  return { calculate, cleanGame, lineupIssues, matchWinner, nextRoundRotation, removeRound, roundRotation };
 }));
