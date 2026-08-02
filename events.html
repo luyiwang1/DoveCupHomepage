@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>特别活动 · 金鸽杯</title>
+<meta name="description" content="金鸽杯特别活动、团体赛事和历届活动记录。">
+<style>
+:root{--ink:#17241e;--green:#143323;--ivory:#f8efd7;--paper:#fff8e7;--gold:#c99a3c;--clay:#a9653c;--line:rgba(20,51,35,.16);--phoenix:#9c3f32}
+*{box-sizing:border-box}body{margin:0;color:var(--ink);background:#ead9b6;font-family:"Avenir Next","Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}a{color:inherit;text-decoration:none}
+.hero{position:relative;min-height:58vh;padding:28px clamp(18px,5vw,72px) 54px;color:var(--ivory);isolation:isolate;display:flex;flex-direction:column;justify-content:space-between}.hero:before{position:absolute;inset:0;z-index:-2;background:url("golden-dove-cup-hero.png") center/cover no-repeat;content:""}.hero:after{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(10,29,20,.92),rgba(10,29,20,.5)),linear-gradient(180deg,rgba(10,29,20,.15),rgba(10,29,20,.85));content:""}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:16px}.brand{font-family:Georgia,"Times New Roman",serif;font-size:14px;letter-spacing:.12em;text-transform:uppercase}.home-link{padding:10px 14px;border:1px solid rgba(248,239,215,.45);border-radius:999px;font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.kicker{color:#e3bc65;font-size:11px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}h1{max-width:900px;margin:14px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(58px,10vw,128px);font-weight:500;line-height:.86;letter-spacing:0}.lead{max-width:680px;margin:20px 0 0;color:rgba(248,239,215,.8);font-size:18px;line-height:1.8}
+.events{padding:clamp(54px,7vw,92px) clamp(18px,5vw,72px)}.events-inner{max-width:1260px;margin:0 auto}.section-head{display:flex;justify-content:space-between;align-items:flex-end;gap:20px}.section-head h2{margin:10px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,6vw,76px);font-weight:500;line-height:1}.count{color:var(--clay);font-weight:900}.event-list{display:grid;gap:16px;margin-top:32px}.event-row{display:grid;grid-template-columns:180px minmax(0,1fr) 260px;border:1px solid var(--line);background:var(--paper)}.date{display:grid;align-content:space-between;min-height:260px;padding:24px;color:#fff;background:var(--phoenix)}.date strong{font-family:Georgia,"Times New Roman",serif;font-size:64px;font-weight:500}.date span{font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.content{padding:32px}.status{display:inline-flex;padding:5px 8px;color:#8d372c;background:#f2ddd4;font-size:10px;font-weight:900;letter-spacing:.08em}.content h3{margin:24px 0 10px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px,4vw,56px);font-weight:500}.content p{margin:0;color:#706b5e;line-height:1.75}.side{display:grid;align-content:center;gap:16px;padding:28px;border-left:1px solid var(--line)}.meta span{display:block;color:var(--clay);font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase}.meta strong{display:block;margin-top:5px;font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:500}.button{display:inline-flex;justify-content:center;padding:13px 16px;color:#fff;background:var(--green);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
+.empty{padding:36px;border:1px solid var(--line);background:var(--paper);color:#706b5e}footer{display:flex;justify-content:space-between;gap:16px;padding:28px clamp(18px,5vw,72px);background:#10271e;color:var(--ivory);font-size:12px}
+@media(max-width:760px){.event-row{grid-template-columns:1fr}.date{min-height:170px}.side{border-left:0;border-top:1px solid var(--line)}.section-head{align-items:flex-start;flex-direction:column}footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="hero"><div class="topbar"><a class="brand" href="index.html">Golden Dove Cup</a><a class="home-link" href="index.html">返回主页</a></div><div><div class="kicker">Dove Cup Calendar</div><h1>特别活动</h1><p class="lead">团体赛、主题赛和下一站巡回活动都会保留在这里。每一场比赛结束后，也会成为金鸽杯的赛事档案。</p></div></header>
+<main class="events"><div class="events-inner"><div class="section-head"><div><div class="kicker" style="color:var(--clay)">Event Archive</div><h2>Upcoming & Past</h2></div><div class="count" id="eventCount">0 EVENTS</div></div><div class="event-list" id="eventList"></div></div></main>
+<footer><span>Golden Dove Cup / 金鸽杯</span><span>Toronto tennis events and team specials.</span></footer>
+<script src="events-data.js?v=1"></script>
+<script>
+(function renderEvents(){
+  const events=window.DOVE_EVENTS||[],target=document.getElementById('eventList');
+  const clean=value=>String(value||'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
+  document.getElementById('eventCount').textContent=`${events.length} EVENT${events.length===1?'':'S'}`;
+  if(!events.length){target.innerHTML='<div class="empty">新的特别活动正在准备中。</div>';return}
+  target.innerHTML=events.map(event=>{const date=new Date(`${event.date}T12:00:00`),day=String(date.getDate()).padStart(2,'0'),month=date.toLocaleDateString('en-CA',{month:'short'}).toUpperCase();return`<article class="event-row"><div class="date"><span>${clean(event.dateLabel)}</span><strong>${day}</strong><span>${month} · ${date.getFullYear()}</span></div><div class="content"><span class="status">${clean(event.status)}</span><h3>${clean(event.title)}</h3><p>${clean(event.summary)}</p></div><div class="side"><div class="meta"><span>Venue</span><strong>${clean(event.venue)}</strong></div><div class="meta"><span>Format</span><strong>${clean(event.format)}</strong></div><a class="button" href="${clean(event.href)}">查看活动</a></div></article>`}).join('');
+}());
+</script>
+</body>
+</html>

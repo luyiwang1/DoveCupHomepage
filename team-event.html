@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>8.8 混双团体赛 · 金鸽杯</title>
+<meta name="description" content="金鸽杯 8 月 8 日凤凰与狮鹫混双团体赛，实时阵容、比分和团队结果。">
+<style>
+:root{
+  --ink:#17241e;--green:#143323;--green2:#244b38;--ivory:#f8efd7;--paper:#fffaf0;
+  --gold:#c99a3c;--line:rgba(20,51,35,.16);--phoenix:#a74432;--phoenix-soft:#f5e4dc;
+  --griffin:#315c6b;--griffin-soft:#e1edf0;--muted:#706b5e;--danger:#a93232;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{margin:0;color:var(--ink);background:#f4ead4;font-family:"Avenir Next","Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}
+button,input,select{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
+.event-hero{position:relative;min-height:520px;padding:28px clamp(18px,5vw,72px) 54px;color:var(--ivory);isolation:isolate;display:flex;flex-direction:column;justify-content:space-between}
+.event-hero:before{position:absolute;inset:0;z-index:-2;background:url("golden-dove-cup-hero.png") center 43%/cover no-repeat;content:""}
+.event-hero:after{position:absolute;inset:0;z-index:-1;background:linear-gradient(90deg,rgba(10,29,20,.93),rgba(10,29,20,.68) 54%,rgba(10,29,20,.26)),linear-gradient(180deg,rgba(10,29,20,.18),rgba(10,29,20,.88));content:""}
+.topbar,.hero-actions,.meta-row,.section-head,.score-strip,.team-head,.pair-row,.toolbar{display:flex;align-items:center}
+.topbar{justify-content:space-between;gap:18px}.brand{font-family:Georgia,"Times New Roman",serif;font-size:14px;letter-spacing:.12em;text-transform:uppercase}.top-links,.hero-actions{display:flex;gap:10px;flex-wrap:wrap}
+.top-link,.button{border:1px solid rgba(248,239,215,.45);border-radius:999px;color:var(--ivory);background:rgba(20,51,35,.28);font-size:12px;font-weight:900;letter-spacing:.08em;padding:11px 15px;text-transform:uppercase;backdrop-filter:blur(10px)}
+.button.primary{color:var(--green);background:var(--ivory);border-color:var(--ivory)}
+.hero-copy{max-width:960px}.eyebrow{color:#e4bd67;font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
+h1{max-width:900px;margin:14px 0 16px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(52px,9vw,112px);font-weight:500;line-height:.88;letter-spacing:0}
+.lead{max-width:760px;margin:0;color:rgba(248,239,215,.85);font-size:clamp(16px,2vw,21px);line-height:1.8}.meta-row{gap:10px;flex-wrap:wrap;margin-top:22px}.meta{padding:8px 11px;border:1px solid rgba(248,239,215,.26);font-size:12px;font-weight:800}
+.score-strip{display:grid;grid-template-columns:1fr minmax(220px,.72fr) 1fr;background:var(--green);color:var(--ivory);border-bottom:1px solid rgba(248,239,215,.14)}
+.team-total{padding:28px clamp(20px,4vw,52px)}.team-total.griffin{text-align:right}.team-name{font-family:Georgia,"Times New Roman",serif;font-size:clamp(27px,4vw,48px)}.team-metrics{display:flex;gap:24px;margin-top:10px}.griffin .team-metrics{justify-content:flex-end}.metric strong{display:block;color:#e8bd5e;font-size:28px}.metric span{display:block;color:rgba(248,239,215,.62);font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
+.match-result{display:grid;place-items:center;align-content:center;padding:24px;border-left:1px solid rgba(248,239,215,.15);border-right:1px solid rgba(248,239,215,.15);text-align:center}.result-label{color:#d8b364;font-size:10px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}.result-title{margin-top:8px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(21px,2.4vw,34px)}.result-note{margin-top:6px;color:rgba(248,239,215,.66);font-size:12px;line-height:1.5}
+.band{padding:clamp(54px,7vw,94px) clamp(18px,5vw,72px)}.band-inner{max-width:1320px;margin:0 auto}.rules{background:var(--paper)}.section-head{justify-content:space-between;gap:24px;align-items:flex-end}.kicker{color:#9b623a;font-size:11px;font-weight:900;letter-spacing:.17em;text-transform:uppercase}.section-head h2{max-width:760px;margin:10px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,6vw,76px);font-weight:500;line-height:1}.section-copy{max-width:460px;margin:0;color:var(--muted);line-height:1.75}
+.rule-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:1px;margin-top:36px;background:var(--line);border:1px solid var(--line)}.rule{min-height:210px;padding:24px;background:#fffdf6}.rule-num{color:var(--gold);font-family:Georgia,"Times New Roman",serif;font-size:42px}.rule h3{margin:28px 0 9px;font-family:Georgia,"Times New Roman",serif;font-size:25px;font-weight:500}.rule p{margin:0;color:var(--muted);font-size:14px;line-height:1.7}
+.teams{background:#e8d8b7}.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:34px}.team-panel{border:1px solid var(--line);background:var(--paper)}.team-panel.phoenix{border-top:5px solid var(--phoenix)}.team-panel.griffin{border-top:5px solid var(--griffin)}.team-head{justify-content:space-between;gap:20px;padding:24px;border-bottom:1px solid var(--line)}.team-head h3{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(30px,4vw,48px);font-weight:500}.captain{color:var(--muted);font-size:13px}.captain strong{color:var(--ink)}.pair-list{display:grid}.pair-row{justify-content:space-between;gap:18px;min-height:70px;padding:14px 20px;border-bottom:1px solid var(--line)}.pair-row:last-child{border-bottom:0}.pair-number{color:var(--gold);font-family:Georgia,"Times New Roman",serif;font-size:24px}.pair-players{font-weight:900;text-align:right}.empty-name{color:#9c9586;font-weight:600}
+.admin-panel{display:none;background:#f5efe2}.is-admin .admin-panel{display:block}.admin-editors{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:28px}.editor{padding:22px;background:#fff;border:1px solid var(--line)}.editor h3{margin:0 0 16px;font-family:Georgia,"Times New Roman",serif;font-size:28px;font-weight:500}.field{display:grid;gap:6px;margin-bottom:12px}.field label{color:var(--muted);font-size:11px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}.field input,.lineup-select,.score-input,.winner-select{width:100%;min-width:0;border:1px solid rgba(20,51,35,.24);border-radius:6px;background:#fffdf7;color:var(--ink);padding:10px 11px;outline:none}.field input:focus,.lineup-select:focus,.score-input:focus,.winner-select:focus{border-color:var(--gold);box-shadow:0 0 0 3px rgba(201,154,60,.12)}.pair-edit{display:grid;grid-template-columns:42px 1fr 1fr;gap:8px;align-items:center;margin-top:8px}.pair-edit span{color:var(--gold);font-weight:900}
+.desk{background:#f5efe2}.toolbar{justify-content:space-between;gap:18px;flex-wrap:wrap}.toolbar-actions{display:flex;gap:9px;flex-wrap:wrap}.tool-button{border:1px solid var(--line);border-radius:6px;background:var(--green);color:var(--ivory);padding:10px 13px;font-size:12px;font-weight:900}.tool-button.secondary{background:#fff;color:var(--green)}.tool-button.danger{background:#fff;color:var(--danger);border-color:rgba(169,50,50,.25)}.admin-only{display:none}.is-admin .admin-only{display:inline-flex}.sync-status{color:var(--muted);font-size:12px;font-weight:800}
+.rounds{display:grid;gap:26px;margin-top:30px}.round-block{background:#fff;border:1px solid var(--line)}.round-title{display:flex;align-items:center;justify-content:space-between;gap:16px;padding:18px 20px;border-bottom:1px solid var(--line)}.round-title h3{margin:0;font-family:Georgia,"Times New Roman",serif;font-size:30px;font-weight:500}.lineup-warning{color:var(--danger);font-size:12px;font-weight:900}.table-wrap{overflow:auto}table{width:100%;min-width:960px;border-collapse:collapse}th,td{padding:13px 14px;border-bottom:1px solid rgba(20,51,35,.11);text-align:left;font-size:13px;vertical-align:middle}th{background:#fbf6ea;color:var(--muted);font-size:10px;letter-spacing:.1em;text-transform:uppercase}tbody tr:last-child td{border-bottom:0}.court-cell{font-family:Georgia,"Times New Roman",serif;font-size:19px}.score-entry{display:grid;grid-template-columns:56px 14px 56px;gap:5px;align-items:center}.score-input{text-align:center;font-size:18px;font-weight:900;padding:8px}.score-display{font-size:20px;font-weight:900;white-space:nowrap}.winner-badge{display:inline-flex;padding:6px 9px;border-radius:999px;font-size:11px;font-weight:900}.winner-badge.phoenix{color:var(--phoenix);background:var(--phoenix-soft)}.winner-badge.griffin{color:var(--griffin);background:var(--griffin-soft)}.winner-badge.pending{color:var(--muted);background:#eee8dc}.round-summary{display:flex;justify-content:flex-end;gap:20px;padding:12px 18px;background:#fbf6ea;color:var(--muted);font-size:12px;font-weight:800}
+.fine-print{margin:22px 0 0;color:var(--muted);font-size:13px;line-height:1.75}.toast{position:fixed;right:20px;bottom:20px;z-index:30;max-width:320px;padding:12px 15px;border-radius:6px;color:#fff;background:var(--green);box-shadow:0 16px 42px rgba(20,51,35,.28);font-size:13px;font-weight:800;opacity:0;pointer-events:none;transform:translateY(10px);transition:.2s}.toast.show{opacity:1;transform:translateY(0)}
+footer{display:flex;justify-content:space-between;gap:16px;padding:28px clamp(18px,5vw,72px);background:#10271e;color:var(--ivory);font-size:12px}
+@media(max-width:900px){.score-strip{grid-template-columns:1fr 1fr}.match-result{grid-column:1/-1;grid-row:2;border:0;border-top:1px solid rgba(248,239,215,.15)}.rule-grid{grid-template-columns:repeat(2,1fr)}.team-grid,.admin-editors{grid-template-columns:1fr}.section-head{align-items:flex-start;flex-direction:column}.event-hero{min-height:580px}}
+@media(max-width:620px){.event-hero{padding:20px 16px 38px;min-height:620px}.top-links .top-link:not(.admin-toggle){display:none}.score-strip{grid-template-columns:1fr}.team-total.griffin{text-align:left}.griffin .team-metrics{justify-content:flex-start}.match-result{grid-column:1;grid-row:auto}.band{padding:48px 14px}.rule-grid{grid-template-columns:1fr}.rule{min-height:auto}.pair-edit{grid-template-columns:32px 1fr}.pair-edit input:last-child{grid-column:2}.hero-actions .button{width:100%}.toolbar-actions{width:100%}.tool-button{flex:1}.team-metrics{gap:16px}footer{flex-direction:column}}
+</style>
+</head>
+<body>
+<header class="event-hero">
+  <div class="topbar">
+    <a class="brand" href="index.html">Golden Dove Cup</a>
+    <div class="top-links">
+      <a class="top-link" href="events.html">全部活动</a>
+      <a class="top-link" href="index.html">主页</a>
+      <button class="top-link admin-toggle" id="adminBtn" onclick="toggleAdmin()">Admin</button>
+    </div>
+  </div>
+  <div class="hero-copy">
+    <div class="eyebrow">August 08 · Team Special · MRTC</div>
+    <h1>凤凰 vs 狮鹫</h1>
+    <p class="lead">四片室内场地同时开赛。八组固定混双以团队之名出战，每一场胜利都将为队伍带回 1 分。</p>
+    <div class="meta-row">
+      <span class="meta">4 COURTS</span><span class="meta">3 ROUNDS</span><span class="meta">35 MIN / MATCH</span><span class="meta">FULL SET WITH AD</span>
+    </div>
+    <div class="hero-actions"><a class="button primary" href="#score-desk">查看实时赛果</a><a class="button" href="#rules">比赛规则</a></div>
+  </div>
+</header>
+
+<section class="score-strip" aria-label="团队总比分">
+  <div class="team-total phoenix"><div class="team-name">凤凰 Phoenix</div><div class="team-metrics"><div class="metric"><strong id="phoenixPoints">0</strong><span>团队积分</span></div><div class="metric"><strong id="phoenixGames">0</strong><span>Total Games</span></div></div></div>
+  <div class="match-result"><div class="result-label">Live Team Result</div><div class="result-title" id="resultTitle">等待比赛开始</div><div class="result-note" id="resultNote">0 / 12 场已完成</div></div>
+  <div class="team-total griffin"><div class="team-name">狮鹫 Griffin</div><div class="team-metrics"><div class="metric"><strong id="griffinPoints">0</strong><span>团队积分</span></div><div class="metric"><strong id="griffinGames">0</strong><span>Total Games</span></div></div></div>
+</section>
+
+<section class="band rules" id="rules">
+  <div class="band-inner">
+    <div class="section-head"><div><div class="kicker">Match Rules</div><h2>每一局都算数，每一场都为了团队。</h2></div><p class="section-copy">四组固定混双每轮全部上场。队长决定每轮的出战顺序和 Court 安排，搭档在整场活动中保持不变。</p></div>
+    <div class="rule-grid">
+      <article class="rule"><div class="rule-num">01</div><h3>完整一盘</h3><p>正常一盘先到 6 个 game，采用 Advantage scoring，有 AD。5-5 时直接进行 7 分抢七。</p></article>
+      <article class="rule"><div class="rule-num">02</div><h3>35 分钟</h3><p>每场限时 35 分钟。时间到时按已完成 game 的局数领先者获胜；提前结束可以自由活动。</p></article>
+      <article class="rule"><div class="rule-num">03</div><h3>一场一分</h3><p>每一场混双胜方所属队伍获得 1 个团队积分。局数相同的场次由赛事负责人指定决胜方。</p></article>
+      <article class="rule"><div class="rule-num">04</div><h3>决定冠军</h3><p>全部比赛结束后先比较团队积分；团队积分相同，再比较两队累计赢得的总 game 数。</p></article>
+    </div>
+  </div>
+</section>
+
+<section class="band teams" id="teams">
+  <div class="band-inner">
+    <div class="section-head"><div><div class="kicker">Fixed Partnerships</div><h2>两支队伍，八组固定混双。</h2></div><p class="section-copy">每位球员每轮都会上场。队长负责决定组合在四片场地上的顺序，而不是决定谁休息。</p></div>
+    <div class="team-grid" id="teamGrid"></div>
+  </div>
+</section>
+
+<section class="band admin-panel">
+  <div class="band-inner">
+    <div class="section-head"><div><div class="kicker">Admin Setup</div><h2>录入队长与固定搭档。</h2></div><p class="section-copy">姓名修改后会实时同步到所有人的页面，并自动更新下方每一轮的出战选择。</p></div>
+    <div class="admin-editors" id="adminEditors"></div>
+  </div>
+</section>
+
+<section class="band desk" id="score-desk">
+  <div class="band-inner">
+    <div class="toolbar">
+      <div><div class="kicker">Tournament Desk</div><h2 style="margin:8px 0 0;font-family:Georgia,'Times New Roman',serif;font-size:clamp(38px,5vw,66px);font-weight:500">比赛成绩与胜负</h2></div>
+      <div class="toolbar-actions"><span class="sync-status" id="syncStatus">正在连接实时数据</span><button class="tool-button admin-only" onclick="addRound()">新增轮次</button><button class="tool-button danger admin-only" onclick="resetScores()">清空比分</button></div>
+    </div>
+    <div class="rounds" id="rounds"></div>
+    <p class="fine-print">录入说明：抢七获胜请把最终局数记为 6-5。35 分钟结束时若局数不同，系统自动判定领先方；若局数相同，请在“同局决胜方”中选择现场获胜队伍。未填完的比赛不会计入团队积分。</p>
+  </div>
+</section>
+
+<footer><span>Golden Dove Cup · Team Special</span><span>MRTC · Toronto · August 08, 2026</span></footer>
+<div class="toast" id="toast"></div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="team-event-calculator.js?v=1"></script>
+<script>
+const ADMIN_PASSWORD='8888';
+const ADMIN_STORAGE='team_event_is_admin';
+const EVENT_DB_PATH='doveCupWaitlistSystem/teamEvents/2026-08-08-mixed-team';
+const FIREBASE_CONFIG={apiKey:'AIzaSyBPTwRAkfHjCA_RCQu5t2udzllF3Rz_CCo',authDomain:'dovecupdatabase.firebaseapp.com',databaseURL:'https://dovecupdatabase-default-rtdb.firebaseio.com/',projectId:'dovecupdatabase',storageBucket:'dovecupdatabase.firebasestorage.app',messagingSenderId:'814970094950',appId:'1:814970094950:web:c061c00eaceed40125b4a7'};
+const TEAM_META={phoenix:{name:'凤凰',english:'Phoenix'},griffin:{name:'狮鹫',english:'Griffin'}};
+const PAIR_IDS=['pair-1','pair-2','pair-3','pair-4'];
+let eventRef=null,eventData=defaultEvent(),isAdminMode=sessionStorage.getItem(ADMIN_STORAGE)==='1',saveTimer=null,toastTimer=null;
+
+function defaultPairs(){return PAIR_IDS.map((id,index)=>({id,player1:'',player2:'',order:index+1}))}
+function defaultRounds(){return Array.from({length:3},(_,roundIndex)=>({id:`round-${roundIndex+1}`,name:`第 ${roundIndex+1} 轮`,matches:Array.from({length:4},(_,courtIndex)=>({court:courtIndex+1,phoenixPairId:PAIR_IDS[courtIndex],griffinPairId:PAIR_IDS[(courtIndex+roundIndex)%4],phoenixGames:'',griffinGames:'',winnerOverride:''}))}))}
+function defaultEvent(){return{id:'2026-08-08-mixed-team',title:'凤凰 vs 狮鹫',venue:'MRTC',date:'2026-08-08',teams:{phoenix:{captain:'',pairs:defaultPairs()},griffin:{captain:'',pairs:defaultPairs()}},rounds:defaultRounds(),updatedAt:null}}
+function normalizeEvent(raw){const fallback=defaultEvent(),next=raw&&typeof raw==='object'?raw:{};fallback.title=next.title||fallback.title;fallback.venue=next.venue||fallback.venue;fallback.date=next.date||fallback.date;Object.keys(TEAM_META).forEach(team=>{const saved=next.teams&&next.teams[team]?next.teams[team]:{};fallback.teams[team].captain=String(saved.captain||'');fallback.teams[team].pairs=fallback.teams[team].pairs.map((pair,index)=>Object.assign(pair,Array.isArray(saved.pairs)?saved.pairs[index]||{}:{}))});if(Array.isArray(next.rounds)&&next.rounds.length){fallback.rounds=next.rounds.map((round,roundIndex)=>({id:round.id||`round-${roundIndex+1}`,name:round.name||`第 ${roundIndex+1} 轮`,matches:Array.from({length:4},(_,matchIndex)=>Object.assign({court:matchIndex+1,phoenixPairId:PAIR_IDS[matchIndex],griffinPairId:PAIR_IDS[(matchIndex+roundIndex)%4],phoenixGames:'',griffinGames:'',winnerOverride:''},Array.isArray(round.matches)?round.matches[matchIndex]||{}:{}))}))}fallback.updatedAt=next.updatedAt||null;return fallback}
+function escapeHtml(value){return String(value??'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]))}
+function pairLabel(team,pairId){const pairs=eventData.teams[team].pairs;const pair=pairs.find(item=>item.id===pairId)||pairs[0];const names=[pair.player1,pair.player2].map(name=>String(name||'').trim()).filter(Boolean);return names.length?names.join(' / '):`${TEAM_META[team].name}组合 ${pairs.indexOf(pair)+1}`}
+function showToast(message){const toast=document.getElementById('toast');toast.textContent=message;toast.classList.add('show');clearTimeout(toastTimer);toastTimer=setTimeout(()=>toast.classList.remove('show'),2200)}
+function renderAdmin(){document.body.classList.toggle('is-admin',isAdminMode);document.getElementById('adminBtn').textContent=isAdminMode?'Admin 已登录':'Admin'}
+function toggleAdmin(){if(isAdminMode){isAdminMode=false;sessionStorage.removeItem(ADMIN_STORAGE);renderAdmin();renderAll();return}const password=prompt('请输入管理员密码');if(password===ADMIN_PASSWORD){isAdminMode=true;sessionStorage.setItem(ADMIN_STORAGE,'1');renderAdmin();renderAll()}else if(password!==null){alert('密码错误')}}
+
+function renderTeams(){document.getElementById('teamGrid').innerHTML=Object.keys(TEAM_META).map(team=>{const info=TEAM_META[team],data=eventData.teams[team];return`<article class="team-panel ${team}"><div class="team-head"><h3>${info.name} ${info.english}</h3><div class="captain">队长 · <strong>${escapeHtml(data.captain||'待选举')}</strong></div></div><div class="pair-list">${data.pairs.map((pair,index)=>`<div class="pair-row"><span class="pair-number">0${index+1}</span><span class="pair-players ${pair.player1||pair.player2?'':'empty-name'}">${escapeHtml(pairLabel(team,pair.id))}</span></div>`).join('')}</div></article>`}).join('')}
+function renderEditors(){document.getElementById('adminEditors').innerHTML=Object.keys(TEAM_META).map(team=>{const data=eventData.teams[team];return`<div class="editor"><h3>${TEAM_META[team].name} ${TEAM_META[team].english}</h3><div class="field"><label>队长</label><input value="${escapeHtml(data.captain)}" placeholder="输入队长姓名" onchange="updateCaptain('${team}',this.value)"></div>${data.pairs.map((pair,index)=>`<div class="pair-edit"><span>0${index+1}</span><input value="${escapeHtml(pair.player1)}" placeholder="球员 A" onchange="updatePair('${team}',${index},'player1',this.value)"><input value="${escapeHtml(pair.player2)}" placeholder="球员 B" onchange="updatePair('${team}',${index},'player2',this.value)"></div>`).join('')}</div>`}).join('')}
+function pairOptions(team,selected){return eventData.teams[team].pairs.map(pair=>`<option value="${pair.id}" ${pair.id===selected?'selected':''}>${escapeHtml(pairLabel(team,pair.id))}</option>`).join('')}
+function lineupCell(team,pairId,roundIndex,matchIndex){return isAdminMode?`<select class="lineup-select" onchange="updateMatch(${roundIndex},${matchIndex},'${team}PairId',this.value)">${pairOptions(team,pairId)}</select>`:`<strong>${escapeHtml(pairLabel(team,pairId))}</strong>`}
+function scoreCell(match,roundIndex,matchIndex){if(!isAdminMode){const left=match.phoenixGames===''?'–':match.phoenixGames,right=match.griffinGames===''?'–':match.griffinGames;return`<span class="score-display">${left} : ${right}</span>`}return`<div class="score-entry"><input class="score-input" type="number" min="0" max="6" value="${escapeHtml(match.phoenixGames)}" aria-label="凤凰 game 数" onchange="updateMatch(${roundIndex},${matchIndex},'phoenixGames',this.value)"><span>:</span><input class="score-input" type="number" min="0" max="6" value="${escapeHtml(match.griffinGames)}" aria-label="狮鹫 game 数" onchange="updateMatch(${roundIndex},${matchIndex},'griffinGames',this.value)"></div>`}
+function winnerBadge(match){const winner=DoveTeamCalculator.matchWinner(match);if(winner)return`<span class="winner-badge ${winner}">${TEAM_META[winner].name} +1</span>`;const both=match.phoenixGames!==''&&match.griffinGames!=='';return`<span class="winner-badge pending">${both?'等待决胜':'待录入'}</span>`}
+function overrideCell(match,roundIndex,matchIndex){if(!isAdminMode)return match.winnerOverride?TEAM_META[match.winnerOverride].name:'—';return`<select class="winner-select" onchange="updateMatch(${roundIndex},${matchIndex},'winnerOverride',this.value)"><option value="">自动判定</option><option value="phoenix" ${match.winnerOverride==='phoenix'?'selected':''}>凤凰</option><option value="griffin" ${match.winnerOverride==='griffin'?'selected':''}>狮鹫</option></select>`}
+function renderScoreboard(){document.getElementById('rounds').innerHTML=eventData.rounds.map((round,roundIndex)=>{const issues=DoveTeamCalculator.lineupIssues(round,PAIR_IDS);const warning=issues.length?`${issues.map(team=>TEAM_META[team].name).join('、')}阵容有重复或遗漏`:'';const roundResult=DoveTeamCalculator.calculate([round]);return`<article class="round-block"><div class="round-title"><h3>${escapeHtml(round.name)}</h3><span class="lineup-warning">${warning}</span></div><div class="table-wrap"><table><thead><tr><th>场地</th><th>凤凰固定搭档</th><th>狮鹫固定搭档</th><th>Game 比分</th><th>同局决胜方</th><th>本场结果</th></tr></thead><tbody>${round.matches.map((match,matchIndex)=>`<tr><td class="court-cell">Court ${match.court}</td><td>${lineupCell('phoenix',match.phoenixPairId,roundIndex,matchIndex)}</td><td>${lineupCell('griffin',match.griffinPairId,roundIndex,matchIndex)}</td><td>${scoreCell(match,roundIndex,matchIndex)}</td><td>${overrideCell(match,roundIndex,matchIndex)}</td><td>${winnerBadge(match)}</td></tr>`).join('')}</tbody></table></div><div class="round-summary"><span>凤凰 ${roundResult.phoenix.teamPoints} 分</span><span>狮鹫 ${roundResult.griffin.teamPoints} 分</span><span>${roundResult.completed} / 4 完成</span></div></article>`}).join('')}
+function renderSummary(){const result=DoveTeamCalculator.calculate(eventData.rounds);document.getElementById('phoenixPoints').textContent=result.phoenix.teamPoints;document.getElementById('phoenixGames').textContent=result.phoenix.games;document.getElementById('griffinPoints').textContent=result.griffin.teamPoints;document.getElementById('griffinGames').textContent=result.griffin.games;const title=document.getElementById('resultTitle'),note=document.getElementById('resultNote');if(result.pending>0){const leader=result.phoenix.teamPoints===result.griffin.teamPoints?null:(result.phoenix.teamPoints>result.griffin.teamPoints?'phoenix':'griffin');title.textContent=leader?`${TEAM_META[leader].name}暂时领先`:'比赛进行中';note.textContent=`${result.completed} / ${result.total} 场已完成`;return}if(result.winner){title.textContent=`${TEAM_META[result.winner].name}获胜`;note.textContent=result.decidedBy==='teamPoints'?'以团队积分胜出':'团队积分相同，以总 game 数胜出';return}title.textContent=result.total?'完全打平':'等待比赛开始';note.textContent=result.total?'团队积分及总 game 数均相同，需要加赛':`0 / ${result.total} 场已完成`}
+function renderAll(){renderAdmin();renderTeams();renderEditors();renderScoreboard();renderSummary()}
+
+function updateCaptain(team,value){eventData.teams[team].captain=value.trim();queueSave();renderTeams();renderScoreboard()}
+function updatePair(team,index,field,value){eventData.teams[team].pairs[index][field]=value.trim();queueSave();renderTeams();renderScoreboard()}
+function updateMatch(roundIndex,matchIndex,field,value){const match=eventData.rounds[roundIndex].matches[matchIndex];match[field]=field.endsWith('Games')?(value===''?'':Math.max(0,Math.min(6,Number(value)))):value;if((field==='phoenixGames'||field==='griffinGames')&&Number(match.phoenixGames)!==Number(match.griffinGames))match.winnerOverride='';queueSave();renderScoreboard();renderSummary()}
+function addRound(){if(!isAdminMode)return;const index=eventData.rounds.length;eventData.rounds.push({id:`round-${Date.now()}`,name:`第 ${index+1} 轮`,matches:Array.from({length:4},(_,courtIndex)=>({court:courtIndex+1,phoenixPairId:PAIR_IDS[courtIndex],griffinPairId:PAIR_IDS[(courtIndex+index)%4],phoenixGames:'',griffinGames:'',winnerOverride:''}))});queueSave();renderScoreboard();renderSummary()}
+function resetScores(){if(!isAdminMode||!confirm('确定清空所有轮次的比分吗？固定搭档和出战顺序会保留。'))return;eventData.rounds.forEach(round=>round.matches.forEach(match=>{match.phoenixGames='';match.griffinGames='';match.winnerOverride=''}));queueSave();renderScoreboard();renderSummary()}
+function queueSave(){if(!eventRef){showToast('实时数据库尚未连接');return}document.getElementById('syncStatus').textContent='正在保存';clearTimeout(saveTimer);saveTimer=setTimeout(()=>{eventData.updatedAt=Date.now();eventRef.set(eventData).then(()=>{document.getElementById('syncStatus').textContent='已实时保存'}).catch(()=>{document.getElementById('syncStatus').textContent='保存失败';showToast('保存失败，请检查网络')})},280)}
+function start(){renderAll();if(!window.firebase||!firebase.database){document.getElementById('syncStatus').textContent='Firebase 加载失败';return}if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);eventRef=firebase.database().ref(EVENT_DB_PATH);eventRef.on('value',snapshot=>{eventData=normalizeEvent(snapshot.val());document.getElementById('syncStatus').textContent='实时同步中';renderAll()},()=>{document.getElementById('syncStatus').textContent='实时数据读取失败'})}
+start();
+</script>
+</body>
+</html>
