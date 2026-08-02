@@ -4,6 +4,7 @@ window.DOVE_RECURRING_EVENTS = [
     status: '常驻活动',
     eyebrow: 'Resident Event · Weekly Tour',
     title: '金鸽巡回赛',
+    logo: 'golden-dove-tour-logo.webp',
     summary: '每周开放的分级升降场巡回赛。四个分级各自进行三轮对局，报名、场地安排和长期到场记录都集中在这里。',
     schedule: '每周六 · 长期开放',
     venue: 'Toronto',
