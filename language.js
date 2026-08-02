@@ -111,6 +111,45 @@
 
   // Team event page.
   add('8.8 混双团体赛 · 金鸽杯', '8.8 混双团体赛 · 金鸽杯', 'Aug 8 Mixed Doubles Team Event · Golden Dove Cup');
+  add('Team Signup', '团体赛接龙', 'Team Signup');
+  add('Admin Pairing', '管理员配对', 'Admin Pairing');
+  add('像接龙一样加入团体赛。', '像接龙一样加入团体赛。', 'Join the team event like a signup chain.');
+  add('＋ 接龙报名', '＋ 接龙报名', '＋ Join the Signup');
+  add('接龙报名', '接龙报名', 'Join the Signup');
+  add('输入一次姓名，选择性别与队伍即可。每队 4 男 4 女；选择“自动分配”时，系统会优先补到人数较少的一队。', '输入一次姓名，选择性别与队伍即可。每队 4 男 4 女；选择“自动分配”时，系统会优先补到人数较少的一队。', 'Enter your name once, then choose a gender and team. Each team has four men and four women; automatic assignment fills the team with fewer players first.');
+  add('从接龙名单直接生成搭档。', '从接龙名单直接生成搭档。', 'Create fixed partners directly from the signup list.');
+  add('自动生成 8 组混双', '自动生成 8 组混双', 'Generate 8 Mixed Pairs');
+  add('系统按报名顺序将每队男、女球员配成四组。管理员也可以用下拉菜单调整搭档并选择队长，不需要重复输入姓名。', '系统按报名顺序将每队男、女球员配成四组。管理员也可以用下拉菜单调整搭档并选择队长，不需要重复输入姓名。', 'The system pairs each team’s men and women in signup order. Admins can adjust partners and select captains from dropdowns without retyping names.');
+  add('团体赛接龙', '团体赛接龙', 'Team Event Signup');
+  add('姓名 / 微信名', '姓名 / 微信名', 'Name / WeChat Name');
+  add('性别', '性别', 'Gender');
+  add('队伍', '队伍', 'Team');
+  add('自动分配', '自动分配', 'Auto Assign');
+  add('加入接龙', '加入接龙', 'Join Signup');
+  add('每支队伍最多 4 男 4 女。你可以删除自己在本设备上的报名；管理员可以管理全部名单。', '每支队伍最多 4 男 4 女。你可以删除自己在本设备上的报名；管理员可以管理全部名单。', 'Each team allows up to four men and four women. You can remove your own signup on this device; admins can manage the full list.');
+  add('选择男球员', '选择男球员', 'Select Male Player');
+  add('选择女球员', '选择女球员', 'Select Female Player');
+  add('男球员', '男球员', 'Male Player');
+  add('女球员', '女球员', 'Female Player');
+  add('男', '男', 'Male');
+  add('女', '女', 'Female');
+  add('还没有人接龙', '还没有人接龙', 'No signups yet');
+  add('删除报名', '删除报名', 'Remove Signup');
+  add('关闭', '关闭', 'Close');
+  add('请选择性别', '请选择性别', 'Select a gender');
+  add('这个名字已经接龙', '这个名字已经接龙', 'This name is already registered');
+  add('这个组别已经报满', '这个组别已经报满', 'This team group is full');
+  add('报名保存失败，请检查网络', '报名保存失败，请检查网络', 'Signup failed. Check your connection.');
+  add('报名没有保存', '报名没有保存', 'Signup was not saved');
+  add('已加入团体赛', '已加入团体赛', 'joined the team event');
+  add('的团体赛报名吗？', '的团体赛报名吗？', 'from the team event?');
+  add('移除失败，请检查网络', '移除失败，请检查网络', 'Removal failed. Check your connection.');
+  add('已移除', '已移除', 'removed');
+  add('已按接龙顺序生成固定混双', '已按接龙顺序生成固定混双', 'Fixed mixed pairs generated in signup order');
+  add('已按接龙顺序生成 8 组固定混双', '已按接龙顺序生成 8 组固定混双', 'Eight fixed mixed pairs generated in signup order');
+  add('名单尚未满，已先生成现有搭档', '名单尚未满，已先生成现有搭档', 'The roster is incomplete; available pairs were generated');
+  add('Game', '局', 'Game');
+  add('VS', '对阵', 'VS');
   add('金鸽杯 8 月 8 日凤凰与狮鹫混双团体赛，实时阵容、比分和团队结果。', '金鸽杯 8 月 8 日凤凰与狮鹫混双团体赛，实时阵容、比分和团队结果。', 'Golden Dove Cup mixed doubles team event on August 8, with live lineups, scores, and team results.');
   add('凤凰 vs 狮鹫', '凤凰 对阵 狮鹫', 'Phoenix vs Griffin');
   add('凤凰 Phoenix', '凤凰', 'Phoenix');
@@ -343,7 +382,8 @@
     exact.zh.set(entry.source, entry.zh);
     exact.en.set(entry.source, entry.en);
   });
-  const fragments = entries.slice().sort((a, b) => b.source.length - a.source.length);
+  const fragments = entries.filter(entry => entry.source.length > 1)
+    .sort((a, b) => b.source.length - a.source.length);
   const textSources = new WeakMap();
   const attrSources = new WeakMap();
   let currentLanguage = 'zh';
@@ -358,6 +398,9 @@
     let next = text;
     if (language === 'en') {
       next = next
+        .replace(/^男\s*(\d+\s*\/\s*\d+)$/, 'Men $1')
+        .replace(/^女\s*(\d+\s*\/\s*\d+)$/, 'Women $1')
+        .replace(/^确定移除\s+(.+)\s+的团体赛报名吗？$/, 'Remove $1 from the team event?')
         .replace(/第\s*(\d+)\s*轮结果决定本轮场地/g, 'Round $1 results determine this round\'s courts')
         .replace(/第\s*(\d+)\s*轮/g, 'Round $1')
         .replace(/(\d+)\s*\/\s*(\d+)\s*场已完成/g, '$1 / $2 matches completed')

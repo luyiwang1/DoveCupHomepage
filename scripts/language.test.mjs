@@ -35,3 +35,15 @@ test('uses complete labels instead of partial mixed translations', () => {
   assert.equal(localizeText('FULL SET WITH AD', 'zh'), '完整一盘 · 占先计分');
 });
 
+test('translates signup capacity without changing names that contain gender characters', () => {
+  assert.equal(localizeText('男 3/4', 'en'), 'Men 3/4');
+  assert.equal(localizeText('女 2/4', 'en'), 'Women 2/4');
+  assert.equal(localizeText('小男女', 'en'), '小男女');
+});
+
+test('translates automatic pairing feedback', () => {
+  assert.equal(
+    localizeText('名单尚未满，已先生成现有搭档', 'en'),
+    'The roster is incomplete; available pairs were generated'
+  );
+});
