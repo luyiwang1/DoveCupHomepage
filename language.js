@@ -171,6 +171,8 @@
   add('名单尚未满，已先生成现有搭档', '名单尚未满，已先生成现有搭档', 'The roster is incomplete; available pairs were generated');
   add('删除轮次', '删除轮次', 'Delete Round');
   add('至少保留一个轮次', '至少保留一个轮次', 'Keep at least one round');
+  add('基础轮次', '基础轮次', 'Base Round');
+  add('前两轮为基础轮次，至少保留两轮', '前两轮为基础轮次，至少保留两轮', 'The first two are base rounds; keep at least two rounds');
   add('轮次已删除', '轮次已删除', 'Round deleted');
   add('该轮比分会一起删除，且无法恢复。', '该轮比分会一起删除，且无法恢复。', 'Its scores will also be deleted and cannot be restored.');
   add('Game', '局', 'Game');

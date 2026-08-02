@@ -98,12 +98,17 @@
     return available === undefined ? (Array.isArray(rounds) ? rounds.length : 0) % ids.length : available;
   }
 
+  function canRemoveRound(rounds, index) {
+    const source = Array.isArray(rounds) ? rounds : [];
+    return source.length > 2 && Number.isInteger(index) && index >= 2 && index < source.length;
+  }
+
   function removeRound(rounds, index) {
     const source = Array.isArray(rounds) ? rounds : [];
-    if (source.length <= 1 || !Number.isInteger(index) || index < 0 || index >= source.length) return null;
+    if (!canRemoveRound(source, index)) return null;
     return source.filter((_, roundIndex) => roundIndex !== index)
       .map((round, roundIndex) => ({ ...round, name: `第 ${roundIndex + 1} 轮` }));
   }
 
-  return { calculate, cleanGame, lineupIssues, matchWinner, nextRoundRotation, removeRound, roundRotation };
+  return { calculate, canRemoveRound, cleanGame, lineupIssues, matchWinner, nextRoundRotation, removeRound, roundRotation };
 }));

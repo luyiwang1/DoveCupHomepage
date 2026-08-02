@@ -57,4 +57,9 @@ test('translates fixed partner and round deletion confirmations', () => {
     localizeText('确定删除第 4 轮吗？该轮比分会一起删除，且无法恢复。', 'en'),
     'Delete Round 4? Its scores will also be deleted and cannot be restored.'
   );
+  assert.equal(localizeText('基础轮次', 'en'), 'Base Round');
+  assert.equal(
+    localizeText('前两轮为基础轮次，至少保留两轮', 'en'),
+    'The first two are base rounds; keep at least two rounds'
+  );
 });

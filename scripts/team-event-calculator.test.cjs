@@ -70,15 +70,18 @@ test('reuses a deleted matchup rotation for the next round', () => {
   assert.equal(calculator.nextRoundRotation(rounds, pairIds), 1);
 });
 
-test('deletes one round, preserves other matches, and renumbers labels', () => {
+test('deletes only the third round or later and always keeps two base rounds', () => {
   const rounds = [1, 2, 3, 4].map(number => ({
     id: `round-${number}`,
     name: `第 ${number} 轮`,
     matches: [{ phoenixGames: number, griffinGames: 0 }]
   }));
-  const result = calculator.removeRound(rounds, 1);
-  assert.deepEqual(result.map(item => item.id), ['round-1', 'round-3', 'round-4']);
+  const result = calculator.removeRound(rounds, 3);
+  assert.deepEqual(result.map(item => item.id), ['round-1', 'round-2', 'round-3']);
   assert.deepEqual(result.map(item => item.name), ['第 1 轮', '第 2 轮', '第 3 轮']);
-  assert.deepEqual(result.map(item => item.matches[0].phoenixGames), [1, 3, 4]);
-  assert.equal(calculator.removeRound([rounds[0]], 0), null);
+  assert.deepEqual(result.map(item => item.matches[0].phoenixGames), [1, 2, 3]);
+  assert.equal(calculator.canRemoveRound(rounds, 0), false);
+  assert.equal(calculator.canRemoveRound(rounds, 1), false);
+  assert.equal(calculator.canRemoveRound(rounds, 2), true);
+  assert.equal(calculator.removeRound(rounds.slice(0, 2), 1), null);
 });
