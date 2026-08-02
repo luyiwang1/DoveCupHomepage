@@ -33,6 +33,7 @@ test('translates English court metadata into Chinese', () => {
 test('uses complete labels instead of partial mixed translations', () => {
   assert.equal(localizeText('进入报名页', 'en'), 'Registration');
   assert.equal(localizeText('进入金鸽巡回赛报名', 'en'), 'Golden Dove Tour Registration');
+  assert.equal(localizeText('金鸽巡回赛报名', 'en'), 'Golden Dove Tour Registration');
   assert.equal(localizeText('了解最新活动', 'en'), 'Explore Latest Events');
   assert.equal(localizeText('FULL SET WITH AD', 'zh'), '完整一盘 · 占先计分');
 });

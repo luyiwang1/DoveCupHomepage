@@ -100,6 +100,7 @@
   add('三轮升降级', '三轮升降级', 'Three-round promotion and relegation');
   add('进入报名页', '进入报名页', 'Registration');
   add('进入金鸽巡回赛报名', '进入金鸽巡回赛报名', 'Golden Dove Tour Registration');
+  add('金鸽巡回赛报名', '金鸽巡回赛报名', 'Golden Dove Tour Registration');
   add('了解最新活动', '了解最新活动', 'Explore Latest Events');
   add('最新活动', '最新活动', 'Latest Event');
   add('赛事入口', '赛事入口', 'Tournament Tools');
