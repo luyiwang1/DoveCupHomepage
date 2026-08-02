@@ -38,6 +38,15 @@ function normalizeScores(data) {
   const scores = data || {};
   scores.players = scores.players && typeof scores.players === 'object' ? scores.players : {};
   scores.events = Array.isArray(scores.events) ? scores.events : [];
+  scores.attendanceWeeks = scores.attendanceWeeks && typeof scores.attendanceWeeks === 'object' ? scores.attendanceWeeks : {};
+  Object.values(scores.players).forEach(player => {
+    if (!player) return;
+    delete player.manualWins;
+    delete player.courtWins;
+    delete player.wins;
+    delete player.points;
+  });
+  scores.mode = 'attendance-only';
   return scores;
 }
 

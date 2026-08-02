@@ -25,7 +25,6 @@ Page({
 
   onHide() {
     clearInterval(this.timer);
-    clearTimeout(this.scoreTimer);
   },
 
   loadData(showLoading = true) {
@@ -256,7 +255,6 @@ Page({
     this.setData({ baseCourts, roundScores: {} }, () => {
       this.buildRounds();
       this.saveLayout();
-      this.scheduleScoreSync();
     });
   },
 
@@ -271,13 +269,12 @@ Page({
     if (!this.data.isAdmin) return;
     wx.showModal({
       title: '清空比分',
-      content: '确定清空三轮比分吗？积分榜里的场地比分也会归零。',
+      content: '确定清空三轮比分吗？',
       success: (res) => {
         if (!res.confirm) return;
         this.setData({ roundScores: {} }, () => {
           this.buildRounds();
           this.saveLayout();
-          this.scheduleScoreSync();
         });
       }
     });
@@ -293,7 +290,6 @@ Page({
     this.setData({ roundScores }, () => {
       this.buildRounds();
       this.saveLayout();
-      this.scheduleScoreSync();
     });
   },
 
@@ -305,50 +301,5 @@ Page({
       roundScores: this.data.roundScores
     };
     db.saveCourts(data).catch(() => wx.showToast({ title: '保存失败', icon: 'none' }));
-  },
-
-  scheduleScoreSync() {
-    clearTimeout(this.scoreTimer);
-    this.scoreTimer = setTimeout(() => this.syncScores(true), 600);
-  },
-
-  computeCourtWins() {
-    const totals = {};
-    this.data.rounds.forEach((round, rIdx) => {
-      round.matches.forEach((match, cIdx) => {
-        const score = this.data.roundScores[`${rIdx}-${cIdx}`] || {};
-        if (!Number.isFinite(Number(score.a)) || !Number.isFinite(Number(score.b))) return;
-        match.teamA.forEach(p => { totals[p.key] = (totals[p.key] || 0) + Number(score.a); });
-        match.teamB.forEach(p => { totals[p.key] = (totals[p.key] || 0) + Number(score.b); });
-      });
-    });
-    return totals;
-  },
-
-  keyForName(name) {
-    return name.trim().toLowerCase().replace(/[.#$/[\]]/g, '_');
-  },
-
-  syncScores(silent = false) {
-    if (!this.data.isAdmin && !silent) return;
-    Promise.resolve(db.getScores()).then(scores => {
-      const wins = this.computeCourtWins();
-      this.data.players.forEach(p => {
-        const key = this.keyForName(p.name);
-        const existing = scores.players[key] || { key, name: p.name, appearances: 0, wins: 0, points: 0 };
-        const manualWins = Number(existing.manualWins !== undefined ? existing.manualWins : (Number(existing.wins || 0) - Number(existing.courtWins || 0))) || 0;
-        existing.name = p.name;
-        existing.manualWins = manualWins;
-        existing.courtWins = Number(wins[p.key] || 0);
-        existing.wins = existing.manualWins + existing.courtWins;
-        existing.points = existing.wins * 10;
-        scores.players[key] = existing;
-      });
-      scores.events.unshift({ type: 'courtScores', ts: Date.now() });
-      scores.events = scores.events.slice(0, 20);
-      return db.saveScores(scores);
-    }).then(() => {
-      if (!silent) wx.showToast({ title: '已同步积分' });
-    }).catch(() => wx.showToast({ title: '同步失败', icon: 'none' }));
   }
 });

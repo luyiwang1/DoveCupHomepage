@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildReset, latestEligibleResetId, normalizeName, scoreKeyForName } from './weekly-reset.mjs';
+import { buildAttendanceOnlyMigration, buildReset, latestEligibleResetId, normalizeName, scoreKeyForName } from './weekly-reset.mjs';
 
 test('finds the latest Saturday 20:00 cutoff in Toronto', () => {
   assert.equal(latestEligibleResetId(new Date('2026-08-02T00:01:00Z')), '2026-08-01');
@@ -46,9 +46,11 @@ test('archives both lists, counts joined players once, and clears the signup for
   assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'irene').signupCount, 1);
   assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'alvin').waitlistCount, 1);
   assert.equal(result.data.scores.players.irene.appearances, 4);
-  assert.equal(result.data.scores.players.irene.points, 20);
+  assert.equal('points' in result.data.scores.players.irene, false);
+  assert.equal('wins' in result.data.scores.players.irene, false);
   assert.equal(result.data.scores.players.gill.appearances, 1);
-  assert.equal(result.data.scores.players.gill.points, 0);
+  assert.equal('points' in result.data.scores.players.gill, false);
+  assert.equal(result.data.scores.mode, 'attendance-only');
   assert.equal(result.data.scores.attendanceWeeks['2026-08-01'].count, 2);
   assert.equal(result.data.scores.events[0].type, 'weeklyAttendance');
 });
@@ -82,4 +84,34 @@ test('backfills attendance from an existing archive exactly once', () => {
   const second = buildReset(first.data, '2026-08-01', new Date('2026-08-03T01:00:00Z'));
   assert.equal(second.changed, false);
   assert.equal(second.data.scores.players.gill.appearances, 1);
+});
+
+test('removes competition stats without changing attendance', () => {
+  const input = {
+    scores: {
+      players: {
+        irene: { key: 'irene', name: 'Irene', appearances: 4, wins: 2, points: 20 },
+        gill: { key: 'gill', name: 'Gill', appearances: 2, manualWins: 1, courtWins: 3, wins: 4, points: 40 }
+      },
+      events: [
+        { type: 'wins', ts: 1 },
+        { type: 'courtScores', ts: 2 },
+        { type: 'weeklyAttendance', ts: 3 }
+      ],
+      attendanceWeeks: { '2026-08-01': { count: 2 } }
+    }
+  };
+
+  const first = buildAttendanceOnlyMigration(input, new Date('2026-08-03T00:00:00Z'));
+  assert.equal(first.changed, true);
+  assert.equal(first.summary.playersCleared, 2);
+  assert.equal(first.data.scores.players.irene.appearances, 4);
+  assert.equal(first.data.scores.players.gill.appearances, 2);
+  assert.equal('points' in first.data.scores.players.irene, false);
+  assert.equal('wins' in first.data.scores.players.gill, false);
+  assert.equal(first.data.scores.events.some(event => event.type === 'wins' || event.type === 'courtScores'), false);
+  assert.equal(first.data.scores.attendanceWeeks['2026-08-01'].count, 2);
+
+  const second = buildAttendanceOnlyMigration(first.data, new Date('2026-08-03T01:00:00Z'));
+  assert.equal(second.changed, false);
 });

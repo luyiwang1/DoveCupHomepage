@@ -114,17 +114,15 @@ function recordAttendance(system, people, resetId, recordedAt) {
     const existing = players[key] || {
       key,
       name,
-      appearances: 0,
-      manualWins: 0,
-      courtWins: 0,
-      wins: 0,
-      points: 0
+      appearances: 0
     };
     existing.key = key;
     existing.name = name;
     existing.appearances = (Number(existing.appearances) || 0) + 1;
-    existing.wins = Number(existing.wins) || 0;
-    existing.points = existing.wins * 10;
+    delete existing.manualWins;
+    delete existing.courtWins;
+    delete existing.wins;
+    delete existing.points;
     existing.lastPlayedAt = recordedAt;
     existing.lastAttendanceWeek = resetId;
     existing.updatedAt = recordedAt;
@@ -144,9 +142,56 @@ function recordAttendance(system, people, resetId, recordedAt) {
     players,
     events: events.slice(0, 20),
     attendanceWeeks,
+    mode: 'attendance-only',
     updatedAt: recordedAt
   };
   return { changed: true, count: names.length };
+}
+
+export function buildAttendanceOnlyMigration(input, now = new Date()) {
+  const system = JSON.parse(JSON.stringify(input || {}));
+  const scores = system.scores && typeof system.scores === 'object' ? system.scores : {};
+  const players = scores.players && typeof scores.players === 'object' ? scores.players : {};
+  const events = Array.isArray(scores.events) ? scores.events : [];
+  let playersCleared = 0;
+
+  Object.values(players).forEach(player => {
+    if (!player || typeof player !== 'object') return;
+    const hadCompetitionStats = ['manualWins', 'courtWins', 'wins', 'points']
+      .some(field => Object.hasOwn(player, field));
+    if (hadCompetitionStats) playersCleared += 1;
+    delete player.manualWins;
+    delete player.courtWins;
+    delete player.wins;
+    delete player.points;
+  });
+
+  const cleanEvents = events.filter(event => !['wins', 'courtScores'].includes(event?.type));
+  const alreadyAttendanceOnly = scores.mode === 'attendance-only'
+    && playersCleared === 0
+    && cleanEvents.length === events.length;
+  if (alreadyAttendanceOnly) {
+    return {
+      changed: false,
+      data: system,
+      summary: { reason: 'already-attendance-only', playersCleared: 0 }
+    };
+  }
+
+  const migratedAt = now.getTime();
+  cleanEvents.unshift({ type: 'attendanceOnly', names: [], ts: migratedAt });
+  system.scores = {
+    ...scores,
+    players,
+    events: cleanEvents.slice(0, 20),
+    mode: 'attendance-only',
+    updatedAt: migratedAt
+  };
+  return {
+    changed: true,
+    data: system,
+    summary: { reason: 'attendance-only-migration', playersCleared }
+  };
 }
 
 export function buildReset(input, resetId, now = new Date()) {
@@ -251,12 +296,15 @@ async function run() {
   const resetIdArg = resetIdArgIndex >= 0 ? process.argv[resetIdArgIndex + 1] : '';
   const resetId = process.env.RESET_ID || resetIdArg || latestEligibleResetId();
   const dryRun = String(process.env.DRY_RUN || '').toLowerCase() === 'true' || process.argv.includes('--dry-run');
+  const attendanceOnlyMigration = process.argv.includes('--attendance-only');
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     const snapshot = await fetchSnapshot(databaseUrl);
     if (!snapshot.etag) throw new Error('Firebase did not return an ETag; refusing to overwrite data without concurrency protection.');
 
-    const result = buildReset(snapshot.data, resetId);
+    const result = attendanceOnlyMigration
+      ? buildAttendanceOnlyMigration(snapshot.data)
+      : buildReset(snapshot.data, resetId);
     if (!result.changed) {
       console.log(JSON.stringify(result.summary));
       return;

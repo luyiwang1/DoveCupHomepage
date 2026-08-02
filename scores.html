@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-<title>Dove Cup 积分榜</title>
+<title>Dove Cup 到场记录</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root{--green:#07C160;--green-dark:#059A4A;--green-light:#E8F9EF;--blue:#10AEFF;--blue-light:#EBF8FF;--orange:#FF8C00;--orange-light:#FFF3E0;--red:#FA5151;--gray-50:#FAFAFA;--gray-100:#F7F7F7;--gray-200:#EFEFEF;--gray-300:#DCDCDC;--gray-500:#999;--gray-700:#555;--ink:#1A1A1A;--white:#fff;--shadow:0 8px 28px rgba(0,0,0,.08);--shadow-soft:0 2px 12px rgba(0,0,0,.06)}
@@ -17,8 +17,8 @@
   <section class="hero">
     <div class="hero-top">
       <div>
-        <h1>🏆 Dove Cup<br>积分榜</h1>
-        <p class="subtitle">参赛只记录次数；每赢 1 个 game +10 分。数据保存在 Firebase，所有人实时看到同一份排行榜。</p>
+        <h1>Dove Cup<br>到场记录</h1>
+        <p class="subtitle">这里只记录每个人实际到场的次数。每周六晚 8 点归档后自动更新，不再记录胜局和积分。</p>
       </div>
       <div class="status-pill" id="syncStatus">实时同步中</div>
     </div>
@@ -29,28 +29,26 @@
     </div>
   </section>
   <section class="stats">
-    <div class="stat-card"><div class="num" id="playerCount">0</div><div class="label">参赛人员</div></div>
-    <div class="stat-card"><div class="num" id="totalAppearances">0</div><div class="label">累计参赛</div></div>
-    <div class="stat-card"><div class="num" id="totalWins">0</div><div class="label">累计赢局</div></div>
-    <div class="stat-card"><div class="num" id="topScore">0</div><div class="label">最高积分</div></div>
+    <div class="stat-card"><div class="num" id="playerCount">0</div><div class="label">到场人员</div></div>
+    <div class="stat-card"><div class="num" id="totalAppearances">0</div><div class="label">累计到场</div></div>
+    <div class="stat-card"><div class="num" id="topAttendance">0</div><div class="label">最多到场</div></div>
+    <div class="stat-card"><div class="num" id="recordedWeeks">0</div><div class="label">已记录周数</div></div>
   </section>
   <section class="panel admin-control">
-    <div class="panel-title">管理员更新积分</div>
+    <div class="panel-title">管理员补录到场</div>
     <div class="admin-grid">
-      <button class="small-btn" onclick="importCurrentJoined()">记录本场报名名单参赛次数</button>
+      <button class="small-btn" onclick="importCurrentJoined()">记录当前名单到场一次</button>
       <div class="field"><label>人员姓名</label><input id="playerNameInput" placeholder="输入姓名"></div>
-      <div class="field"><label>赢的 game 数</label><input id="winsInput" type="number" min="0" value="1"></div>
-      <button class="small-btn blue" onclick="addWins()">给此人加赢局积分</button>
-      <button class="small-btn" onclick="addManualParticipation()">单独记录此人参赛一次</button>
-      <button class="small-btn red" onclick="resetPlayer()">删除此人积分记录</button>
-      <button class="small-btn red" onclick="resetAllScores()">重置全部积分</button>
+      <button class="small-btn" onclick="addManualParticipation()">单独记录此人到场一次</button>
+      <button class="small-btn red" onclick="resetPlayer()">删除此人到场记录</button>
+      <button class="small-btn red" onclick="resetAllScores()">清空全部到场记录</button>
     </div>
-    <p class="note" style="margin-top:12px">周六归档会自动记录本周参赛次数；这里只用于补录参赛次数或赢局。</p>
+    <p class="note" style="margin-top:12px">周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。</p>
   </section>
   <section class="panel">
-    <div class="panel-title">积分表格</div>
-    <div class="table-wrap"><table><thead><tr><th>排名</th><th>姓名</th><th>积分</th><th>参赛次数</th><th>赢局</th><th>明细</th><th class="admin-cell">操作</th></tr></thead><tbody id="scoreRows"></tbody></table></div>
-    <div id="emptyState" class="empty" style="display:none">还没有积分记录。管理员录入第一场参赛后，这里会出现排行榜。</div>
+    <div class="panel-title">到场次数</div>
+    <div class="table-wrap"><table><thead><tr><th>排名</th><th>姓名</th><th>到场次数</th><th>最近到场</th><th>状态</th><th class="admin-cell">操作</th></tr></thead><tbody id="scoreRows"></tbody></table></div>
+    <div id="emptyState" class="empty" style="display:none">还没有到场记录。首次周六归档后，这里会自动显示。</div>
   </section>
   <section class="panel">
     <div class="panel-title">最近更新</div>
@@ -70,26 +68,26 @@ let scoreRef=null,signupRef=null,scoreData={players:{},events:[]},signupState={j
 function goPage(page){location.href=page}
 if(new URLSearchParams(location.search).has('v')){history.replaceState(null,'',location.pathname)}
 function keyForName(name){return name.trim().toLowerCase().replace(/[.#$/[\]]/g,'_')}
-function normalizeScoreData(data){const next=data||{};next.players=next.players&&typeof next.players==='object'?next.players:{};next.events=Array.isArray(next.events)?next.events:[];return next}
+function normalizeScoreData(data){const next=data||{};next.players=next.players&&typeof next.players==='object'?next.players:{};next.events=Array.isArray(next.events)?next.events:[];next.attendanceWeeks=next.attendanceWeeks&&typeof next.attendanceWeeks==='object'?next.attendanceWeeks:{};Object.values(next.players).forEach(p=>{if(!p)return;delete p.points;delete p.wins;delete p.manualWins;delete p.courtWins});next.mode='attendance-only';return next}
 function signupPlayers(){return Array.isArray(signupState.joined)?signupState.joined.filter(p=>p&&p.name):[]}
-function playerList(){const map=new Map();signupPlayers().forEach(p=>{const key=keyForName(p.name);if(!key)return;map.set(key,{key,name:p.name,appearances:0,wins:0,points:0,hasScoreRecord:false,fromSignup:true})});Object.entries(scoreData.players).forEach(([key,p])=>{if(!p||!p.name)return;map.set(key,Object.assign({},p,{key,hasScoreRecord:true,fromSignup:map.has(key)}))});return Array.from(map.values()).sort((a,b)=>(b.points||0)-(a.points||0)||(b.wins||0)-(a.wins||0)||String(a.name).localeCompare(String(b.name),'zh-Hans-CN'))}
+function playerList(){const map=new Map();signupPlayers().forEach(p=>{const key=keyForName(p.name);if(!key)return;map.set(key,{key,name:p.name,appearances:0,hasScoreRecord:false,fromSignup:true})});Object.entries(scoreData.players).forEach(([key,p])=>{if(!p||!p.name)return;map.set(key,Object.assign({},p,{key,hasScoreRecord:true,fromSignup:map.has(key)}))});return Array.from(map.values()).sort((a,b)=>(b.appearances||0)-(a.appearances||0)||String(a.name).localeCompare(String(b.name),'zh-Hans-CN'))}
 function renderAdmin(){document.body.classList.toggle('is-admin',isAdminMode);document.getElementById('adminBtn').textContent=isAdminMode?'Admin 已登录':'Admin'}
 function toggleAdmin(){if(isAdminMode){isAdminMode=false;sessionStorage.removeItem(ADMIN_STORAGE);renderAdmin();render();return}const pass=prompt('请输入管理员密码');if(pass===ADMIN_PASSWORD){isAdminMode=true;sessionStorage.setItem(ADMIN_STORAGE,'1');renderAdmin();render()}else if(pass!==null){alert('密码错误')}}
-function requireAdmin(){if(isAdminMode)return true;alert('只有管理员可以更新积分');return false}
+function requireAdmin(){if(isAdminMode)return true;alert('只有管理员可以更新到场记录');return false}
 function saveScores(){if(scoreRef)scoreRef.set(Object.assign({},scoreData,{updatedAt:Date.now()})).catch(()=>alert('保存失败，请检查网络'))}
-function ensurePlayer(name){const clean=name.trim();if(!clean)return null;const key=keyForName(clean);if(!scoreData.players[key])scoreData.players[key]={key,name:clean,appearances:0,wins:0,points:0,lastPlayedAt:null,updatedAt:Date.now()};return scoreData.players[key]}
-function addEvent(type,names,wins=0){scoreData.events.unshift({type,names,wins,ts:Date.now()});scoreData.events=scoreData.events.slice(0,20)}
-function importCurrentJoined(){if(!requireAdmin())return;const joined=Array.isArray(signupState.joined)?signupState.joined:[];if(!joined.length){alert('当前报名名单为空');return}joined.forEach(p=>{const player=ensurePlayer(p.name);if(!player)return;player.appearances=(player.appearances||0)+1;player.points=(Number(player.wins)||0)*10;player.lastPlayedAt=Date.now();player.updatedAt=Date.now()});addEvent('participation',joined.map(p=>p.name));saveScores();render()}
-function addManualParticipation(){if(!requireAdmin())return;const name=document.getElementById('playerNameInput').value.trim();const player=ensurePlayer(name);if(!player){alert('请输入姓名');return}player.appearances=(player.appearances||0)+1;player.points=(Number(player.wins)||0)*10;player.lastPlayedAt=Date.now();player.updatedAt=Date.now();addEvent('manualParticipation',[player.name]);saveScores();render()}
-function addWins(){if(!requireAdmin())return;const name=document.getElementById('playerNameInput').value.trim();const wins=parseInt(document.getElementById('winsInput').value,10);if(!name||!Number.isFinite(wins)||wins<0){alert('请输入姓名和有效赢局数');return}const player=ensurePlayer(name);player.wins=(player.wins||0)+wins;player.points=(Number(player.wins)||0)*10;player.updatedAt=Date.now();addEvent('wins',[player.name],wins);saveScores();render()}
+function ensurePlayer(name){const clean=name.trim();if(!clean)return null;const key=keyForName(clean);if(!scoreData.players[key])scoreData.players[key]={key,name:clean,appearances:0,lastPlayedAt:null,updatedAt:Date.now()};return scoreData.players[key]}
+function addEvent(type,names){scoreData.events.unshift({type,names,ts:Date.now()});scoreData.events=scoreData.events.slice(0,20)}
+function importCurrentJoined(){if(!requireAdmin())return;const joined=Array.isArray(signupState.joined)?signupState.joined:[];if(!joined.length){alert('当前报名名单为空');return}joined.forEach(p=>{const player=ensurePlayer(p.name);if(!player)return;player.appearances=(player.appearances||0)+1;player.lastPlayedAt=Date.now();player.updatedAt=Date.now()});addEvent('participation',joined.map(p=>p.name));saveScores();render()}
+function addManualParticipation(){if(!requireAdmin())return;const name=document.getElementById('playerNameInput').value.trim();const player=ensurePlayer(name);if(!player){alert('请输入姓名');return}player.appearances=(player.appearances||0)+1;player.lastPlayedAt=Date.now();player.updatedAt=Date.now();addEvent('manualParticipation',[player.name]);saveScores();render()}
 function resetPlayer(){if(!requireAdmin())return;const name=document.getElementById('playerNameInput').value.trim();if(!name){alert('请输入要删除的姓名');return}deletePlayerByKey(keyForName(name))}
 function deletePlayerFromButton(btn){deletePlayerByKey(btn.dataset.key)}
-function deletePlayerByKey(key){if(!requireAdmin())return;const player=scoreData.players[key];if(!player){alert('积分表里找不到这个人');return}if(!confirm(`确定删除 ${player.name} 的积分记录吗？`))return;delete scoreData.players[key];addEvent('deletePlayer',[player.name]);saveScores();render()}
-function resetAllScores(){if(!requireAdmin())return;if(!confirm('确定重置全部积分吗？这个操作会清空所有参赛和赢局记录。'))return;scoreData={players:{},events:[{type:'resetAll',names:[],ts:Date.now()}]};saveScores();render()}
-function render(){const list=playerList();document.getElementById('playerCount').textContent=list.length;document.getElementById('totalAppearances').textContent=list.reduce((s,p)=>s+(p.appearances||0),0);document.getElementById('totalWins').textContent=list.reduce((s,p)=>s+(p.wins||0),0);document.getElementById('topScore').textContent=list[0]?.points||0;document.getElementById('emptyState').style.display=list.length?'none':'block';document.getElementById('scoreRows').innerHTML=list.map((p,i)=>`<tr><td class="rank">${i+1}</td><td class="name">${escapeHtml(p.name)}</td><td class="points">${p.points||0}</td><td><span class="tag">${p.appearances||0} 次</span></td><td><span class="tag">${p.wins||0} game</span></td><td>${p.hasScoreRecord?`参赛 ${p.appearances||0} 次 · 赢局 ${p.wins||0}×10`:'已报名，暂未记录参赛'}</td><td class="admin-cell">${p.hasScoreRecord?`<button class="row-delete" data-key="${escapeHtml(p.key)}" onclick="deletePlayerFromButton(this)">删除</button>`:'<span class="tag">报名名单</span>'}</td></tr>`).join('');document.getElementById('eventLog').innerHTML=scoreData.events.length?scoreData.events.slice(0,8).map(e=>`<div class="log-row"><span>${eventText(e)}</span><span>${new Date(e.ts).toLocaleString('zh-CN')}</span></div>`).join(''):'<div class="empty">暂无更新记录</div>'}
-function eventText(e){if(e.type==='weeklyAttendance')return `${e.resetId||'本周'} 自动记录参赛：${e.count??(e.names||[]).length} 人`;if(e.type==='participation')return `记录参赛：${(e.names||[]).length} 人`;if(e.type==='manualParticipation')return `${(e.names||[])[0]} 记录参赛一次`;if(e.type==='wins')return `${(e.names||[])[0]} 赢 ${e.wins||0} game，+${(e.wins||0)*10}`;if(e.type==='courtScores')return '场地比分已自动同步到积分榜';if(e.type==='deletePlayer'||e.type==='resetPlayer')return `${(e.names||[])[0]} 积分记录已删除`;if(e.type==='resetAll')return '全部积分已重置';return '积分更新'}
+function deletePlayerByKey(key){if(!requireAdmin())return;const player=scoreData.players[key];if(!player){alert('到场记录里找不到这个人');return}if(!confirm(`确定删除 ${player.name} 的到场记录吗？`))return;delete scoreData.players[key];addEvent('deletePlayer',[player.name]);saveScores();render()}
+function resetAllScores(){if(!requireAdmin())return;if(!confirm('确定清空全部到场记录吗？'))return;scoreData={players:{},attendanceWeeks:{},events:[{type:'resetAll',names:[],ts:Date.now()}],mode:'attendance-only'};saveScores();render()}
+function formatDate(ts){return ts?new Date(ts).toLocaleDateString('zh-CN',{timeZone:'America/Toronto'}):'—'}
+function render(){const list=playerList();document.getElementById('playerCount').textContent=list.filter(p=>p.hasScoreRecord).length;document.getElementById('totalAppearances').textContent=list.reduce((s,p)=>s+(p.appearances||0),0);document.getElementById('topAttendance').textContent=list[0]?.appearances||0;document.getElementById('recordedWeeks').textContent=Object.keys(scoreData.attendanceWeeks||{}).length;document.getElementById('emptyState').style.display=list.length?'none':'block';document.getElementById('scoreRows').innerHTML=list.map((p,i)=>`<tr><td class="rank">${i+1}</td><td class="name">${escapeHtml(p.name)}</td><td class="points">${p.appearances||0} 次</td><td>${formatDate(p.lastPlayedAt)}</td><td>${p.hasScoreRecord?'已记录':'已报名，暂未到场'}</td><td class="admin-cell">${p.hasScoreRecord?`<button class="row-delete" data-key="${escapeHtml(p.key)}" onclick="deletePlayerFromButton(this)">删除</button>`:'<span class="tag">报名名单</span>'}</td></tr>`).join('');document.getElementById('eventLog').innerHTML=scoreData.events.length?scoreData.events.slice(0,8).map(e=>`<div class="log-row"><span>${eventText(e)}</span><span>${new Date(e.ts).toLocaleString('zh-CN')}</span></div>`).join(''):'<div class="empty">暂无更新记录</div>'}
+function eventText(e){if(e.type==='attendanceOnly')return '已切换为只记录到场次数';if(e.type==='weeklyAttendance')return `${e.resetId||'本周'} 自动记录到场：${e.count??(e.names||[]).length} 人`;if(e.type==='participation')return `记录到场：${(e.names||[]).length} 人`;if(e.type==='manualParticipation')return `${(e.names||[])[0]} 记录到场一次`;if(e.type==='deletePlayer'||e.type==='resetPlayer')return `${(e.names||[])[0]} 到场记录已删除`;if(e.type==='resetAll')return '全部到场记录已清空';return '到场记录已更新'}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
-function start(){renderAdmin();if(!window.firebase||!firebase.database){document.getElementById('syncStatus').textContent='Firebase 加载失败';render();return}if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);scoreRef=firebase.database().ref(SCORE_DB_PATH);signupRef=firebase.database().ref(SIGNUP_DB_PATH);scoreRef.on('value',snap=>{scoreData=normalizeScoreData(snap.val());document.getElementById('syncStatus').textContent='积分实时同步中';render()});signupRef.on('value',snap=>{const data=snap.val();signupState=data&&data.state?data.state:{joined:[]};render()})}
+function start(){renderAdmin();if(!window.firebase||!firebase.database){document.getElementById('syncStatus').textContent='Firebase 加载失败';render();return}if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);scoreRef=firebase.database().ref(SCORE_DB_PATH);signupRef=firebase.database().ref(SIGNUP_DB_PATH);scoreRef.on('value',snap=>{scoreData=normalizeScoreData(snap.val());document.getElementById('syncStatus').textContent='到场记录实时同步中';render()});signupRef.on('value',snap=>{const data=snap.val();signupState=data&&data.state?data.state:{joined:[]};render()})}
 start();
 </script>
 </body>
