@@ -50,6 +50,21 @@ test('translates automatic pairing feedback', () => {
   assert.equal(localizeText('待补男球员', 'en'), 'Waiting for Male Player');
 });
 
+test('translates special-event archive and attendance messages', () => {
+  assert.equal(
+    localizeText('活动归档完成，14 位参赛选手已记录到场', 'en'),
+    'Event archived. Attendance was recorded for 14 players.'
+  );
+  assert.equal(
+    localizeText('特别活动 · 凤凰 vs 狮鹫：14 人到场', 'en'),
+    'Special Event · Phoenix vs Griffin: 14 attendees'
+  );
+  assert.equal(
+    localizeText('活动归档后，参赛名单会保留在这里。', 'en'),
+    'Archived special-event rosters will appear here.'
+  );
+});
+
 test('translates fixed partner and round deletion confirmations', () => {
   assert.equal(
     localizeText('确定移除固定搭档 Wyman + Linda 吗？两个人会一起退出。', 'en'),

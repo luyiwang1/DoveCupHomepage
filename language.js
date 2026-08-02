@@ -154,6 +154,23 @@
   add('拖拽互换搭档', '拖拽互换搭档', 'Drag to Swap Partners');
   add('只能互换同队同性别球员', '只能互换同队同性别球员', 'Only same-team players of the same gender can be swapped');
   add('搭档已互换', '搭档已互换', 'Partners swapped');
+  add('活动档案已锁定', '活动档案已锁定', 'Event Archive Locked');
+  add('名单、搭档、轮次与赛果已永久保留。', '名单、搭档、轮次与赛果已永久保留。', 'The roster, pairs, rounds, and results are permanently preserved.');
+  add('查看到场记录', '查看到场记录', 'View Attendance');
+  add('归档活动并记录到场', '归档活动并记录到场', 'Archive Event and Record Attendance');
+  add('活动当天开放归档', '活动当天开放归档', 'Archive Available on Event Day');
+  add('活动当天才可以归档', '活动当天才可以归档', 'The event can be archived on event day');
+  add('活动已归档', '活动已归档', 'Event Archived');
+  add('已归档', '已归档', 'Archived');
+  add('活动档案只读', '活动档案只读', 'Event Archive · Read Only');
+  add('活动已归档，数据只读', '活动已归档，数据只读', 'This event is archived and read only');
+  add('活动已经归档', '活动已经归档', 'This event is already archived');
+  add('当前参赛名单为空，无法归档', '当前参赛名单为空，无法归档', 'The event cannot be archived because the roster is empty');
+  add('正在归档活动', '正在归档活动', 'Archiving event');
+  add('归档失败', '归档失败', 'Archive Failed');
+  add('活动归档失败，请检查网络', '活动归档失败，请检查网络', 'Event archive failed. Check your connection.');
+  add('归档没有完成', '归档没有完成', 'Archive Not Completed');
+  add('活动归档没有完成', '活动归档没有完成', 'The event archive was not completed');
   add('男', '男', 'Male');
   add('女', '女', 'Female');
   add('还没有人接龙', '还没有人接龙', 'No signups yet');
@@ -403,6 +420,8 @@
   add('到场记录已删除', '到场记录已删除', 'attendance record deleted');
   add('全部到场记录已清空', '全部到场记录已清空', 'All attendance records cleared');
   add('到场记录已更新', '到场记录已更新', 'Attendance updated');
+  add('特别活动到场', '特别活动到场', 'Special Event Attendance');
+  add('活动归档后，参赛名单会保留在这里。', '活动归档后，参赛名单会保留在这里。', 'Archived special-event rosters will appear here.');
   add('已切换为只记录到场次数', '已切换为只记录到场次数', 'Switched to attendance-only tracking');
   add('自动记录到场：', '自动记录到场：', 'Attendance recorded automatically:');
   add('只有管理员可以更新到场记录', '只有管理员可以更新到场记录', 'Only an admin can update attendance');
@@ -435,6 +454,11 @@
     let next = text;
     if (language === 'en') {
       next = next
+        .replace(/^本活动已于\s*(.+)\s*归档，(\d+)\s*位参赛选手已记录到场。$/, 'Archived on $1. Attendance was recorded for $2 players.')
+        .replace(/^活动归档完成，(\d+)\s*位参赛选手已记录到场$/, 'Event archived. Attendance was recorded for $1 players.')
+        .replace(/^特别活动\s*·\s*(.+)：(\d+)\s*人到场$/, 'Special Event · $1: $2 attendees')
+        .replace(/^归档后名单、组合和比分将锁定，并把当前\s*(\d+)\s*位参赛选手各记录到场一次。当前还有\s*(\d+)\s*场没有录入比分，也会按现状保存。确定继续吗？$/, 'Archive and lock the roster, pairs, and scores, then record one attendance for each of the $1 players? $2 matches are still missing scores and will be preserved as-is.')
+        .replace(/^归档后名单、组合和比分将锁定，并把当前\s*(\d+)\s*位参赛选手各记录到场一次。确定继续吗？$/, 'Archive and lock the roster, pairs, and scores, then record one attendance for each of the $1 players?')
         .replace(/^男\s*(\d+\s*\/\s*\d+)$/, 'Men $1')
         .replace(/^女\s*(\d+\s*\/\s*\d+)$/, 'Women $1')
         .replace(/^确定移除固定搭档\s+(.+)\s+吗？两个人会一起退出。$/, 'Remove fixed partners $1? Both players will leave.')
