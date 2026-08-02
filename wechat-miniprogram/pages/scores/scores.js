@@ -81,7 +81,7 @@ Page({
     player.manualWins = Number(player.manualWins || 0);
     player.courtWins = Number(player.courtWins || 0);
     player.wins = player.manualWins + player.courtWins;
-    player.points = Number(player.appearances || 0) * 50 + player.wins * 10;
+    player.points = player.wins * 10;
   },
 
   saveScores(scores) {

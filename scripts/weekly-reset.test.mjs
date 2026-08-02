@@ -1,6 +1,6 @@
 import assert from 'node:assert/strict';
 import test from 'node:test';
-import { buildReset, latestEligibleResetId, normalizeName } from './weekly-reset.mjs';
+import { buildReset, latestEligibleResetId, normalizeName, scoreKeyForName } from './weekly-reset.mjs';
 
 test('finds the latest Saturday 20:00 cutoff in Toronto', () => {
   assert.equal(latestEligibleResetId(new Date('2026-08-02T00:01:00Z')), '2026-08-01');
@@ -10,6 +10,7 @@ test('finds the latest Saturday 20:00 cutoff in Toronto', () => {
 
 test('normalizes names before counting', () => {
   assert.equal(normalizeName('  Irene   WANG '), 'irene wang');
+  assert.equal(scoreKeyForName(' Rachel.Test '), 'rachel_test');
 });
 
 test('archives both lists, counts joined players once, and clears the signup form', () => {
@@ -27,7 +28,12 @@ test('archives both lists, counts joined players once, and clears the signup for
         waitlist: [{ id: 4, name: 'Alvin', levelGroup: '20_25', ts: 400 }]
       }
     },
-    scores: { players: { existing: { points: 50 } } }
+    scores: {
+      players: {
+        irene: { key: 'irene', name: 'Irene', appearances: 3, wins: 2, points: 70 }
+      },
+      events: []
+    }
   };
 
   const result = buildReset(input, '2026-08-01', new Date('2026-08-02T00:05:00Z'));
@@ -39,7 +45,12 @@ test('archives both lists, counts joined players once, and clears the signup for
   assert.equal(result.summary.uniqueSignupsCounted, 2);
   assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'irene').signupCount, 1);
   assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'alvin').waitlistCount, 1);
-  assert.equal(result.data.scores.players.existing.points, 50);
+  assert.equal(result.data.scores.players.irene.appearances, 4);
+  assert.equal(result.data.scores.players.irene.points, 20);
+  assert.equal(result.data.scores.players.gill.appearances, 1);
+  assert.equal(result.data.scores.players.gill.points, 0);
+  assert.equal(result.data.scores.attendanceWeeks['2026-08-01'].count, 2);
+  assert.equal(result.data.scores.events[0].type, 'weeklyAttendance');
 });
 
 test('does not archive or count the same week twice', () => {
@@ -47,4 +58,28 @@ test('does not archive or count the same week twice', () => {
   const second = buildReset(first.data, '2026-08-01');
   assert.equal(second.changed, false);
   assert.equal(Object.values(second.data.signupStats)[0].signupCount, 1);
+});
+
+test('backfills attendance from an existing archive exactly once', () => {
+  const input = {
+    main: { state: { joined: [], waitlist: [] } },
+    signupHistory: {
+      '2026-08-01': {
+        resetId: '2026-08-01',
+        joined: [{ name: 'Gill' }, { name: ' gill ' }, { name: 'Irene' }]
+      }
+    },
+    weeklyReset: { lastResetId: '2026-08-01' },
+    scores: { players: {}, events: [] }
+  };
+
+  const first = buildReset(input, '2026-08-01', new Date('2026-08-03T00:00:00Z'));
+  assert.equal(first.changed, true);
+  assert.equal(first.summary.reason, 'attendance-backfilled');
+  assert.equal(first.summary.attendanceRecorded, 2);
+  assert.equal(first.data.scores.players.gill.appearances, 1);
+
+  const second = buildReset(first.data, '2026-08-01', new Date('2026-08-03T01:00:00Z'));
+  assert.equal(second.changed, false);
+  assert.equal(second.data.scores.players.gill.appearances, 1);
 });

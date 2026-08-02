@@ -3,7 +3,7 @@
     <view class="row-between">
       <view>
         <view class="hero-title">🏆 积分榜</view>
-        <view class="hero-subtitle">参赛 +50 · 每赢 1 game +10</view>
+        <view class="hero-subtitle">参赛记录次数 · 每赢 1 game +10</view>
       </view>
       <button class="btn secondary" size="mini" bindtap="toggleAdmin">{{isAdmin ? 'Admin 已登录' : 'Admin'}}</button>
     </view>
@@ -11,13 +11,13 @@
 
   <view wx:if="{{isAdmin}}" class="card">
     <view class="section-title" style="margin-top:0">管理员更新</view>
-    <button class="btn" style="width:100%" bindtap="importCurrentJoined">本场报名名单全部参赛 +50</button>
+    <button class="btn" style="width:100%" bindtap="importCurrentJoined">记录本场报名名单参赛次数</button>
     <view class="row" style="margin-top:16rpx">
       <input class="input" style="flex:1" placeholder="姓名" value="{{nameInput}}" bindinput="onNameInput" />
       <input class="input" style="width:150rpx" type="number" value="{{winsInput}}" bindinput="onWinsInput" />
     </view>
     <view class="row" style="margin-top:16rpx">
-      <button class="btn secondary" bindtap="addParticipation">单人参赛 +50</button>
+      <button class="btn secondary" bindtap="addParticipation">单人记录参赛一次</button>
       <button class="btn secondary" bindtap="addWins">手动加赢局</button>
     </view>
     <view class="row" style="margin-top:16rpx">

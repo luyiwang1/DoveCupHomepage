@@ -37,6 +37,10 @@ function playerKey(name) {
   return `p_${createHash('sha256').update(normalizeName(name)).digest('hex').slice(0, 24)}`;
 }
 
+export function scoreKeyForName(name) {
+  return String(name || '').trim().toLocaleLowerCase('en-CA').replace(/[.#$/[\]]/g, '_');
+}
+
 function cleanPerson(person) {
   return {
     id: person.id ?? null,
@@ -86,13 +90,83 @@ function updatePlayerStat(stats, person, kind, resetId, archivedAt) {
   return key;
 }
 
+function recordAttendance(system, people, resetId, recordedAt) {
+  const scores = system.scores && typeof system.scores === 'object' ? system.scores : {};
+  const players = scores.players && typeof scores.players === 'object' ? scores.players : {};
+  const events = Array.isArray(scores.events) ? scores.events : [];
+  const attendanceWeeks = scores.attendanceWeeks && typeof scores.attendanceWeeks === 'object'
+    ? scores.attendanceWeeks
+    : {};
+
+  if (attendanceWeeks[resetId]) {
+    return { changed: false, count: Number(attendanceWeeks[resetId].count) || 0 };
+  }
+
+  const names = [];
+  const seen = new Set();
+  (Array.isArray(people) ? people : []).forEach(person => {
+    const name = String(person?.name || '').trim();
+    const key = scoreKeyForName(name);
+    if (!key || seen.has(key)) return;
+    seen.add(key);
+    names.push(name);
+
+    const existing = players[key] || {
+      key,
+      name,
+      appearances: 0,
+      manualWins: 0,
+      courtWins: 0,
+      wins: 0,
+      points: 0
+    };
+    existing.key = key;
+    existing.name = name;
+    existing.appearances = (Number(existing.appearances) || 0) + 1;
+    existing.wins = Number(existing.wins) || 0;
+    existing.points = existing.wins * 10;
+    existing.lastPlayedAt = recordedAt;
+    existing.lastAttendanceWeek = resetId;
+    existing.updatedAt = recordedAt;
+    players[key] = existing;
+  });
+
+  attendanceWeeks[resetId] = {
+    resetId,
+    count: names.length,
+    names,
+    recordedAt,
+    source: 'weekly-signup-archive'
+  };
+  events.unshift({ type: 'weeklyAttendance', resetId, names, count: names.length, ts: recordedAt });
+  system.scores = {
+    ...scores,
+    players,
+    events: events.slice(0, 20),
+    attendanceWeeks,
+    updatedAt: recordedAt
+  };
+  return { changed: true, count: names.length };
+}
+
 export function buildReset(input, resetId, now = new Date()) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(resetId)) throw new Error(`Invalid reset id: ${resetId}`);
 
   const system = JSON.parse(JSON.stringify(input || {}));
   const history = system.signupHistory && typeof system.signupHistory === 'object' ? system.signupHistory : {};
   if (history[resetId] || system.weeklyReset?.lastResetId === resetId) {
-    return { changed: false, data: system, summary: { resetId, reason: 'already-archived' } };
+    const attendance = history[resetId]
+      ? recordAttendance(system, history[resetId].joined, resetId, now.getTime())
+      : { changed: false, count: 0 };
+    return {
+      changed: attendance.changed,
+      data: system,
+      summary: {
+        resetId,
+        reason: attendance.changed ? 'attendance-backfilled' : 'already-archived',
+        attendanceRecorded: attendance.count
+      }
+    };
   }
 
   const main = system.main && typeof system.main === 'object' ? system.main : {};
@@ -129,6 +203,7 @@ export function buildReset(input, resetId, now = new Date()) {
     joined: joined.map(cleanPerson),
     waitlist: waitlist.map(cleanPerson)
   };
+  const attendance = recordAttendance(system, joined, resetId, archivedAt);
 
   system.main = {
     ...main,
@@ -158,6 +233,7 @@ export function buildReset(input, resetId, now = new Date()) {
       joinedArchived: joined.length,
       waitlistArchived: waitlist.length,
       uniqueSignupsCounted: joinedKeys.size,
+      attendanceRecorded: attendance.count,
       trackedPlayers: Object.keys(stats).length
     }
   };
@@ -171,8 +247,10 @@ async function fetchSnapshot(databaseUrl) {
 
 async function run() {
   const databaseUrl = process.env.FIREBASE_DATABASE_URL || DEFAULT_DATABASE_URL;
-  const resetId = process.env.RESET_ID || latestEligibleResetId();
-  const dryRun = String(process.env.DRY_RUN || '').toLowerCase() === 'true';
+  const resetIdArgIndex = process.argv.indexOf('--reset-id');
+  const resetIdArg = resetIdArgIndex >= 0 ? process.argv[resetIdArgIndex + 1] : '';
+  const resetId = process.env.RESET_ID || resetIdArg || latestEligibleResetId();
+  const dryRun = String(process.env.DRY_RUN || '').toLowerCase() === 'true' || process.argv.includes('--dry-run');
 
   for (let attempt = 1; attempt <= MAX_ATTEMPTS; attempt += 1) {
     const snapshot = await fetchSnapshot(databaseUrl);

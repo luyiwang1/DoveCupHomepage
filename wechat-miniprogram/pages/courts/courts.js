@@ -341,7 +341,7 @@ Page({
         existing.manualWins = manualWins;
         existing.courtWins = Number(wins[p.key] || 0);
         existing.wins = existing.manualWins + existing.courtWins;
-        existing.points = Number(existing.appearances || 0) * 50 + existing.wins * 10;
+        existing.points = existing.wins * 10;
         scores.players[key] = existing;
       });
       scores.events.unshift({ type: 'courtScores', ts: Date.now() });

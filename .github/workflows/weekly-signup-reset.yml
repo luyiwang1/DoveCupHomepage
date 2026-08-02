@@ -4,6 +4,9 @@ on:
   schedule:
     - cron: '0 20 * * 6'
       timezone: 'America/Toronto'
+    # Redundant UTC checks cover both EDT (00:00 UTC) and EST (01:00 UTC).
+    # The reset script is timezone-aware and idempotent, so only the first due run writes.
+    - cron: '*/5 0-1 * * 0'
   workflow_dispatch:
     inputs:
       reset_id:
