@@ -49,8 +49,8 @@ a{color:inherit;text-decoration:none}
 .links{display:flex;align-items:center;gap:clamp(12px,2.5vw,28px);font-size:12px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}
 .ticket{padding:10px 14px;color:var(--green);background:var(--ivory);border-radius:999px}
 .hero{
-  position:relative;display:grid;min-height:94vh;
-  padding:110px clamp(18px,5vw,72px) 42px;
+  position:relative;display:grid;min-height:clamp(440px,56svh,560px);
+  padding:92px clamp(18px,5vw,72px) 34px;
   color:var(--ivory);isolation:isolate;
 }
 .hero:before{position:absolute;inset:0;z-index:-2;background:url("golden-dove-cup-hero.png") center/cover no-repeat;content:""}
@@ -60,7 +60,7 @@ a{color:inherit;text-decoration:none}
     linear-gradient(90deg,rgba(8,24,17,.9),rgba(8,24,17,.54) 46%,rgba(8,24,17,.08)),
     linear-gradient(180deg,rgba(8,24,17,.14),rgba(8,24,17,.88));
 }
-.hero-inner{align-self:end;max-width:920px}
+.hero-inner{align-self:start;max-width:920px}
 .eyebrow{
   display:inline-flex;align-items:center;gap:12px;margin-bottom:18px;
   color:#eccd82;font-size:12px;font-weight:900;letter-spacing:.2em;text-transform:uppercase;
@@ -71,6 +71,7 @@ h1{
   font-family:Georgia,"Times New Roman",serif;
   font-size:clamp(74px,14vw,170px);font-weight:500;line-height:.86;letter-spacing:0;
 }
+html[lang="en"] .hero h1{max-width:900px;font-size:clamp(64px,8vw,104px);line-height:.9}
 .hero-copy{
   max-width:690px;margin:24px 0 0;
   color:rgba(248,239,215,.88);font-size:clamp(17px,2vw,22px);line-height:1.85;
@@ -83,12 +84,12 @@ h1{
 }
 .button.primary{color:var(--green);background:var(--ivory);border-color:var(--ivory)}
 .ticker{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));color:var(--ivory);background:var(--green)}
-.ticker div{min-height:106px;padding:20px clamp(16px,3vw,32px);border-right:1px solid rgba(248,239,215,.14)}
+.ticker div{min-height:88px;padding:16px clamp(16px,3vw,32px);border-right:1px solid rgba(248,239,215,.14)}
 .ticker span{display:block;color:rgba(248,239,215,.62);font-size:11px;font-weight:900;letter-spacing:.16em;text-transform:uppercase}
 .ticker strong{display:block;margin-top:9px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(22px,2.8vw,34px);font-weight:500}
 section{padding:clamp(58px,8vw,108px) clamp(18px,5vw,72px)}
 .kicker{color:var(--clay);font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
-.events{color:var(--ink);background:#e8d7b4}.events-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}.events-head h2{max-width:760px;margin:12px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(42px,6vw,82px);font-weight:500;line-height:1}.all-events{padding-bottom:8px;color:var(--green);font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--green)}
+.events{padding-top:clamp(36px,4vw,54px);color:var(--ink);background:#e8d7b4}.events-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}.events-head h2{max-width:900px;margin:12px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(40px,5vw,66px);font-weight:500;line-height:1}.all-events{padding-bottom:8px;color:var(--green);font-size:12px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--green)}
 .event-feature{display:grid;grid-template-columns:220px minmax(0,1.1fr) minmax(280px,.72fr);margin-top:34px;border:1px solid var(--line);background:#fff8e7}.event-date{display:grid;align-content:space-between;min-height:330px;padding:28px;color:var(--ivory);background:#9c3f32}.event-date strong{font-family:Georgia,"Times New Roman",serif;font-size:76px;font-weight:500;line-height:.8}.event-date span{font-size:11px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}.event-main{padding:clamp(28px,4vw,48px)}.event-main .status{display:inline-flex;padding:6px 9px;color:#8c372d;background:#f3ddd5;font-size:11px;font-weight:900;letter-spacing:.08em}.event-main h3{margin:26px 0 12px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,5vw,68px);font-weight:500}.event-main p{max-width:650px;margin:0;color:rgba(23,36,30,.7);font-size:16px;line-height:1.8}.event-meta{display:grid;align-content:center;gap:1px;background:var(--line);border-left:1px solid var(--line)}.event-meta div{padding:18px 22px;background:#fffaf0}.event-meta span{display:block;color:var(--clay);font-size:10px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.event-meta strong{display:block;margin-top:6px;font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:500}.event-cta{display:inline-flex;justify-content:center;margin-top:8px;padding:15px 18px;color:var(--ivory);background:var(--green);font-size:12px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
 .intro{display:grid;grid-template-columns:minmax(0,1fr) minmax(280px,.75fr);gap:clamp(28px,6vw,80px);align-items:end;background:var(--paper)}
 .intro h2,.format h2,.join h2{margin:12px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(40px,6vw,86px);font-weight:500;line-height:1}
@@ -116,10 +117,18 @@ details p{margin:10px 0 0;color:rgba(23,36,30,.7);line-height:1.75}
 footer{display:flex;justify-content:space-between;gap:14px;padding:30px clamp(18px,5vw,72px);color:var(--ivory);background:#10271e;font-size:13px}
 @media(max-width:860px){
   .nav{position:absolute}.links a:not(.ticket){display:none}
-  .hero{min-height:88vh}.hero h1{font-size:clamp(66px,24vw,106px)}
+  .hero{min-height:auto;padding:88px 18px 32px}.hero h1{font-size:clamp(66px,24vw,106px)}
+  .hero-copy{margin-top:18px;font-size:16px;line-height:1.65}.actions{margin-top:22px}
+  html[lang="en"] .hero h1{font-size:52px}
+  html[lang="en"] .hero-copy{margin-top:14px;font-size:14px;line-height:1.5}
+  html[lang="en"] .hero .actions{gap:8px;margin-top:18px}
+  html[lang="en"] .hero .button{min-height:42px;padding:10px 11px;font-size:10px}
   .ticker,.event-feature,.intro,.format-grid,.join,.faq-grid{grid-template-columns:1fr}
   .ticker div{min-height:auto;border-right:0;border-bottom:1px solid rgba(248,239,215,.14)}
-  .events-head{align-items:flex-start;flex-direction:column}.event-date{min-height:190px}.event-meta{border-left:0;border-top:1px solid var(--line)}
+  .events{padding-top:36px}.events-head{align-items:flex-start;flex-direction:column}.event-date{min-height:190px}.event-meta{border-left:0;border-top:1px solid var(--line)}
+  html[lang="en"] .events-head{gap:14px}
+  html[lang="en"] .events-head h2{font-size:34px;line-height:1.04}
+  html[lang="en"] .event-feature{margin-top:24px}
   footer{flex-direction:column}
 }
 </style>
@@ -149,13 +158,6 @@ footer{display:flex;justify-content:space-between;gap:14px;padding:30px clamp(18
   </div>
 </header>
 
-<div class="ticker">
-  <div><span>City</span><strong>Toronto</strong></div>
-  <div><span>Level</span><strong>新手场（2.0-） · 2.0-2.5 · 2.5-3.0 · 3.0+</strong></div>
-  <div><span>Format</span><strong>三轮升降级</strong></div>
-  <div><span>Tools</span><strong>活动 · 报名 · 场地 · 到场</strong></div>
-</div>
-
 <section id="events" class="events">
   <div class="events-head">
     <div><span class="kicker">Special Events</span><h2>巡回赛之外，偶尔来一场特别的。</h2></div>
@@ -163,6 +165,13 @@ footer{display:flex;justify-content:space-between;gap:14px;padding:30px clamp(18
   </div>
   <div id="featuredEvent"></div>
 </section>
+
+<div class="ticker">
+  <div><span>City</span><strong>Toronto</strong></div>
+  <div><span>Level</span><strong>新手场（2.0-） · 2.0-2.5 · 2.5-3.0 · 3.0+</strong></div>
+  <div><span>Format</span><strong>三轮升降级</strong></div>
+  <div><span>Tools</span><strong>活动 · 报名 · 场地 · 到场</strong></div>
+</div>
 
 <section id="about" class="intro">
   <div>
