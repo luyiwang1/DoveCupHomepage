@@ -99,6 +99,8 @@
   add('活动 · 报名 · 场地 · 到场', '活动 · 报名 · 场地 · 到场', 'Events · Registration · Courts · Attendance');
   add('三轮升降级', '三轮升降级', 'Three-round promotion and relegation');
   add('进入报名页', '进入报名页', 'Registration');
+  add('进入金鸽巡回赛报名', '进入金鸽巡回赛报名', 'Golden Dove Tour Registration');
+  add('了解最新活动', '了解最新活动', 'Explore Latest Events');
   add('最新活动', '最新活动', 'Latest Event');
   add('赛事入口', '赛事入口', 'Tournament Tools');
   add('报名 / Waitlist', '报名 / 候补名单', 'Registration / Waitlist');
@@ -116,7 +118,7 @@
   add('主页负责心动，工具页负责办赛。', '主页负责心动，工具页负责办赛。', 'The homepage sets the mood. The tools run the tournament.');
   add('你可以把这个页面发给新朋友看活动质感；真正要报名、排场地、看出勤时，再进入对应工具页。这样宣传和管理分开，观感就不会互相打架。', '你可以把这个页面发给新朋友看活动质感；真正要报名、排场地、看出勤时，再进入对应工具页。这样宣传和管理分开，观感就不会互相打架。', 'Share this page to introduce the event. When it is time to register, assign courts, or check attendance, use the dedicated tools so promotion and administration stay cleanly separated.');
   add('不需要。活动设有新手场（2.0-）、2.0-2.5、2.5-3.0、3.0+ 四个分级，每个分级最多 8 人，核心是有质量地打球和认识新朋友。', '不需要。活动设有新手场（2.0-）、2.0-2.5、2.5-3.0、3.0+ 四个分级，每个分级最多 8 人，核心是有质量地打球和认识新朋友。', 'No. There are four divisions: beginner (under 2.0), 2.0-2.5, 2.5-3.0, and 3.0+, with up to eight players in each. The goal is quality tennis and meeting good people.');
-  add('点击“进入报名页”会打开独立的报名接龙系统，那里可以报名、进入 waitlist，也能由管理员确认付款。', '点击“进入报名页”会打开独立的报名接龙系统，那里可以报名、进入候补名单，也能由管理员确认付款。', 'Select “Registration” to open the separate signup system, where players can register, join the waitlist, and have payment confirmed by an admin.');
+  add('点击“进入金鸽巡回赛报名”会打开独立的报名接龙系统，那里可以报名、进入 waitlist，也能由管理员确认付款。', '点击“进入金鸽巡回赛报名”会打开独立的报名接龙系统，那里可以报名、进入候补名单，也能由管理员确认付款。', 'Select “Golden Dove Tour Registration” to open the separate signup system, where players can register, join the waitlist, and have payment confirmed by an admin.');
   add('场地页面和到场记录是单独工具页，比赛当天使用，不会干扰这个宣传主页的观感。', '场地页面和到场记录是单独工具页，比赛当天使用，不会干扰这个宣传主页的观感。', 'Court assignments and attendance are separate tools used on match day, keeping this promotional homepage focused.');
   add('可以。当前部署在 GitHub Pages，后续可以绑定自定义域名，也可以继续替换日期、地点、价格和社媒链接。', '可以。当前部署在 GitHub Pages，后续可以绑定自定义域名，也可以继续替换日期、地点、价格和社媒链接。', 'Yes. The site is currently on GitHub Pages and can later use a custom domain, with dates, venues, prices, and social links updated anytime.');
   add('需要很强才能参加吗？', '需要很强才能参加吗？', 'Do I need to be an advanced player?');
