@@ -50,6 +50,9 @@
   add('Event Archive', '活动档案', 'Event Archive');
   add('Upcoming & Past', '即将举行与往期活动', 'Upcoming & Past');
   add('Special Events', '特别活动', 'Special Events');
+  add('Resident Events', '常驻活动', 'Resident Events');
+  add('Special Event Series', '特殊活动', 'Special Events');
+  add('Schedule', '时间', 'Schedule');
   add('The invitation', '邀请', 'The Invitation');
   add('Cup format', '杯赛赛制', 'Cup Format');
   add('Sign Up', '报名', 'Sign Up');
@@ -69,6 +72,26 @@
   add('AUG', '8月', 'AUG');
 
   // Promotional homepage and activities archive.
+  add('金鸽杯活动', '金鸽杯活动', 'Golden Dove Cup Events');
+  add('活动中心', '活动中心', 'Events Hub');
+  add('常驻活动', '常驻活动', 'Recurring Events');
+  add('特殊活动', '特殊活动', 'Special Events');
+  add('场常驻活动', '场常驻活动', 'Recurring Event(s)');
+  add('场特殊活动', '场特殊活动', 'Special Event(s)');
+  add('金鸽巡回赛', '金鸽巡回赛', 'Golden Dove Tour');
+  add('常驻活动 · 金鸽巡回赛', '常驻活动 · 金鸽巡回赛', 'Recurring Event · Golden Dove Tour');
+  add('金鸽巡回赛 · 报名接龙', '金鸽巡回赛 · 报名接龙', 'Golden Dove Tour · Registration');
+  add('金鸽巡回赛 · 三轮升降级赛程', '金鸽巡回赛 · 三轮升降级赛程', 'Golden Dove Tour · Court Rotations');
+  add('金鸽巡回赛 · 到场记录', '金鸽巡回赛 · 到场记录', 'Golden Dove Tour · Attendance');
+  add('每周持续开放的巡回赛，以及不定期举行的团体赛与主题赛，都集中在这里。', '每周持续开放的巡回赛，以及不定期举行的团体赛与主题赛，都集中在这里。', 'The ongoing weekly tour and occasional team or themed events all live here.');
+  add('每周开放的分级升降场巡回赛。四个分级各自进行三轮对局，报名、场地安排和长期到场记录都集中在这里。', '每周开放的分级升降场巡回赛。四个分级各自进行三轮对局，报名、场地安排和长期到场记录都集中在这里。', 'A weekly promotion-and-relegation tour across four divisions. Registration, court assignments, and long-term attendance all live here.');
+  add('每周六 · 长期开放', '每周六 · 长期开放', 'Every Saturday · Ongoing');
+  add('4 个分级 · 三轮升降级', '4 个分级 · 三轮升降级', '4 Divisions · 3 Promotion/Relegation Rounds');
+  add('加入本周名单和候补名单', '加入本周名单和候补名单', 'Join this week\'s roster or waitlist');
+  add('查看三轮场地与比分', '查看三轮场地与比分', 'View three-round courts and scores');
+  add('查看累计到场次数', '查看累计到场次数', 'View cumulative attendance');
+  add('新的常驻活动正在准备中。', '新的常驻活动正在准备中。', 'A new recurring event is being prepared.');
+  add('新的特殊活动正在准备中。', '新的特殊活动正在准备中。', 'A new special event is being prepared.');
   add('金鸽杯 Golden Dove Cup', '金鸽杯', 'Golden Dove Cup');
   add('金鸽杯 Golden Dove Cup 是一场复古俱乐部气质的网球社交杯赛。', '金鸽杯是一场具有复古俱乐部气质的网球社交杯赛。', 'Golden Dove Cup is a vintage club-style social tennis tournament.');
   add('一场更有仪式感的周末网球杯赛。复古俱乐部氛围、轻竞技轮转、赛后社交和长期到场记录，给多伦多的网球周末一个漂亮入口。', '一场更有仪式感的周末网球杯赛。复古俱乐部氛围、轻竞技轮转、赛后社交和长期到场记录，给多伦多的网球周末一个漂亮入口。', 'A weekend tennis cup with a sense of occasion: vintage club atmosphere, friendly competition, post-match social time, and long-term attendance records for Toronto players.');

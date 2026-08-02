@@ -35,6 +35,13 @@ test('uses complete labels instead of partial mixed translations', () => {
   assert.equal(localizeText('FULL SET WITH AD', 'zh'), '完整一盘 · 占先计分');
 });
 
+test('translates the recurring Golden Dove Tour activity hub', () => {
+  assert.equal(localizeText('金鸽巡回赛', 'en'), 'Golden Dove Tour');
+  assert.equal(localizeText('常驻活动 · 金鸽巡回赛', 'en'), 'Recurring Event · Golden Dove Tour');
+  assert.equal(localizeText('加入本周名单和候补名单', 'en'), "Join this week's roster or waitlist");
+  assert.equal(localizeText('场特殊活动', 'en'), 'Special Event(s)');
+});
+
 test('translates signup capacity without changing names that contain gender characters', () => {
   assert.equal(localizeText('男 3/4', 'en'), 'Men 3/4');
   assert.equal(localizeText('女 2/4', 'en'), 'Women 2/4');

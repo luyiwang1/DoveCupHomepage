@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
-<script src="language.js?v=1"></script>
-<title>金鸽杯报名接龙</title>
+<script src="language.js?v=7"></script>
+<title>金鸽巡回赛 · 报名接龙</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
 <style>
 :root {
@@ -726,12 +726,12 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 <!-- Header -->
 <div class="app-header">
   <div class="header-top">
-    <div class="event-title" id="eventTitle">金鸽杯报名接龙</div>
+    <div class="event-title" id="eventTitle">金鸽巡回赛 · 报名接龙</div>
     <button class="edit-title-btn admin-only" onclick="editTitle()">✏️ 改名</button>
     <button class="admin-btn" onclick="goPage('index.html')">首页</button>
     <button class="admin-btn" onclick="goPage('courts.html')">场地</button>
     <button class="admin-btn" onclick="goPage('scores.html')">到场</button>
-    <button class="admin-btn" onclick="goPage('events.html')">活动</button>
+    <button class="admin-btn" onclick="goPage('events.html')">活动中心</button>
     <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">Admin</button>
   </div>
   <div class="stats-row">
@@ -953,10 +953,11 @@ function remotePayload() {
   };
 }
 function defaultState() {
-  return { title: '金鸽杯报名接龙', capacity: null, joined: [], waitlist: [] };
+  return { title: '金鸽巡回赛 · 报名接龙', capacity: null, joined: [], waitlist: [] };
 }
 function normalizeState(input) {
   const next = Object.assign(defaultState(), input || {});
+  if (next.title === '金鸽杯报名接龙' || next.title === '🎉 活动接龙') next.title = '金鸽巡回赛 · 报名接龙';
   next.joined = Array.isArray(next.joined) ? next.joined : [];
   next.waitlist = Array.isArray(next.waitlist) ? next.waitlist : [];
   return enforceLevelCapacityForState(next);
