@@ -306,7 +306,7 @@
   add('名额占用', '名额占用', 'Capacity Used');
   add('总名额上限', '总名额上限', 'Total Capacity');
   add('设置', '设置', 'Set');
-  add('报名表每周六 20:00（多伦多时间）归档并更新为空。', '报名表每周六 20:00（多伦多时间）归档并更新为空。', 'The registration form archives and resets every Saturday at 8:00 PM Toronto time.');
+  add('报名表每周六 19:00（多伦多时间）归档并更新为空。', '报名表每周六 19:00（多伦多时间）归档并更新为空。', 'The registration form archives and resets every Saturday at 7:00 PM Toronto time.');
   add('报名列表', '报名列表', 'Registration List');
   add('📊 报名概况', '📊 报名概况', '📊 Registration Summary');
   add('报名概况', '报名概况', 'Registration Summary');
@@ -417,7 +417,7 @@
   // Attendance page.
   add('Dove Cup 到场记录', '金鸽杯到场记录', 'Dove Cup Attendance');
   add('到场记录', '到场记录', 'Attendance');
-  add('这里只记录每个人实际到场的次数。每周六晚 8 点归档后自动更新，不再记录胜局和积分。', '这里只记录每个人实际到场的次数。每周六晚 8 点归档后自动更新，不再记录胜局和积分。', 'This page records actual attendance only. It updates after the Saturday 8:00 PM archive and does not track wins or points.');
+  add('这里只记录每个人实际到场的次数。每周六晚 7 点归档后自动更新，不再记录胜局和积分。', '这里只记录每个人实际到场的次数。每周六晚 7 点归档后自动更新，不再记录胜局和积分。', 'This page records actual attendance only. It updates after the Saturday 7:00 PM archive and does not track wins or points.');
   add('到场人员', '到场人员', 'Players Attended');
   add('累计到场', '累计到场', 'Total Attendances');
   add('最多到场', '最多到场', 'Most Attendances');

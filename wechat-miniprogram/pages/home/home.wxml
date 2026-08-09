@@ -18,7 +18,7 @@
       <button class="btn" bindtap="addJoined">报名</button>
     </view>
     <button class="btn secondary" style="margin-top:16rpx;width:100%" bindtap="addWaitlist">加入 Waitlist</button>
-    <view class="weekly-reset-note">每周六 20:00（多伦多时间）归档并更新报名表。</view>
+    <view class="weekly-reset-note">每周六 19:00（多伦多时间）归档并更新报名表。</view>
   </view>
 
   <view wx:if="{{isAdmin}}" class="card">

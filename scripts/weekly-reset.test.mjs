@@ -2,10 +2,11 @@ import assert from 'node:assert/strict';
 import test from 'node:test';
 import { buildAttendanceOnlyMigration, buildReset, latestEligibleResetId, normalizeName, scoreKeyForName } from './weekly-reset.mjs';
 
-test('finds the latest Saturday 20:00 cutoff in Toronto', () => {
-  assert.equal(latestEligibleResetId(new Date('2026-08-02T00:01:00Z')), '2026-08-01');
-  assert.equal(latestEligibleResetId(new Date('2026-08-01T23:59:00Z')), '2026-07-25');
-  assert.equal(latestEligibleResetId(new Date('2026-12-06T01:05:00Z')), '2026-12-05');
+test('finds the latest Saturday 19:00 cutoff in Toronto across DST', () => {
+  assert.equal(latestEligibleResetId(new Date('2026-08-01T22:59:00Z')), '2026-07-25');
+  assert.equal(latestEligibleResetId(new Date('2026-08-01T23:00:00Z')), '2026-08-01');
+  assert.equal(latestEligibleResetId(new Date('2026-12-05T23:59:00Z')), '2026-11-28');
+  assert.equal(latestEligibleResetId(new Date('2026-12-06T00:00:00Z')), '2026-12-05');
 });
 
 test('normalizes names before counting', () => {
@@ -42,6 +43,8 @@ test('archives both lists, counts joined players once, and clears the signup for
   assert.deepEqual(result.data.main.state.waitlist, []);
   assert.equal(result.data.signupHistory['2026-08-01'].joinedCount, 3);
   assert.equal(result.data.signupHistory['2026-08-01'].waitlistCount, 1);
+  assert.equal(result.data.signupHistory['2026-08-01'].scheduledFor, '2026-08-01T19:00:00[America/Toronto]');
+  assert.equal(result.data.weeklyReset.archiveHour, 19);
   assert.equal(result.summary.uniqueSignupsCounted, 2);
   assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'irene').signupCount, 1);
   assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'alvin').waitlistCount, 1);
