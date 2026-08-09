@@ -42,19 +42,23 @@ function eventSystem() {
 }
 
 test('archives a complete team event and records each attendee once', () => {
-  const archivedAt = Date.parse('2026-08-08T23:00:00Z');
+  const archivedAt = Date.parse('2026-08-09T18:00:00Z');
   const result = archive.buildArchive(eventSystem(), '2026-08-08-mixed-team', archivedAt);
 
   assert.equal(result.changed, true);
   assert.equal(result.summary.attendanceRecorded, 2);
   assert.equal(result.data.teamEvents['2026-08-08-mixed-team'].status, 'archived');
   assert.equal(result.data.scores.players.alice.appearances, 3);
+  assert.equal(result.data.scores.players.alice.lastPlayedAt, Date.parse('2026-08-08T12:00:00Z'));
   assert.equal(result.data.scores.players.bob.appearances, 1);
   assert.equal(result.data.scores.attendanceWeeks['2026-08-08'].count, 1);
   assert.equal(result.data.scores.attendanceEvents['2026-08-08-mixed-team'].count, 2);
+  assert.equal(result.data.scores.attendanceEvents['2026-08-08-mixed-team'].recordedAt, Date.parse('2026-08-08T12:00:00Z'));
+  assert.equal(result.data.teamEvents['2026-08-08-mixed-team'].attendanceRecordedAt, Date.parse('2026-08-08T12:00:00Z'));
   assert.equal(result.data.scores.events[0].type, 'specialEventAttendance');
 
   const snapshot = result.data.eventArchives['2026-08-08-mixed-team'];
+  assert.equal(snapshot.archivedAt, archivedAt);
   assert.equal(snapshot.registrations.length, 2);
   assert.equal(snapshot.teams.phoenix.pairs[0].player2, 'Alice');
   assert.equal(snapshot.rounds[0].matches[0].phoenixGames, 6);

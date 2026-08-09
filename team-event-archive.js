@@ -15,6 +15,14 @@
     return cleanName(name).toLocaleLowerCase('en-CA').replace(/[.#$/[\]]/g, '_');
   }
 
+  function attendanceTimestampForDate(date, fallback) {
+    const value = String(date || '').trim();
+    const timestamp = /^\d{4}-\d{2}-\d{2}$/.test(value)
+      ? Date.parse(`${value}T12:00:00Z`)
+      : NaN;
+    return Number.isFinite(timestamp) ? timestamp : fallback;
+  }
+
   function uniqueAttendees(registrations) {
     const source = Array.isArray(registrations) ? registrations : Object.values(registrations || {});
     const seen = new Set();
@@ -136,11 +144,15 @@
       changed = true;
     }
 
+    const attendanceRecordedAt = attendanceTimestampForDate(
+      snapshot.date,
+      snapshot.archivedAt || archivedAt
+    );
     const attendance = updateAttendance(
       system.scores && typeof system.scores === 'object' ? system.scores : {},
       eventId,
       snapshot,
-      snapshot.archivedAt || archivedAt
+      attendanceRecordedAt
     );
     if (attendance.changed) {
       system.scores = attendance.scores;
@@ -151,14 +163,15 @@
     const needsEventLock = event.status !== 'archived'
       || Number(event.archivedAt) !== canonicalArchivedAt
       || event.archiveId !== eventId
-      || Number(event.attendanceCount) !== snapshot.attendeeCount;
+      || Number(event.attendanceCount) !== snapshot.attendeeCount
+      || Number(event.attendanceRecordedAt) !== attendanceRecordedAt;
     if (needsEventLock) {
       teamEvents[eventId] = {
         ...event,
         status: 'archived',
         archivedAt: canonicalArchivedAt,
         archiveId: eventId,
-        attendanceRecordedAt: canonicalArchivedAt,
+        attendanceRecordedAt,
         attendanceCount: snapshot.attendeeCount,
         attendanceNames: snapshot.attendeeNames,
         finalResult: snapshot.finalResult
