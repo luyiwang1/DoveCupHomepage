@@ -51,5 +51,10 @@ window.DoveEventStatus = {
     if (today > eventDate) return '已结束';
     if (today === eventDate) return '进行中';
     return '即将开始';
+  },
+  classFor(status) {
+    if (status === '进行中') return 'status-live';
+    if (status === '已结束') return 'status-ended';
+    return 'status-upcoming';
   }
 };
