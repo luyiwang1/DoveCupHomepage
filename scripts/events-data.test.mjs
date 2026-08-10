@@ -10,6 +10,14 @@ vm.runInNewContext(source, context);
 const event = context.window.DOVE_EVENTS[0];
 const status = context.window.DoveEventStatus;
 
+test('stores the archived team-event result shown in the past-event card', () => {
+  assert.equal(event.attendeeCount, 16);
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(event.result)),
+    { winner: '狮鹫', winnerPoints: 8, loserPoints: 4, winnerGames: 54, loserGames: 37 }
+  );
+});
+
 test('updates a special-event status using the Toronto calendar date', () => {
   assert.equal(status.forEvent(event, Date.parse('2026-08-08T03:59:59Z')), '即将开始');
   assert.equal(status.forEvent(event, Date.parse('2026-08-08T04:00:00Z')), '进行中');

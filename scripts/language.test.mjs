@@ -44,6 +44,15 @@ test('translates automatic special-event statuses', () => {
   assert.equal(localizeText('已结束', 'en'), 'Ended');
 });
 
+test('translates the past-event summary and empty upcoming state', () => {
+  assert.equal(localizeText('新活动筹备中', 'en'), 'A New Event Is in the Works');
+  assert.equal(localizeText('往期活动', 'en'), 'Past Events');
+  assert.equal(localizeText('16 人参赛', 'en'), '16 Players');
+  assert.equal(localizeText('狮鹫 8:4 获胜', 'en'), 'Griffin Won 8-4');
+  assert.equal(localizeText('总局数 54:37', 'en'), 'Total Games 54-37');
+  assert.equal(localizeText('查看完整赛果', 'en'), 'View Full Results');
+});
+
 test('translates the recurring Golden Dove Tour activity hub', () => {
   assert.equal(localizeText('金鸽巡回赛', 'en'), 'Golden Dove Tour');
   assert.equal(localizeText('常驻活动 · 金鸽巡回赛', 'en'), 'Recurring Event · Golden Dove Tour');

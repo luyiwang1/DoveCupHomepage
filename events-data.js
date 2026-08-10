@@ -27,6 +27,14 @@ window.DOVE_EVENTS = [
     summary: '两支队伍、四片室内场地、固定混双搭档。每一场胜利都为团队带回 1 分。',
     venue: 'MRTC · Toronto',
     format: '4 Courts · Mixed Doubles · Team Score',
+    attendeeCount: 16,
+    result: {
+      winner: '狮鹫',
+      winnerPoints: 8,
+      loserPoints: 4,
+      winnerGames: 54,
+      loserGames: 37
+    },
     href: 'team-event.html'
   }
 ];
