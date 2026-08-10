@@ -20,7 +20,6 @@ window.DOVE_EVENTS = [
   {
     id: '2026-08-08-mixed-team',
     featured: true,
-    status: '即将开始',
     eyebrow: 'Team Special · Mixed Doubles',
     date: '2026-08-08',
     dateLabel: 'AUG 08 · SATURDAY',
@@ -31,3 +30,26 @@ window.DOVE_EVENTS = [
     href: 'team-event.html'
   }
 ];
+
+window.DoveEventStatus = {
+  torontoDateId(timestamp = Date.now()) {
+    const parts = new Intl.DateTimeFormat('en-CA', {
+      timeZone: 'America/Toronto',
+      year: 'numeric',
+      month: '2-digit',
+      day: '2-digit'
+    }).formatToParts(new Date(timestamp));
+    const values = Object.fromEntries(parts
+      .filter(part => part.type !== 'literal')
+      .map(part => [part.type, part.value]));
+    return `${values.year}-${values.month}-${values.day}`;
+  },
+  forEvent(event, timestamp = Date.now()) {
+    const eventDate = String(event && event.date || '');
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(eventDate)) return event && event.status || '即将开始';
+    const today = this.torontoDateId(timestamp);
+    if (today > eventDate) return '已结束';
+    if (today === eventDate) return '进行中';
+    return '即将开始';
+  }
+};

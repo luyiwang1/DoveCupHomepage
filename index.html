@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="language.css?v=1">
-<script src="language.js?v=9"></script>
+<script src="language.js?v=10"></script>
 <title>金鸽杯 Golden Dove Cup</title>
 <meta name="description" content="金鸽杯 Golden Dove Cup 是一场复古俱乐部气质的网球社交杯赛。">
 <style>
@@ -248,7 +248,7 @@ body *{letter-spacing:0!important}
   <span>Golden Dove Cup / 金鸽杯</span>
   <span>Vintage tennis social for the weekend court crowd.</span>
 </footer>
-<script src="events-data.js?v=1"></script>
+<script src="events-data.js?v=5"></script>
 <script>
 (function renderFeaturedEvent(){
   const event=(window.DOVE_EVENTS||[]).find(item=>item.featured)||(window.DOVE_EVENTS||[])[0];
@@ -258,7 +258,8 @@ body *{letter-spacing:0!important}
   const day=String(date.getDate()).padStart(2,'0');
   const month=date.toLocaleDateString('en-CA',{month:'short'}).toUpperCase();
   const clean=value=>String(value||'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-  target.innerHTML=`<article class="event-feature"><div class="event-date"><span>${clean(event.dateLabel)}</span><strong>${day}</strong><span>${month} · 2026</span></div><div class="event-main"><span class="status">${clean(event.status)}</span><h3>${clean(event.title)}</h3><p>${clean(event.summary)}</p></div><div class="event-meta"><div><span>Venue</span><strong>${clean(event.venue)}</strong></div><div><span>Format</span><strong>${clean(event.format)}</strong></div><div><a class="event-cta" href="${clean(event.href)}">进入活动页面</a></div></div></article>`;
+  const status=window.DoveEventStatus.forEvent(event);
+  target.innerHTML=`<article class="event-feature"><div class="event-date"><span>${clean(event.dateLabel)}</span><strong>${day}</strong><span>${month} · 2026</span></div><div class="event-main"><span class="status">${clean(status)}</span><h3>${clean(event.title)}</h3><p>${clean(event.summary)}</p></div><div class="event-meta"><div><span>Venue</span><strong>${clean(event.venue)}</strong></div><div><span>Format</span><strong>${clean(event.format)}</strong></div><div><a class="event-cta" href="${clean(event.href)}">进入活动页面</a></div></div></article>`;
 }());
 </script>
 </body>

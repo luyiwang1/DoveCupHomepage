@@ -130,6 +130,8 @@
   add('两支队伍、四片室内场地、固定混双搭档。每一场胜利都为团队带回 1 分。', '两支队伍、四片室内场地、固定混双搭档。每一场胜利都为团队带回 1 分。', 'Two teams, four indoor courts, and fixed mixed-doubles partners. Every match win earns one team point.');
   add('新的特别活动正在准备中。', '新的特别活动正在准备中。', 'A new special event is being prepared.');
   add('即将开始', '即将开始', 'Coming Soon');
+  add('进行中', '进行中', 'In Progress');
+  add('已结束', '已结束', 'Ended');
   add('查看全部活动', '查看全部活动', 'View All Events');
   add('进入活动页面', '进入活动页面', 'Open Event');
   add('查看活动', '查看活动', 'View Event');

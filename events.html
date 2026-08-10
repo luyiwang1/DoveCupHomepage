@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="language.css?v=1">
-<script src="language.js?v=7"></script>
+<script src="language.js?v=10"></script>
 <title>金鸽杯活动</title>
 <meta name="description" content="金鸽杯常驻巡回赛、特别活动和历届赛事记录。">
 <style>
@@ -40,7 +40,7 @@
   </section>
 </main>
 <footer><span>Golden Dove Cup / 金鸽杯</span><span>Toronto tennis events and team specials.</span></footer>
-<script src="events-data.js?v=4"></script>
+<script src="events-data.js?v=5"></script>
 <script>
 (function renderEvents(){
   const recurring=window.DOVE_RECURRING_EVENTS||[],special=window.DOVE_EVENTS||[];
@@ -54,7 +54,7 @@
   document.addEventListener('DOMContentLoaded',()=>updateCounts(),{once:true});
   window.addEventListener('dove:languagechange',event=>updateCounts(event.detail&&event.detail.language));
   residentTarget.innerHTML=recurring.length?recurring.map(event=>`<article class="resident-row"><div class="resident-main"><span class="status">${clean(event.status)}</span><h3>${clean(event.title)}</h3><p>${clean(event.summary)}</p></div><div class="resident-meta"><div class="meta"><span>Schedule</span><strong>${clean(event.schedule)}</strong></div><div class="meta"><span>Venue</span><strong>${clean(event.venue)}</strong></div><div class="meta"><span>Format</span><strong>${clean(event.format)}</strong></div></div><div class="tool-list">${(event.tools||[]).map(tool=>`<a class="tool-link" href="${clean(tool.href)}"><span><strong>${clean(tool.label)}</strong><small>${clean(tool.hint)}</small></span><span class="arrow" aria-hidden="true">→</span></a>`).join('')}</div></article>`).join(''):'<div class="empty">新的常驻活动正在准备中。</div>';
-  specialTarget.innerHTML=special.length?special.map(event=>{const date=new Date(`${event.date}T12:00:00`),day=String(date.getDate()).padStart(2,'0'),month=date.toLocaleDateString('en-CA',{month:'short'}).toUpperCase();return`<article class="special-row"><div class="date"><span>${clean(event.dateLabel)}</span><strong>${day}</strong><span>${month} · ${date.getFullYear()}</span></div><div class="special-content"><span class="status">${clean(event.status)}</span><h3>${clean(event.title)}</h3><p>${clean(event.summary)}</p></div><div class="special-side"><div class="meta"><span>Venue</span><strong>${clean(event.venue)}</strong></div><div class="meta"><span>Format</span><strong>${clean(event.format)}</strong></div><a class="button" href="${clean(event.href)}">查看活动</a></div></article>`}).join(''):'<div class="empty">新的特殊活动正在准备中。</div>';
+  specialTarget.innerHTML=special.length?special.map(event=>{const date=new Date(`${event.date}T12:00:00`),day=String(date.getDate()).padStart(2,'0'),month=date.toLocaleDateString('en-CA',{month:'short'}).toUpperCase(),status=window.DoveEventStatus.forEvent(event);return`<article class="special-row"><div class="date"><span>${clean(event.dateLabel)}</span><strong>${day}</strong><span>${month} · ${date.getFullYear()}</span></div><div class="special-content"><span class="status">${clean(status)}</span><h3>${clean(event.title)}</h3><p>${clean(event.summary)}</p></div><div class="special-side"><div class="meta"><span>Venue</span><strong>${clean(event.venue)}</strong></div><div class="meta"><span>Format</span><strong>${clean(event.format)}</strong></div><a class="button" href="${clean(event.href)}">查看活动</a></div></article>`}).join(''):'<div class="empty">新的特殊活动正在准备中。</div>';
 }());
 </script>
 </body>

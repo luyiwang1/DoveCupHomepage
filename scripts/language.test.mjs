@@ -38,6 +38,12 @@ test('uses complete labels instead of partial mixed translations', () => {
   assert.equal(localizeText('FULL SET WITH AD', 'zh'), '完整一盘 · 占先计分');
 });
 
+test('translates automatic special-event statuses', () => {
+  assert.equal(localizeText('即将开始', 'en'), 'Coming Soon');
+  assert.equal(localizeText('进行中', 'en'), 'In Progress');
+  assert.equal(localizeText('已结束', 'en'), 'Ended');
+});
+
 test('translates the recurring Golden Dove Tour activity hub', () => {
   assert.equal(localizeText('金鸽巡回赛', 'en'), 'Golden Dove Tour');
   assert.equal(localizeText('常驻活动 · 金鸽巡回赛', 'en'), 'Recurring Event · Golden Dove Tour');
