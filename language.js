@@ -449,6 +449,12 @@
   add('清空全部到场记录', '清空全部到场记录', 'Clear All Attendance');
   add('周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。', '周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。', 'The Saturday archive records the official roster automatically. Use this area only for admin corrections.');
   add('到场次数', '到场次数', 'Attendances');
+  add('本周报名名单', '本周报名名单', 'This Week\'s Registration');
+  add('报名后会实时显示在这里；每周六晚 7 点归档后，才会增加本周到场次数。', '报名后会实时显示在这里；每周六晚 7 点归档后，才会增加本周到场次数。', 'Registrations appear here live. This week\'s attendance is added only after the Saturday 7:00 PM archive.');
+  add('有历史到场记录', '有历史到场记录', 'Previous Attendance');
+  add('首次报名，待到场', '首次报名，待到场', 'First Registration · Pending');
+  add('本周还没有人报名。', '本周还没有人报名。', 'No one has registered this week yet.');
+  add('未分级', '未分级', 'Unassigned');
   add('排名', '排名', 'Rank');
   add('最近到场', '最近到场', 'Last Attendance');
   add('状态', '状态', 'Status');

@@ -53,6 +53,13 @@ test('translates the past-event summary and empty upcoming state', () => {
   assert.equal(localizeText('查看完整赛果', 'en'), 'View Full Results');
 });
 
+test('translates the live weekly signup roster on attendance', () => {
+  assert.equal(localizeText('本周报名名单', 'en'), 'This Week\'s Registration');
+  assert.equal(localizeText('有历史到场记录', 'en'), 'Previous Attendance');
+  assert.equal(localizeText('首次报名，待到场', 'en'), 'First Registration · Pending');
+  assert.equal(localizeText('本周还没有人报名。', 'en'), 'No one has registered this week yet.');
+});
+
 test('translates the recurring Golden Dove Tour activity hub', () => {
   assert.equal(localizeText('金鸽巡回赛', 'en'), 'Golden Dove Tour');
   assert.equal(localizeText('常驻活动 · 金鸽巡回赛', 'en'), 'Recurring Event · Golden Dove Tour');
