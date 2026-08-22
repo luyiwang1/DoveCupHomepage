@@ -53,6 +53,16 @@ test('translates the past-event summary and empty upcoming state', () => {
   assert.equal(localizeText('查看完整赛果', 'en'), 'View Full Results');
 });
 
+test('translates the event gallery experience without mixed-language labels', () => {
+  assert.equal(localizeText('Dove Cup Moments', 'zh'), '金鸽影集');
+  assert.equal(localizeText('Photo Archive', 'zh'), '活动影集');
+  assert.equal(localizeText('现场照片整理中', 'en'), 'Event Photos in Preparation');
+  assert.equal(localizeText('查看影集位置', 'en'), 'Open Album');
+  assert.equal(localizeText('浏览活动影集', 'en'), 'View Event Album');
+  assert.equal(localizeText('6 张活动照片', 'en'), '6 event photos');
+  assert.equal(localizeText('活动照片，与赛果一起留下。', 'en'), 'Keep the photos with the final results.');
+});
+
 test('translates the live weekly signup roster on attendance', () => {
   assert.equal(localizeText('本周报名名单', 'en'), 'This Week\'s Registration');
   assert.equal(localizeText('有历史到场记录', 'en'), 'Previous Attendance');

@@ -35,6 +35,16 @@ window.DOVE_EVENTS = [
       winnerGames: 54,
       loserGames: 37
     },
+    gallery: {
+      title: '凤凰 vs 狮鹫',
+      titleEn: 'Phoenix vs Griffin',
+      cover: 'golden-dove-cup-hero-v2.webp',
+      coverAlt: '金鸽杯复古网球场品牌视觉',
+      coverAltEn: 'Golden Dove Cup vintage tennis court brand visual',
+      pending: '首期活动的现场照片正在整理中。照片上传后会与参赛名单、固定搭档和完整赛果一起永久保留在这里。',
+      pendingEn: 'Photos from the first special event are being prepared. Once uploaded, they will remain here with the roster, fixed partnerships, and full results.',
+      photos: []
+    },
     href: 'team-event.html'
   }
 ];

@@ -18,6 +18,14 @@ test('stores the archived team-event result shown in the past-event card', () =>
   );
 });
 
+test('keeps a bilingual event album ready for real activity photos', () => {
+  assert.equal(event.gallery.title, '凤凰 vs 狮鹫');
+  assert.equal(event.gallery.titleEn, 'Phoenix vs Griffin');
+  assert.equal(event.gallery.cover, 'golden-dove-cup-hero-v2.webp');
+  assert.equal(event.gallery.coverAltEn, 'Golden Dove Cup vintage tennis court brand visual');
+  assert.deepEqual(JSON.parse(JSON.stringify(event.gallery.photos)), []);
+});
+
 test('updates a special-event status using the Toronto calendar date', () => {
   assert.equal(status.forEvent(event, Date.parse('2026-08-08T03:59:59Z')), '即将开始');
   assert.equal(status.forEvent(event, Date.parse('2026-08-08T04:00:00Z')), '进行中');

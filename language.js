@@ -153,6 +153,15 @@
   add('进入活动页面', '进入活动页面', 'Open Event');
   add('查看活动', '查看活动', 'View Event');
   add('返回主页', '返回主页', 'Back to Home');
+  add('Dove Cup Moments', '金鸽影集', 'Dove Cup Moments');
+  add('Photo Archive', '活动影集', 'Photo Archive');
+  add('活动影集', '活动影集', 'Event Album');
+  add('现场照片整理中', '现场照片整理中', 'Event Photos in Preparation');
+  add('查看影集位置', '查看影集位置', 'Open Album');
+  add('浏览活动影集', '浏览活动影集', 'View Event Album');
+  add('活动照片，与赛果一起留下。', '活动照片，与赛果一起留下。', 'Keep the photos with the final results.');
+  add('每场特别活动都会保留自己的影集。照片上传后，可以在这里逐张浏览，并与名单、固定搭档和完整比分一起长期保存。', '每场特别活动都会保留自己的影集。照片上传后，可以在这里逐张浏览，并与名单、固定搭档和完整比分一起长期保存。', 'Every special event keeps its own album. Once uploaded, the photos can be viewed here and preserved with the roster, fixed partnerships, and full scores.');
+  add('金鸽杯复古网球场品牌视觉', '金鸽杯复古网球场品牌视觉', 'Golden Dove Cup vintage tennis court brand visual');
 
   // Team event page.
   add('8.8 混双团体赛 · 金鸽杯', '8.8 混双团体赛 · 金鸽杯', 'Aug 8 Mixed Doubles Team Event · Golden Dove Cup');
@@ -526,6 +535,7 @@
         .replace(/狮鹫\s*(\d+)\s*分/g, 'Griffin $1 pts')
         .replace(/(\d+)\s*个分级/g, '$1 divisions')
         .replace(/(\d+)\s*个空位/g, '$1 spots left')
+        .replace(/(\d+)\s*张活动照片/g, '$1 event photos')
         .replace(/(\d+)\s*人/g, '$1 players')
         .replace(/(\d+)\s*次/g, '$1 times')
         .replace(/(\d+)\s*周/g, '$1 weeks')
