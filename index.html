@@ -257,7 +257,7 @@ body *{letter-spacing:0!important}
   <span>Golden Dove Cup / 金鸽杯</span>
   <span>Vintage tennis social for the weekend court crowd.</span>
 </footer>
-<script src="events-data.js?v=9"></script>
+<script src="events-data.js?v=10"></script>
 <script src="gallery.js?v=2"></script>
 <script>
 (function renderFeaturedEvent(){
@@ -286,7 +286,8 @@ body *{letter-spacing:0!important}
     const title=window.DoveGallery.copy(gallery,'title',lang),summary=hasPhotos?window.DoveGallery.copy(gallery,'summary',lang):window.DoveGallery.copy(gallery,'pending',lang);
     target.setAttribute('data-dove-no-translate','');
     const photoCount=window.DoveGallery.photosFor(event).length;
-    target.innerHTML=`<div class="moments-head"><div><span class="kicker">Dove Cup Moments</span><h2>${text('把每一次相聚，留在赛果之外。','Keep every gathering beyond the final score.')}</h2></div><p class="moments-note">${text('每场活动的照片会和名单、组合与赛果一起，成为永久保留的金鸽杯档案。','Each event album stays with its roster, partnerships, and results as part of the permanent Golden Dove Cup archive.')}</p></div><div class="moments-layout"><a class="moments-media" href="${clean(event.href)}#gallery"><img src="${clean(cover)}" alt="${clean(window.DoveGallery.copy(gallery,'coverAlt',lang))}" loading="lazy"><span class="moments-stamp">${hasPhotos?text(`${photoCount} 张现场照片`,`${photoCount} Event Photo${photoCount===1?'':'s'}`):text('现场照片整理中','Event Photos in Preparation')}</span></a><div class="moments-copy"><span class="kicker">${clean(event.dateLabel)}</span><h3>${clean(title)}</h3><p>${clean(summary)}</p><div class="moments-meta"><div><span>${text('活动','Event')}</span><strong>${clean(lang==='en'?'Phoenix vs Griffin':event.title)}</strong></div><div><span>${text('地点','Venue')}</span><strong>${clean(event.venue)}</strong></div></div><a class="moments-link" href="${clean(event.href)}#gallery">${hasPhotos?text('浏览完整影集','View Full Album'):text('查看影集位置','Open Album')}</a></div></div>`;
+    const eventLabel=Number(event.eventNumber)?`EVENT ${Number(event.eventNumber)} · ${event.dateLabel}`:event.dateLabel;
+    target.innerHTML=`<div class="moments-head"><div><span class="kicker">Dove Cup Moments</span><h2>${text('把每一次相聚，留在赛果之外。','Keep every gathering beyond the final score.')}</h2></div><p class="moments-note">${text('每场活动的照片会和名单、组合与赛果一起，成为永久保留的金鸽杯档案。','Each event album stays with its roster, partnerships, and results as part of the permanent Golden Dove Cup archive.')}</p></div><div class="moments-layout"><a class="moments-media" href="${clean(event.href)}#gallery"><img src="${clean(cover)}" alt="${clean(window.DoveGallery.copy(gallery,'coverAlt',lang))}" loading="lazy"><span class="moments-stamp">${hasPhotos?text(`${photoCount} 张现场照片`,`${photoCount} Event Photo${photoCount===1?'':'s'}`):text('现场照片整理中','Event Photos in Preparation')}</span></a><div class="moments-copy"><span class="kicker">${clean(eventLabel)}</span><h3>${clean(title)}</h3><p>${clean(summary)}</p><div class="moments-meta"><div><span>${text('活动','Event')}</span><strong>${clean(lang==='en'?'Phoenix vs Griffin':event.title)}</strong></div><div><span>${text('地点','Venue')}</span><strong>${clean(event.venue)}</strong></div></div><a class="moments-link" href="${clean(event.href)}#gallery">${hasPhotos?text('浏览完整影集','View Full Album'):text('查看影集位置','Open Album')}</a></div></div>`;
   };
   render();
   window.addEventListener('dove:languagechange',render);

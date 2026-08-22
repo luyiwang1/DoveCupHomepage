@@ -19,6 +19,7 @@ window.DOVE_RECURRING_EVENTS = [
 window.DOVE_EVENTS = [
   {
     id: '2026-08-08-mixed-team',
+    eventNumber: 10,
     featured: true,
     eyebrow: 'Team Special · Mixed Doubles',
     date: '2026-08-08',
@@ -41,17 +42,17 @@ window.DOVE_EVENTS = [
       cover: 'assets/events/2026-08-08/team-group-photo-01.webp',
       coverAlt: '凤凰与狮鹫团体赛选手在 MRTC 室内网球场合影',
       coverAltEn: 'Phoenix and Griffin team-event players posing on an indoor court at MRTC',
-      summary: '8 月 8 日凤凰与狮鹫团体赛的第一张现场照片已经收录，名单、固定搭档、赛果和活动瞬间都保留在同一份档案里。',
-      summaryEn: 'The first event photo from the Aug 8 Phoenix vs Griffin team competition is now archived with its roster, fixed partnerships, and full results.',
-      pending: '首期活动的现场照片正在整理中。照片上传后会与参赛名单、固定搭档和完整赛果一起永久保留在这里。',
-      pendingEn: 'Photos from the first special event are being prepared. Once uploaded, they will remain here with the roster, fixed partnerships, and full results.',
+      summary: '第 10 次活动的现场合影已经收录，名单、固定搭档、赛果和活动瞬间都保留在同一份档案里。',
+      summaryEn: 'The Event 10 group photo is now archived with its roster, fixed partnerships, and full results.',
+      pending: '第 10 次活动的现场照片正在整理中。照片上传后会与参赛名单、固定搭档和完整赛果一起永久保留在这里。',
+      pendingEn: 'Photos from Event 10 are being prepared. Once uploaded, they will remain here with the roster, fixed partnerships, and full results.',
       photos: [
         {
           src: 'assets/events/2026-08-08/team-group-photo-01.webp',
           alt: '凤凰与狮鹫团体赛选手在 MRTC 室内网球场合影',
           altEn: 'Phoenix and Griffin team-event players posing on an indoor court at MRTC',
-          caption: '8 月 8 日凤凰 vs 狮鹫团体赛 · MRTC 赛后合影',
-          captionEn: 'Aug 8 Phoenix vs Griffin team event · Post-match photo at MRTC'
+          caption: 'EVENT 10 · 8 月 8 日凤凰 vs 狮鹫团体赛 · MRTC 赛后合影',
+          captionEn: 'EVENT 10 · Aug 8 Phoenix vs Griffin team event · Post-match photo at MRTC'
         }
       ]
     },
