@@ -21,9 +21,9 @@ test('stores the archived team-event result shown in the past-event card', () =>
 test('keeps a bilingual event album ready for real activity photos', () => {
   assert.equal(event.gallery.title, '凤凰 vs 狮鹫');
   assert.equal(event.gallery.titleEn, 'Phoenix vs Griffin');
-  assert.equal(event.gallery.cover, 'golden-dove-cup-hero-v2.webp');
-  assert.equal(event.gallery.coverAltEn, 'Golden Dove Cup vintage tennis court brand visual');
-  assert.deepEqual(JSON.parse(JSON.stringify(event.gallery.photos)), []);
+  assert.equal(event.gallery.cover, 'assets/events/2026-08-08/team-group-photo-01.webp');
+  assert.equal(event.gallery.photos.length, 1);
+  assert.equal(event.gallery.photos[0].captionEn, 'Aug 8 Phoenix vs Griffin team event · Post-match photo at MRTC');
 });
 
 test('updates a special-event status using the Toronto calendar date', () => {

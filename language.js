@@ -162,6 +162,7 @@
   add('活动照片，与赛果一起留下。', '活动照片，与赛果一起留下。', 'Keep the photos with the final results.');
   add('每场特别活动都会保留自己的影集。照片上传后，可以在这里逐张浏览，并与名单、固定搭档和完整比分一起长期保存。', '每场特别活动都会保留自己的影集。照片上传后，可以在这里逐张浏览，并与名单、固定搭档和完整比分一起长期保存。', 'Every special event keeps its own album. Once uploaded, the photos can be viewed here and preserved with the roster, fixed partnerships, and full scores.');
   add('金鸽杯复古网球场品牌视觉', '金鸽杯复古网球场品牌视觉', 'Golden Dove Cup vintage tennis court brand visual');
+  add('凤凰与狮鹫团体赛选手在 MRTC 室内网球场合影', '凤凰与狮鹫团体赛选手在 MRTC 室内网球场合影', 'Phoenix and Griffin team-event players posing on an indoor court at MRTC');
 
   // Team event page.
   add('8.8 混双团体赛 · 金鸽杯', '8.8 混双团体赛 · 金鸽杯', 'Aug 8 Mixed Doubles Team Event · Golden Dove Cup');
@@ -535,7 +536,7 @@
         .replace(/狮鹫\s*(\d+)\s*分/g, 'Griffin $1 pts')
         .replace(/(\d+)\s*个分级/g, '$1 divisions')
         .replace(/(\d+)\s*个空位/g, '$1 spots left')
-        .replace(/(\d+)\s*张活动照片/g, '$1 event photos')
+        .replace(/(\d+)\s*张活动照片/g, (_, count) => `${count} event photo${Number(count) === 1 ? '' : 's'}`)
         .replace(/(\d+)\s*人/g, '$1 players')
         .replace(/(\d+)\s*次/g, '$1 times')
         .replace(/(\d+)\s*周/g, '$1 weeks')

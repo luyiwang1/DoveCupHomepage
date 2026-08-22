@@ -60,7 +60,12 @@ test('translates the event gallery experience without mixed-language labels', ()
   assert.equal(localizeText('查看影集位置', 'en'), 'Open Album');
   assert.equal(localizeText('浏览活动影集', 'en'), 'View Event Album');
   assert.equal(localizeText('6 张活动照片', 'en'), '6 event photos');
+  assert.equal(localizeText('1 张活动照片', 'en'), '1 event photo');
   assert.equal(localizeText('活动照片，与赛果一起留下。', 'en'), 'Keep the photos with the final results.');
+  assert.equal(
+    localizeText('凤凰与狮鹫团体赛选手在 MRTC 室内网球场合影', 'en'),
+    'Phoenix and Griffin team-event players posing on an indoor court at MRTC'
+  );
 });
 
 test('translates the live weekly signup roster on attendance', () => {

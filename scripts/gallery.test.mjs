@@ -12,10 +12,17 @@ vm.runInNewContext(gallerySource, context);
 const api = context.window.DoveGallery;
 const event = context.window.DOVE_EVENTS[0];
 
-test('uses the configured event cover while the photo album is pending', () => {
+test('uses the first real team-event photo as the album cover', () => {
   assert.equal(api.galleryFor(event).title, '凤凰 vs 狮鹫');
-  assert.equal(api.coverFor(event), 'golden-dove-cup-hero-v2.webp');
-  assert.equal(api.hasPhotos(event), false);
+  assert.equal(api.coverFor(event), 'assets/events/2026-08-08/team-group-photo-01.webp');
+  assert.equal(api.hasPhotos(event), true);
+  assert.equal(api.photosFor(event).length, 1);
+});
+
+test('keeps the preparation state available for future empty albums', () => {
+  const pending = { gallery: { cover: 'brand-cover.webp', photos: [] } };
+  assert.equal(api.coverFor(pending), 'brand-cover.webp');
+  assert.equal(api.hasPhotos(pending), false);
 });
 
 test('recognizes a published photo album and preserves bilingual captions', () => {
