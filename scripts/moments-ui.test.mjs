@@ -12,7 +12,9 @@ test('renders Moments as a slow seamless marquee with fullscreen photos', () => 
   assert.match(script, /moment-slide-caption/);
   assert.match(script, /moment-archive-stamp/);
   assert.match(script, /momentDetails/);
-  assert.match(styles, /animation:moment-marquee 150s linear infinite/);
+  assert.match(styles, /animation:moment-marquee 190s linear infinite/);
+  assert.match(styles, /flex:0 0 clamp\(380px,48vw,620px\)/);
+  assert.match(styles, /flex-basis:86vw/);
   assert.match(styles, /prefers-reduced-motion:reduce/);
   assert.match(styles, /animation-play-state:paused/);
 });
