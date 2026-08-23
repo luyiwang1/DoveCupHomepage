@@ -163,7 +163,7 @@
   add('查看活动', '查看活动', 'View Event');
   add('返回主页', '返回主页', 'Back to Home');
   add('AUG 23 · SUNDAY', '8月23日 · 周日', 'AUG 23 · SUNDAY');
-  add('男单、女单各 8 人独立接龙，姓名实时同步到单淘汰签表；现场选择场地、录入比分后自动推进胜者。', '男单、女单各 8 人独立接龙，姓名实时同步到单淘汰签表；现场选择场地、录入比分后自动推进胜者。', 'Separate eight-player men\'s and women\'s signups sync live to the single-elimination draws; admins assign courts, record scores, and advance winners automatically.');
+  add('男单、女单各 8 人独立报名，姓名实时同步到单淘汰签表；现场选择场地、录入比分后自动推进胜者。', '男单、女单各 8 人独立报名，姓名实时同步到单淘汰签表；现场选择场地、录入比分后自动推进胜者。', 'Separate eight-player men\'s and women\'s registrations sync live to the single-elimination draws; admins assign courts, record scores, and advance winners automatically.');
   add('6 Courts · Men + Women Singles · Rolling Tournament', '6 片场地 · 男单 + 女单 · 滚动赛程', '6 Courts · Men + Women Singles · Rolling Tournament');
   add('Golden Dove Cup Singles Championship tournament desk for rolling men\'s and women\'s single-elimination draws.', '金鸽杯单打冠军赛现场赛事桌，用于男女单打单淘汰滚动签表。', 'Golden Dove Cup Singles Championship tournament desk for rolling men\'s and women\'s single-elimination draws.');
   add('A rolling tournament desk for 8 men and 8 women, two independent single-elimination draws, six courts, and a two-hour event window.', '现场赛事桌：8 名男子、8 名女子，男女独立单淘汰签表，6 片场地，2 小时活动窗口。', 'A rolling tournament desk for 8 men and 8 women, two independent single-elimination draws, six courts, and a two-hour event window.');
@@ -175,8 +175,9 @@
   add('View Draws', '查看签表', 'View Draws');
   add('Back to Events', '返回活动中心', 'Back to Events');
   add('Signup', '报名', 'Signup');
-  add('Join the Signup', '接龙报名', 'Join the Signup');
-  add('Singles Signup', '单打接龙报名', 'Singles Signup');
+  add('Register to Play', '报名参赛', 'Register to Play');
+  add('Singles Registration', '单打报名', 'Singles Registration');
+  add('Confirm Registration', '确认报名', 'Confirm Registration');
   add('Join the Singles Championship.', '报名单打冠军赛。', 'Join the Singles Championship.');
   add('Name / WeChat Name', '姓名 / 微信名', 'Name / WeChat Name');
   add('Division', '组别', 'Division');
@@ -184,9 +185,9 @@
   add('Registration Closed', '报名已锁定', 'Registration Closed');
   add('Men\'s Singles', '男单', 'Men\'s Singles');
   add('Women\'s Singles', '女单', 'Women\'s Singles');
-  add('Eight spots are available in each draw. Your name appears on the court board and draw immediately.', '男单、女单各有 8 个席位；报名后姓名会立即同步到签表。', 'Eight spots are available in each draw. Your name appears on the draw immediately.');
+  add('Eight spots are available in each draw. Your name appears on the draw immediately.', '男单、女单各有 8 个席位；报名后姓名会立即同步到签表。', 'Eight spots are available in each draw. Your name appears on the draw immediately.');
   add('Registration is locked. The published roster and draw remain live below.', '报名已经锁定，已公布的名单和签表会继续实时显示。', 'Registration is locked. The published roster and draw remain live below.');
-  add('Signup List', '接龙名单', 'Signup List');
+  add('Player List', '参赛名单', 'Player List');
   add('Open Slot', '空位', 'Open Slot');
   add('Close Registration', '锁定报名', 'Close Registration');
   add('Reopen Registration', '重新开放报名', 'Reopen Registration');

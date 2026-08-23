@@ -66,7 +66,7 @@ window.DOVE_EVENTS = [
     date: '2026-08-23',
     dateLabel: 'AUG 23 · SUNDAY',
     title: 'Golden Dove Cup · Singles Championship',
-    summary: '男单、女单各 8 人独立接龙，姓名实时同步到单淘汰签表；现场选择场地、录入比分后自动推进胜者。',
+    summary: '男单、女单各 8 人独立报名，姓名实时同步到单淘汰签表；现场选择场地、录入比分后自动推进胜者。',
     venue: 'Toronto',
     format: '6 Courts · Men + Women Singles · Rolling Tournament',
     attendeeCount: 16,
