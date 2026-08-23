@@ -234,6 +234,9 @@
   add('Unassigned', '未分配', 'Unassigned');
   add('Start', '开始', 'Start');
   add('Finish & Advance', '完成并晋级', 'Finish & Advance');
+  add('Edit Match', '编辑比赛', 'Edit Match');
+  add('Match Editor', '比赛编辑', 'Match Editor');
+  add('Close', '关闭', 'Close');
   add('Copy failed', '复制失败', 'Copy failed');
   add('Players', '选手', 'Players');
   add('Court updated', '场地已更新', 'Court updated');

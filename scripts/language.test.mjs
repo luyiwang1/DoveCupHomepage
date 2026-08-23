@@ -81,6 +81,8 @@ test('translates the Singles Championship desk without mixed-language controls',
   assert.equal(localizeText('Unassigned', 'zh'), '未分配');
   assert.equal(localizeText('Start on Court 3', 'zh'), '在场地 3 开始');
   assert.equal(localizeText('Finish & Advance', 'zh'), '完成并晋级');
+  assert.equal(localizeText('Edit Match', 'zh'), '编辑比赛');
+  assert.equal(localizeText('Match Editor', 'zh'), '比赛编辑');
 });
 
 test('translates the live weekly signup roster on attendance', () => {
