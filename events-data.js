@@ -76,7 +76,7 @@ window.DOVE_EVENTS = [
       { label: '赛制', value: '单淘汰' }
     ],
     archiveAction: '查看赛事桌',
-    href: 'singles-championship.html'
+    href: 'singles-championship.html?v=2'
   }
 ];
 

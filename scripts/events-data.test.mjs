@@ -47,7 +47,7 @@ test('keeps the Dove King Championship as the next numbered special event', () =
   assert.equal(singlesEvent.dateLabel, 'AUG 29 · SATURDAY · 5–7 PM');
   assert.equal(singlesEvent.title, 'Dove King Championship');
   assert.equal(singlesEvent.format, '6 Courts · Men + Women Singles · 5–7 PM');
-  assert.equal(singlesEvent.href, 'singles-championship.html');
+  assert.equal(singlesEvent.href, 'singles-championship.html?v=2');
   assert.deepEqual(
     JSON.parse(JSON.stringify(singlesEvent.archiveStats)),
     [
