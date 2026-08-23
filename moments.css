@@ -49,10 +49,12 @@
   .moments{padding-top:30px;padding-bottom:30px}
   .moments-head h2{font-size:40px}
   .moments-head-simple h2{font-size:30px}
-  .moment-marquee{margin-top:20px}
-  .moment-marquee-track{animation-duration:140s}
-  .moment-marquee-group{gap:8px;padding-right:8px}
-  .moment-slide{flex-basis:86vw;aspect-ratio:4/3}
+  .moment-marquee{margin-top:20px;overflow-x:auto;overscroll-behavior-inline:contain;scroll-snap-type:x mandatory;scrollbar-width:none;-webkit-overflow-scrolling:touch}
+  .moment-marquee::-webkit-scrollbar{display:none}
+  .moment-marquee-track{animation:none;will-change:auto}
+  .moment-marquee-group{gap:8px;padding-right:7vw;padding-left:7vw}
+  .moment-marquee-group[aria-hidden="true"]{display:none}
+  .moment-slide{flex-basis:86vw;aspect-ratio:4/3;scroll-snap-align:center}
   .moment-slide-caption strong{font-size:21px}
   .moment-slide-caption small{font-size:9px}
   .moment-archive-grid{grid-template-columns:1fr}
