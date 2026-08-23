@@ -9,6 +9,8 @@
   let lightbox = null;
   let activePhotos = [];
   let activeIndex = 0;
+  let lastFocused = null;
+  let swipeStart = null;
 
   function language() {
     return root.DoveLanguage && root.DoveLanguage.getLanguage
@@ -69,6 +71,20 @@
     lightbox.querySelector('.dove-lightbox-prev').addEventListener('click', () => moveLightbox(-1));
     lightbox.querySelector('.dove-lightbox-next').addEventListener('click', () => moveLightbox(1));
     lightbox.addEventListener('click', event => { if (event.target === lightbox) closeLightbox(); });
+    lightbox.addEventListener('pointerdown', event => {
+      if (event.button !== 0) return;
+      swipeStart = { x: event.clientX, y: event.clientY };
+    });
+    lightbox.addEventListener('pointerup', event => {
+      if (!swipeStart) return;
+      const deltaX = event.clientX - swipeStart.x;
+      const deltaY = event.clientY - swipeStart.y;
+      swipeStart = null;
+      if (Math.abs(deltaX) > 56 && Math.abs(deltaX) > Math.abs(deltaY) * 1.2) {
+        moveLightbox(deltaX > 0 ? -1 : 1);
+      }
+    });
+    lightbox.addEventListener('pointercancel', () => { swipeStart = null; });
     document.addEventListener('keydown', event => {
       if (!lightbox.classList.contains('open')) return;
       if (event.key === 'Escape') closeLightbox();
@@ -96,6 +112,10 @@
     next.hidden = activePhotos.length < 2;
     previous.setAttribute('aria-label', lang === 'en' ? 'Previous photo' : '上一张照片');
     next.setAttribute('aria-label', lang === 'en' ? 'Next photo' : '下一张照片');
+    [-1, 1].forEach(offset => {
+      const nearby = activePhotos[(activeIndex + offset + activePhotos.length) % activePhotos.length];
+      if (nearby && nearby.src) new Image().src = nearby.src;
+    });
   }
 
   function openLightbox(event, index) {
@@ -104,6 +124,7 @@
     activeIndex = Math.max(0, Math.min(Number(index) || 0, activePhotos.length - 1));
     ensureLightbox();
     updateLightbox();
+    lastFocused = document.activeElement;
     lightbox.classList.add('open');
     document.body.style.overflow = 'hidden';
     lightbox.querySelector('.dove-lightbox-close').focus();
@@ -113,6 +134,8 @@
     if (!lightbox) return;
     lightbox.classList.remove('open');
     document.body.style.overflow = '';
+    if (lastFocused && typeof lastFocused.focus === 'function') lastFocused.focus();
+    lastFocused = null;
   }
 
   function moveLightbox(direction) {
@@ -147,6 +170,13 @@
     return target;
   }
 
+  function openEventGallery(eventOrId, index = 0) {
+    const event = typeof eventOrId === 'string' ? eventById(eventOrId) : eventOrId;
+    if (!event || !hasPhotos(event)) return false;
+    openLightbox(event, index);
+    return true;
+  }
+
   if (root && root.addEventListener) {
     root.addEventListener('dove:languagechange', () => {
       mounted.forEach((event, target) => render(target, event));
@@ -154,5 +184,5 @@
     });
   }
 
-  return { copy, eventById, galleryFor, photosFor, hasPhotos, coverFor, mountEventGallery };
+  return { copy, eventById, galleryFor, photosFor, hasPhotos, coverFor, mountEventGallery, openEventGallery };
 }));

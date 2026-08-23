@@ -25,6 +25,11 @@ test('keeps the preparation state available for future empty albums', () => {
   assert.equal(api.hasPhotos(pending), false);
 });
 
+test('exposes fullscreen gallery opening for carousel and archive views', () => {
+  assert.equal(typeof api.openEventGallery, 'function');
+  assert.equal(api.openEventGallery({ gallery: { photos: [] } }), false);
+});
+
 test('recognizes a published photo album and preserves bilingual captions', () => {
   const published = {
     gallery: {

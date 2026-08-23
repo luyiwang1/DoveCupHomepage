@@ -155,6 +155,8 @@
   add('返回主页', '返回主页', 'Back to Home');
   add('Dove Cup Moments', '金鸽影集', 'Dove Cup Moments');
   add('Photo Archive', '活动影集', 'Photo Archive');
+  add('Event Archive', '活动档案', 'Event Archive');
+  add('活动照片档案', '活动照片档案', 'Event Photo Archive');
   add('活动影集', '活动影集', 'Event Album');
   add('现场照片整理中', '现场照片整理中', 'Event Photos in Preparation');
   add('查看影集位置', '查看影集位置', 'Open Album');

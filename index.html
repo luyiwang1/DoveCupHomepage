@@ -4,8 +4,8 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="language.css?v=1">
-<link rel="stylesheet" href="gallery.css?v=2">
-<script src="language.js?v=13"></script>
+<link rel="stylesheet" href="gallery.css?v=3">
+<script src="language.js?v=14"></script>
 <title>金鸽杯 Golden Dove Cup</title>
 <meta name="description" content="金鸽杯 Golden Dove Cup 是一场复古俱乐部气质的网球社交杯赛。">
 <style>
@@ -144,6 +144,7 @@ body *{letter-spacing:0!important}
   footer{flex-direction:column}
 }
 </style>
+<link rel="stylesheet" href="moments.css?v=1">
 </head>
 <body>
 <nav class="nav">
@@ -258,7 +259,9 @@ body *{letter-spacing:0!important}
   <span>Vintage tennis social for the weekend court crowd.</span>
 </footer>
 <script src="events-data.js?v=10"></script>
-<script src="gallery.js?v=2"></script>
+<script src="moments-data.js?v=2"></script>
+<script src="gallery.js?v=3"></script>
+<script src="moments.js?v=2"></script>
 <script>
 (function renderFeaturedEvent(){
   const activeEvents=(window.DOVE_EVENTS||[]).filter(item=>window.DoveEventStatus.forEvent(item)!=='已结束');
@@ -273,25 +276,7 @@ body *{letter-spacing:0!important}
   const statusClass=window.DoveEventStatus.classFor(status);
   target.innerHTML=`<article class="event-feature"><div class="event-date"><span>${clean(event.dateLabel)}</span><strong>${day}</strong><span>${month} · 2026</span></div><div class="event-main"><span class="status ${statusClass}">${clean(status)}</span><h3>${clean(event.title)}</h3><p>${clean(event.summary)}</p></div><div class="event-meta"><div><span>Venue</span><strong>${clean(event.venue)}</strong></div><div><span>Format</span><strong>${clean(event.format)}</strong></div><div><a class="event-cta" href="${clean(event.href)}">进入活动页面</a></div></div></article>`;
 }());
-(function renderFeaturedGallery(){
-  const target=document.getElementById('featuredGallery');
-  const galleryEvents=(window.DOVE_EVENTS||[]).filter(event=>window.DoveGallery.galleryFor(event)).sort((a,b)=>String(b.date).localeCompare(String(a.date)));
-  const event=galleryEvents[0];
-  if(!event){target.closest('.moments').hidden=true;return}
-  const render=()=>{
-    const lang=window.DoveLanguage&&window.DoveLanguage.getLanguage?window.DoveLanguage.getLanguage():'zh';
-    const gallery=window.DoveGallery.galleryFor(event),hasPhotos=window.DoveGallery.hasPhotos(event),cover=window.DoveGallery.coverFor(event);
-    const clean=value=>String(value||'').replace(/[&<>"']/g,char=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[char]));
-    const text=(zh,en)=>lang==='en'?en:zh;
-    const title=window.DoveGallery.copy(gallery,'title',lang),summary=hasPhotos?window.DoveGallery.copy(gallery,'summary',lang):window.DoveGallery.copy(gallery,'pending',lang);
-    target.setAttribute('data-dove-no-translate','');
-    const photoCount=window.DoveGallery.photosFor(event).length;
-    const eventLabel=Number(event.eventNumber)?`EVENT ${Number(event.eventNumber)} · ${event.dateLabel}`:event.dateLabel;
-    target.innerHTML=`<div class="moments-head"><div><span class="kicker">Dove Cup Moments</span><h2>${text('把每一次相聚，留在赛果之外。','Keep every gathering beyond the final score.')}</h2></div><p class="moments-note">${text('每场活动的照片会和名单、组合与赛果一起，成为永久保留的金鸽杯档案。','Each event album stays with its roster, partnerships, and results as part of the permanent Golden Dove Cup archive.')}</p></div><div class="moments-layout"><a class="moments-media" href="${clean(event.href)}#gallery"><img src="${clean(cover)}" alt="${clean(window.DoveGallery.copy(gallery,'coverAlt',lang))}" loading="lazy"><span class="moments-stamp">${hasPhotos?text(`${photoCount} 张现场照片`,`${photoCount} Event Photo${photoCount===1?'':'s'}`):text('现场照片整理中','Event Photos in Preparation')}</span></a><div class="moments-copy"><span class="kicker">${clean(eventLabel)}</span><h3>${clean(title)}</h3><p>${clean(summary)}</p><div class="moments-meta"><div><span>${text('活动','Event')}</span><strong>${clean(lang==='en'?'Phoenix vs Griffin':event.title)}</strong></div><div><span>${text('地点','Venue')}</span><strong>${clean(event.venue)}</strong></div></div><a class="moments-link" href="${clean(event.href)}#gallery">${hasPhotos?text('浏览完整影集','View Full Album'):text('查看影集位置','Open Album')}</a></div></div>`;
-  };
-  render();
-  window.addEventListener('dove:languagechange',render);
-}());
+window.DoveMoments.mountCarousel('featuredGallery');
 </script>
 </body>
 </html>
