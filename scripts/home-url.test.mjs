@@ -10,7 +10,7 @@ const linkedPages = await Promise.all(
 );
 
 test('keeps one permanent public homepage URL', () => {
-  assert.match(homepage, /<link rel="canonical" href="https:\/\/luyiwang1\.github\.io\/DoveCupWaitlistSystem\/">/);
+  assert.match(homepage, /<link rel="canonical" href="https:\/\/luyiwang1\.github\.io\/DoveCupHomepage\/">/);
   assert.match(homepage, /replace\(\/\\\/index\\\.html\$\/i, '\/'\)/);
   assert.match(homepage, /\['v', 'build', 'qa', 'check', 't'\]/);
 });
