@@ -14,7 +14,7 @@
   // Shared navigation, labels, and mixed-language sports terms.
   add('Golden Dove Cup / 金鸽杯', '金鸽杯', 'Golden Dove Cup');
   add('Golden Dove Cup · Team Special', '金鸽杯 · 团体特别赛', 'Golden Dove Cup · Team Special');
-  add('Golden Dove Cup · Singles Championship', '金鸽杯 · 单打冠军赛', 'Golden Dove Cup · Singles Championship');
+  add('Dove King Championship', '鸽王争霸赛', 'Dove King Championship');
   add('Golden Dove Cup', '金鸽杯', 'Golden Dove Cup');
   add('金鸽杯', '金鸽杯', 'Golden Dove Cup');
   add('Dove Cup Calendar', '金鸽杯活动日历', 'Dove Cup Calendar');
@@ -162,11 +162,11 @@
   add('进入活动页面', '进入活动页面', 'Open Event');
   add('查看活动', '查看活动', 'View Event');
   add('返回主页', '返回主页', 'Back to Home');
-  add('AUG 23 · SUNDAY', '8月23日 · 周日', 'AUG 23 · SUNDAY');
+  add('AUG 29 · SATURDAY · 5–7 PM', '8月29日 · 周六 · 17:00–19:00', 'AUG 29 · SATURDAY · 5–7 PM');
   add('男单、女单各 8 人独立报名，姓名实时同步到单淘汰签表；现场选择场地、录入比分后自动推进胜者。', '男单、女单各 8 人独立报名，姓名实时同步到单淘汰签表；现场选择场地、录入比分后自动推进胜者。', 'Separate eight-player men\'s and women\'s registrations sync live to the single-elimination draws; admins assign courts, record scores, and advance winners automatically.');
-  add('6 Courts · Men + Women Singles · Rolling Tournament', '6 片场地 · 男单 + 女单 · 滚动赛程', '6 Courts · Men + Women Singles · Rolling Tournament');
-  add('Golden Dove Cup Singles Championship tournament desk for rolling men\'s and women\'s single-elimination draws.', '金鸽杯单打冠军赛现场赛事桌，用于男女单打单淘汰滚动签表。', 'Golden Dove Cup Singles Championship tournament desk for rolling men\'s and women\'s single-elimination draws.');
-  add('A rolling tournament desk for 8 men and 8 women, two independent single-elimination draws, six courts, and a two-hour event window.', '现场赛事桌：8 名男子、8 名女子，男女独立单淘汰签表，6 片场地，2 小时活动窗口。', 'A rolling tournament desk for 8 men and 8 women, two independent single-elimination draws, six courts, and a two-hour event window.');
+  add('6 Courts · Men + Women Singles · 5–7 PM', '6 片场地 · 男单 + 女单 · 17:00–19:00', '6 Courts · Men + Women Singles · 5–7 PM');
+  add('Eight men and eight women compete in two single-elimination draws across six courts on August 29 from 5–7 PM Toronto time.', '8 名男子与 8 名女子分别进入单淘汰签表，8 月 29 日多伦多时间 17:00–19:00，在 6 片场地同时开赛。', 'Eight men and eight women compete in two single-elimination draws across six courts on August 29 from 5–7 PM Toronto time.');
+  add('AUG 29 · 5–7 PM', '8月29日 · 17:00–19:00', 'AUG 29 · 5–7 PM');
   add('8 Men + 8 Women', '8 男 + 8 女', '8 Men + 8 Women');
   add('6 Courts', '6 片场地', '6 Courts');
   add('35 Min / Match', '每场 35 分钟', '35 Min / Match');
@@ -178,7 +178,7 @@
   add('Register to Play', '报名参赛', 'Register to Play');
   add('Singles Registration', '单打报名', 'Singles Registration');
   add('Confirm Registration', '确认报名', 'Confirm Registration');
-  add('Join the Singles Championship.', '报名单打冠军赛。', 'Join the Singles Championship.');
+  add('Enter the Dove King Championship.', '报名鸽王争霸赛。', 'Enter the Dove King Championship.');
   add('Name / WeChat Name', '姓名 / 微信名', 'Name / WeChat Name');
   add('Division', '组别', 'Division');
   add('Registration Open', '报名开放中', 'Registration Open');
@@ -261,7 +261,7 @@
   add('Only an admin can edit the tournament desk', '只有管理员可以编辑赛事桌', 'Only an admin can edit the tournament desk');
   add('Enter admin password', '请输入管理员密码', 'Enter admin password');
   add('Wrong password', '密码错误', 'Wrong password');
-  add('Reset players, courts, statuses, and scores for this Singles Championship?', '确定重置本场单打冠军赛的选手、场地、状态和比分吗？', 'Reset players, courts, statuses, and scores for this Singles Championship?');
+  add('Reset players, courts, statuses, and scores for the Dove King Championship?', '确定重置鸽王争霸赛的选手、场地、状态和比分吗？', 'Reset players, courts, statuses, and scores for the Dove King Championship?');
   add('Tournament reset', '赛事已重置', 'Tournament reset');
   add('Status', '状态', 'Status');
   add('Games', '局数', 'Games');
@@ -285,7 +285,7 @@
   add('Assign a court first', '请先分配场地', 'Assign a court first');
   add('Both players are not ready yet', '双方选手尚未就绪', 'Both players are not ready yet');
   add('Desk summary copied', '现场摘要已复制', 'Desk summary copied');
-  add('Singles Championship tournament desk.', '单打冠军赛现场赛事桌。', 'Singles Championship tournament desk.');
+  add('Dove King Championship tournament desk.', '鸽王争霸赛现场赛事桌。', 'Dove King Championship tournament desk.');
   add('Dove Cup Moments', '金鸽影集', 'Dove Cup Moments');
   add('Photo Archive', '活动影集', 'Photo Archive');
   add('Event Archive', '活动档案', 'Event Archive');

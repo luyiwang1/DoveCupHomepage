@@ -5,9 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>try{if(!localStorage.getItem('dove_cup_language'))localStorage.setItem('dove_cup_language','en')}catch(error){}</script>
 <link rel="stylesheet" href="language.css?v=1">
-<script src="language.js?v=23"></script>
-<title>Golden Dove Cup · Singles Championship</title>
-<meta name="description" content="Golden Dove Cup Singles Championship tournament desk for rolling men's and women's single-elimination draws.">
+<script src="language.js?v=24"></script>
+<title>Dove King Championship · Golden Dove Cup</title>
+<meta name="description" content="Dove King Championship tournament desk for rolling men's and women's single-elimination draws on August 29 from 5–7 PM in Toronto.">
 <style>
 :root{--ink:#17241e;--green:#143323;--green2:#244b38;--ivory:#f8efd7;--paper:#fffaf0;--gold:#c99a3c;--line:rgba(20,51,35,.16);--clay:#a9653c;--phoenix:#a74432;--phoenix-soft:#f5e4dc;--griffin:#315c6b;--griffin-soft:#e1edf0;--muted:#706b5e;--danger:#a93232}
 *{box-sizing:border-box}html{scroll-behavior:smooth}body{margin:0;color:var(--ink);background:#f4ead4;font-family:"Avenir Next","Segoe UI","PingFang SC","Microsoft YaHei",sans-serif}button,input,select{font:inherit}button{cursor:pointer}a{color:inherit;text-decoration:none}
@@ -40,10 +40,11 @@
     </div>
   </div>
   <div class="hero-copy">
-    <div class="eyebrow">Singles Championship</div>
-    <h1>Golden Dove Cup · Singles Championship</h1>
-    <p class="lead">A rolling tournament desk for 8 men and 8 women, two independent single-elimination draws, six courts, and a two-hour event window.</p>
+    <div class="eyebrow">Dove King Championship</div>
+    <h1>Dove King Championship</h1>
+    <p class="lead">Eight men and eight women compete in two single-elimination draws across six courts on August 29 from 5–7 PM Toronto time.</p>
     <div class="meta-row">
+      <span class="meta">AUG 29 · 5–7 PM</span>
       <span class="meta">8 Men + 8 Women</span>
       <span class="meta">6 Courts</span>
       <span class="meta">35 Min / Match</span>
@@ -69,7 +70,7 @@
   <section class="band registration" id="signup">
     <div class="band-inner">
       <div class="section-head">
-        <div><div class="kicker">Singles Registration</div><h2>Join the Singles Championship.</h2></div>
+        <div><div class="kicker">Singles Registration</div><h2>Enter the Dove King Championship.</h2></div>
         <div class="signup-status" id="registrationStatus">Registration Open</div>
       </div>
       <div class="signup-layout">
@@ -123,7 +124,7 @@
   </section>
 </main>
 
-<footer><span>Golden Dove Cup / 金鸽杯</span><span>Singles Championship tournament desk.</span></footer>
+<footer><span>Golden Dove Cup / 金鸽杯</span><span>Dove King Championship tournament desk.</span></footer>
 <dialog class="match-dialog" id="matchEditorDialog" onclick="if(event.target===this)closeMatchEditor()">
   <div id="matchEditorContent"></div>
 </dialog>
@@ -176,7 +177,7 @@ function setMatchCourt(matchId,value){if(!canEdit())return;updateAndSave(DoveSin
 function setMatchStatus(matchId,value){if(!canEdit())return;updateAndSave(DoveSinglesChampionship.updateMatch(eventData,matchId,{status:value}),'Status updated')}
 function startMatch(matchId,court){if(!canEdit())return;const match=DoveSinglesChampionship.matchById(eventData,matchId);if(!match||!DoveSinglesChampionship.dependenciesReady(eventData,match)){showToast('Both players are not ready yet');return}if(!court&&!match.court){showToast('Assign a court first');return}updateAndSave(DoveSinglesChampionship.startMatch(eventData,matchId,court),'Match started')}
 function finishMatch(matchId){if(!canEdit())return;const match=DoveSinglesChampionship.matchById(eventData,matchId),players=match?DoveSinglesChampionship.competitors(eventData,match):[];if(!match||players.some(player=>!player)){showToast('Both players are not ready yet');return}const winner=document.getElementById(`winner-${matchId}`).value;if(!winner){showToast('Choose a winner');return}const scoreA=document.getElementById(`scoreA-${matchId}`).value,scoreB=document.getElementById(`scoreB-${matchId}`).value,tiebreak=document.getElementById(`tb-${matchId}`).value;updateAndSave(DoveSinglesChampionship.finishMatch(eventData,matchId,winner,scoreA,scoreB,tiebreak),'Winner advanced');closeMatchEditor()}
-function resetTournament(){if(!canEdit())return;if(!confirm(tr('Reset players, courts, statuses, and scores for this Singles Championship?')))return;eventData=DoveSinglesChampionship.resetEvent();renderAll();saveNow().then(()=>showToast('Tournament reset'))}
+function resetTournament(){if(!canEdit())return;if(!confirm(tr('Reset players, courts, statuses, and scores for the Dove King Championship?')))return;eventData=DoveSinglesChampionship.resetEvent();renderAll();saveNow().then(()=>showToast('Tournament reset'))}
 function statusPill(status){return `<span class="status-pill ${String(status).toLowerCase()}">${clean(status)}</span>`}
 function renderSignups(){const registration=eventData.registration,open=registration.open,status=document.getElementById('registrationStatus'),submit=document.getElementById('signupSubmit'),nameInput=document.getElementById('signupName'),toggle=document.getElementById('registrationToggle');status.textContent=open?'Registration Open':'Registration Closed';status.classList.toggle('closed',!open);submit.disabled=!open;nameInput.disabled=!open;if(toggle)toggle.textContent=open?'Close Registration':'Reopen Registration';document.getElementById('signupNote').textContent=open?'Eight spots are available in each draw. Your name appears on the draw immediately.':'Registration is locked. The published roster and draw remain live below.';document.getElementById('signupRosters').innerHTML=DoveSinglesChampionship.DIVISIONS.map(division=>{const entries=DoveSinglesChampionship.registrationEntries(eventData,division),bySlot=new Map(entries.map(entry=>[entry.slot,entry])),title=division==='men'?"Men's Singles":"Women's Singles";return `<section class="roster-board"><div class="roster-head"><div><div class="kicker">${clean(title)}</div><h3>Player List</h3></div><strong>${entries.length} / ${DoveSinglesChampionship.REGISTRATION_CAPACITY}</strong></div><div class="roster-list">${Array.from({length:DoveSinglesChampionship.REGISTRATION_CAPACITY},(_,index)=>{const slot=index+1,entry=bySlot.get(slot),canRemove=entry&&open&&(isAdminMode||entry.ownerKey===currentSignupOwner);return `<div class="roster-row"><span class="slot-number">${slot}</span><span class="slot-name ${entry?'':'slot-empty'}" ${entry?'data-dove-no-translate':''}>${clean(entry?entry.name:'Open Slot')}</span>${canRemove?`<button class="remove-signup" type="button" aria-label="Remove Registration" title="Remove Registration" onclick="removeSignup('${clean(entry.id)}')">×</button>`:'<span></span>'}</div>`}).join('')}</div></section>`}).join('')}
 function renderSummary(){const data=DoveSinglesChampionship.summary(eventData);document.getElementById('finishedMetric').textContent=`${data.finished} / ${data.total}`;document.getElementById('playingMetric').textContent=data.playing;document.getElementById('readyMetric').textContent=data.ready;document.getElementById('championMetric').textContent=[data.champions.men,data.champions.women].filter(Boolean).join(' / ')||'Pending'}

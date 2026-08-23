@@ -70,7 +70,11 @@ test('translates the event gallery experience without mixed-language labels', ()
   );
 });
 
-test('translates the Singles Championship desk without mixed-language controls', () => {
+test('translates the Dove King Championship desk without mixed-language controls', () => {
+  assert.equal(localizeText('Dove King Championship', 'zh'), '鸽王争霸赛');
+  assert.equal(localizeText('AUG 29 · SATURDAY · 5–7 PM', 'zh'), '8月29日 · 周六 · 17:00–19:00');
+  assert.equal(localizeText('AUG 29 · 5–7 PM', 'zh'), '8月29日 · 17:00–19:00');
+  assert.equal(localizeText('Enter the Dove King Championship.', 'zh'), '报名鸽王争霸赛。');
   assert.equal(localizeText('Draws', 'zh'), '签表');
   assert.equal(localizeText('Live synced', 'zh'), '实时已同步');
   assert.equal(localizeText('Men QF4', 'zh'), '男单四分之一决赛 4');
