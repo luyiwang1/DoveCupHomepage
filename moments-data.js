@@ -6,18 +6,19 @@
     2: { src: 'assets/moments/event-02.webp', focusX: 50, focusY: 69, zoom: 1.02 },
     3: { src: 'assets/moments/event-03.webp', focusX: 50, focusY: 88, zoom: 1.08 },
     4: { src: 'assets/moments/event-04.webp', focusX: 50, focusY: 100, zoom: 1.14 },
-    5: { src: 'assets/moments/event-05.webp', focusX: 50, focusY: 91, zoom: 1.1 },
-    6: { src: 'assets/moments/event-06.webp', focusX: 50, focusY: 86, zoom: 1.08 },
-    7: { src: 'assets/moments/event-07-v2.webp', focusX: 50, focusY: 100, zoom: 1.16 },
-    8: { src: 'assets/moments/event-08-v2.webp', focusX: 50, focusY: 88, zoom: 1.08 },
-    9: { src: 'assets/moments/event-09.webp', focusX: 50, focusY: 100, zoom: 1.24 },
-    10: { src: 'assets/events/2026-08-08/team-group-photo-01.webp', focusX: 40, focusY: 100, zoom: 1.5 },
-    11: { src: 'assets/moments/event-11.webp', focusX: 50, focusY: 100, zoom: 1.12 }
+    5: { src: 'assets/moments/event-05-v2.webp', focusX: 50, focusY: 82, zoom: 1.06 },
+    6: { src: 'assets/moments/event-05.webp', focusX: 50, focusY: 91, zoom: 1.1 },
+    7: { src: 'assets/moments/event-06.webp', focusX: 50, focusY: 86, zoom: 1.08 },
+    8: { src: 'assets/moments/event-07-v2.webp', focusX: 50, focusY: 100, zoom: 1.16 },
+    9: { src: 'assets/moments/event-08-v2.webp', focusX: 50, focusY: 88, zoom: 1.08 },
+    10: { src: 'assets/moments/event-09.webp', focusX: 50, focusY: 100, zoom: 1.24 },
+    11: { src: 'assets/events/2026-08-08/team-group-photo-01.webp', focusX: 40, focusY: 100, zoom: 1.5 },
+    12: { src: 'assets/moments/event-11.webp', focusX: 50, focusY: 100, zoom: 1.12 }
   };
 
-  const moments = Array.from({ length: 11 }, (_, index) => {
+  const moments = Array.from({ length: 12 }, (_, index) => {
     const eventNumber = index + 1;
-    const special = eventNumber === 10;
+    const special = eventNumber === 11;
     const photo = photoSlots[eventNumber] || null;
     const paddedNumber = String(eventNumber).padStart(2, '0');
     const title = special ? '凤凰 vs 狮鹫' : '金鸽巡回赛';
@@ -41,10 +42,10 @@
       titleEn,
       venue: 'MRTC · Toronto',
       summary: special
-        ? '固定混双搭档、两支队伍和完整团队赛果，都留在第 10 次活动的档案里。'
+        ? `固定混双搭档、两支队伍和完整团队赛果，都留在第 ${eventNumber} 次活动的档案里。`
         : `第 ${eventNumber} 次金鸽巡回赛的到场合影，记录这一站一起上场的人。`,
       summaryEn: special
-        ? 'Fixed mixed-doubles teams, two squads, and the complete result are preserved in the Event 10 archive.'
+        ? `Fixed mixed-doubles teams, two squads, and the complete result are preserved in the Event ${paddedNumber} archive.`
         : `The Event ${paddedNumber} group photo remembers everyone who joined this Golden Dove Tour stop.`,
       photo: photo ? {
         ...photo,
