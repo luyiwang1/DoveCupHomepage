@@ -3,6 +3,8 @@
 .moments-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}
 .moments-head .kicker{color:#d5ab55}
 .moments-head h2{max-width:850px;margin:10px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,5.5vw,72px);font-weight:500;line-height:1}
+.moments-head-simple{display:block}
+.moments-head-simple h2{margin:0;font-size:clamp(28px,3vw,42px);line-height:1.05}
 .moments-note{max-width:380px;margin:0;color:rgba(248,239,215,.66);font-size:13px;line-height:1.7}
 .moments-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,.75fr);align-items:center;margin-top:34px;border-top:1px solid rgba(248,239,215,.2);border-bottom:1px solid rgba(248,239,215,.2)}
 .moment-carousel{min-width:0;padding:18px 18px 16px 0}
@@ -65,6 +67,7 @@
 @media(max-width:560px){
   .moments{padding-top:30px;padding-bottom:30px}
   .moments-head h2{font-size:40px}
+  .moments-head-simple h2{font-size:30px}
   .moment-track{gap:8px}
   .moment-track:after{flex:0 0 8%;content:""}
   .moment-slide{flex-basis:92%;aspect-ratio:4/3}
