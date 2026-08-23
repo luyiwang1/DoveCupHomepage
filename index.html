@@ -3,6 +3,19 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="canonical" href="https://luyiwang1.github.io/DoveCupWaitlistSystem/">
+<script>
+(() => {
+  const url = new URL(location.href);
+  const cleanPath = url.pathname.replace(/\/index\.html$/i, '/');
+  ['v', 'build', 'qa', 'check', 't'].forEach(key => url.searchParams.delete(key));
+  const query = url.searchParams.toString();
+  const canonicalUrl = cleanPath + (query ? `?${query}` : '') + url.hash;
+  if (canonicalUrl !== location.pathname + location.search + location.hash) {
+    history.replaceState(null, '', canonicalUrl);
+  }
+})();
+</script>
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="gallery.css?v=3">
 <script src="language.js?v=24"></script>
