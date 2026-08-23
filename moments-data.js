@@ -9,16 +9,17 @@
     5: { src: 'assets/moments/event-05-v2.webp', focusX: 50, focusY: 82, zoom: 1.06 },
     6: { src: 'assets/moments/event-05.webp', focusX: 50, focusY: 91, zoom: 1.1 },
     7: { src: 'assets/moments/event-06.webp', focusX: 50, focusY: 86, zoom: 1.08 },
-    8: { src: 'assets/moments/event-07-v2.webp', focusX: 50, focusY: 100, zoom: 1.16 },
-    9: { src: 'assets/moments/event-08-v2.webp', focusX: 50, focusY: 88, zoom: 1.08 },
-    10: { src: 'assets/moments/event-09.webp', focusX: 50, focusY: 100, zoom: 1.24 },
-    11: { src: 'assets/events/2026-08-08/team-group-photo-01.webp', focusX: 40, focusY: 100, zoom: 1.5 },
-    12: { src: 'assets/moments/event-11.webp', focusX: 50, focusY: 100, zoom: 1.12 }
+    8: { src: 'assets/moments/event-08-v4.webp', focusX: 50, focusY: 72, zoom: 1.04 },
+    9: { src: 'assets/moments/event-07-v2.webp', focusX: 50, focusY: 100, zoom: 1.16 },
+    10: { src: 'assets/moments/event-08-v2.webp', focusX: 50, focusY: 88, zoom: 1.08 },
+    11: { src: 'assets/moments/event-09.webp', focusX: 50, focusY: 100, zoom: 1.24 },
+    12: { src: 'assets/events/2026-08-08/team-group-photo-01.webp', focusX: 40, focusY: 100, zoom: 1.5 },
+    13: { src: 'assets/moments/event-11.webp', focusX: 50, focusY: 100, zoom: 1.12 }
   };
 
-  const moments = Array.from({ length: 12 }, (_, index) => {
+  const moments = Array.from({ length: 13 }, (_, index) => {
     const eventNumber = index + 1;
-    const special = eventNumber === 11;
+    const special = eventNumber === 12;
     const photo = photoSlots[eventNumber] || null;
     const paddedNumber = String(eventNumber).padStart(2, '0');
     const title = special ? '凤凰 vs 狮鹫' : '金鸽巡回赛';

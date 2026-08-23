@@ -19,13 +19,13 @@ test('stores the archived team-event result shown in the past-event card', () =>
 });
 
 test('keeps a bilingual event album ready for real activity photos', () => {
-  assert.equal(event.eventNumber, 11);
+  assert.equal(event.eventNumber, 12);
   assert.equal(event.gallery.title, '凤凰 vs 狮鹫');
   assert.equal(event.gallery.titleEn, 'Phoenix vs Griffin');
   assert.equal(event.gallery.cover, 'assets/events/2026-08-08/team-group-photo-01.webp');
   assert.equal(event.gallery.photos.length, 1);
-  assert.equal(event.gallery.photos[0].caption, 'EVENT 11 · 8 月 8 日凤凰 vs 狮鹫团体赛 · MRTC 赛后合影');
-  assert.equal(event.gallery.photos[0].captionEn, 'EVENT 11 · Aug 8 Phoenix vs Griffin team event · Post-match photo at MRTC');
+  assert.equal(event.gallery.photos[0].caption, 'EVENT 12 · 8 月 8 日凤凰 vs 狮鹫团体赛 · MRTC 赛后合影');
+  assert.equal(event.gallery.photos[0].captionEn, 'EVENT 12 · Aug 8 Phoenix vs Griffin team event · Post-match photo at MRTC');
 });
 
 test('updates a special-event status using the Toronto calendar date', () => {
