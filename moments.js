@@ -66,6 +66,8 @@
       index: 0,
       timer: null,
       scrollTimer: null,
+      settleTimer: null,
+      programmaticIndex: null,
       pauseReasons: new Set(),
       pointerX: null,
       dragged: false,
@@ -124,15 +126,41 @@
       startTimer();
     }
 
+    function slideLeft(slide) {
+      const firstSlide = target.querySelector('.moment-slide');
+      return slide && firstSlide ? slide.offsetLeft - firstSlide.offsetLeft : 0;
+    }
+
+    function settleProgrammaticScroll(index) {
+      if (state.programmaticIndex !== index) return;
+      const viewport = target.querySelector('.moment-viewport');
+      const slide = target.querySelectorAll('.moment-slide')[index];
+      if (viewport && slide) {
+        const left = slideLeft(slide);
+        if (Math.abs(viewport.scrollLeft - left) > 2) {
+          viewport.scrollTo({ left, behavior: 'auto' });
+        }
+      }
+      state.programmaticIndex = null;
+      root.clearTimeout(state.settleTimer);
+    }
+
     function goTo(index, smooth) {
       state.index = (Number(index) + moments.length) % moments.length;
       const viewport = target.querySelector('.moment-viewport');
       const slide = target.querySelectorAll('.moment-slide')[state.index];
       if (viewport && slide) {
+        const shouldSmooth = smooth && !state.reducedMotion;
+        state.programmaticIndex = shouldSmooth ? state.index : null;
+        root.clearTimeout(state.settleTimer);
         viewport.scrollTo({
-          left: slide.offsetLeft,
-          behavior: smooth && !state.reducedMotion ? 'smooth' : 'auto'
+          left: slideLeft(slide),
+          behavior: shouldSmooth ? 'smooth' : 'auto'
         });
+        if (shouldSmooth) {
+          const expectedIndex = state.index;
+          state.settleTimer = root.setTimeout(() => settleProgrammaticScroll(expectedIndex), 500);
+        }
       }
       updateDetails();
     }
@@ -149,6 +177,8 @@
       viewport.addEventListener('mouseenter', () => pause('hover', true));
       viewport.addEventListener('mouseleave', () => pause('hover', false));
       viewport.addEventListener('pointerdown', event => {
+        root.clearTimeout(state.settleTimer);
+        state.programmaticIndex = null;
         state.pointerX = event.clientX;
         state.dragged = false;
         pause('pointer', true);
@@ -168,8 +198,16 @@
         root.clearTimeout(state.scrollTimer);
         state.scrollTimer = root.setTimeout(() => {
           const slides = [...target.querySelectorAll('.moment-slide')];
+          if (state.programmaticIndex !== null) {
+            const expectedIndex = state.programmaticIndex;
+            const expectedSlide = slides[expectedIndex];
+            if (expectedSlide && Math.abs(viewport.scrollLeft - slideLeft(expectedSlide)) <= 2) {
+              settleProgrammaticScroll(expectedIndex);
+            }
+            return;
+          }
           const nearest = slides.reduce((best, slide, index) => {
-            const distance = Math.abs(slide.offsetLeft - viewport.scrollLeft);
+            const distance = Math.abs(slideLeft(slide) - viewport.scrollLeft);
             return distance < best.distance ? { index, distance } : best;
           }, { index: state.index, distance: Infinity });
           if (nearest.index !== state.index) {
