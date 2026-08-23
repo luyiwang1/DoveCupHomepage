@@ -10,11 +10,13 @@ vm.runInNewContext(source, context);
 const moments = context.globalThis.DOVE_MOMENTS;
 const gallery = context.globalThis.DOVE_MOMENTS_GALLERY;
 
-test('keeps an eleven-event archive without duplicating the missing photo', () => {
+test('keeps a complete eleven-event photo archive', () => {
   assert.equal(moments.length, 11);
   assert.deepEqual(JSON.parse(JSON.stringify(moments.map(moment => moment.eventNumber))), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
-  assert.equal(moments.filter(moment => moment.photo).length, 10);
-  assert.equal(moments.find(moment => moment.eventNumber === 9).photo, null);
+  assert.equal(moments.filter(moment => moment.photo).length, 11);
+  assert.equal(moments.find(moment => moment.eventNumber === 7).photo.src, 'assets/moments/event-07-v2.webp');
+  assert.equal(moments.find(moment => moment.eventNumber === 8).photo.src, 'assets/moments/event-08-v2.webp');
+  assert.equal(moments.find(moment => moment.eventNumber === 9).photo.src, 'assets/moments/event-09.webp');
 });
 
 test('marks only Event 10 as the special team event', () => {
@@ -26,10 +28,10 @@ test('marks only Event 10 as the special team event', () => {
 });
 
 test('builds the fullscreen gallery in chronological order', () => {
-  assert.equal(gallery.gallery.photos.length, 10);
+  assert.equal(gallery.gallery.photos.length, 11);
   assert.deepEqual(
     JSON.parse(JSON.stringify(gallery.gallery.photos.map(photo => photo.eventNumber))),
-    [1, 2, 3, 4, 5, 6, 7, 8, 10, 11]
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]
   );
 });
 

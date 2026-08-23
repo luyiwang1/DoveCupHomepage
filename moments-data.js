@@ -8,8 +8,9 @@
     4: { src: 'assets/moments/event-04.webp', focusX: 50, focusY: 100, zoom: 1.14 },
     5: { src: 'assets/moments/event-05.webp', focusX: 50, focusY: 91, zoom: 1.1 },
     6: { src: 'assets/moments/event-06.webp', focusX: 50, focusY: 86, zoom: 1.08 },
-    7: { src: 'assets/moments/event-07.webp', focusX: 50, focusY: 88, zoom: 1.08 },
-    8: { src: 'assets/moments/event-08.webp', focusX: 50, focusY: 100, zoom: 1.24 },
+    7: { src: 'assets/moments/event-07-v2.webp', focusX: 50, focusY: 100, zoom: 1.16 },
+    8: { src: 'assets/moments/event-08-v2.webp', focusX: 50, focusY: 88, zoom: 1.08 },
+    9: { src: 'assets/moments/event-09.webp', focusX: 50, focusY: 100, zoom: 1.24 },
     10: { src: 'assets/events/2026-08-08/team-group-photo-01.webp', focusX: 40, focusY: 100, zoom: 1.5 },
     11: { src: 'assets/moments/event-11.webp', focusX: 50, focusY: 100, zoom: 1.12 }
   };
