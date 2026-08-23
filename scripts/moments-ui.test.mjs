@@ -9,6 +9,9 @@ test('renders Moments as a slow seamless marquee with fullscreen photos', () => 
   assert.match(script, /moment-marquee-track/);
   assert.match(script, /moment-marquee-group[^>]*aria-hidden="true"/);
   assert.match(script, /DoveMoments\.openMoment/);
+  assert.match(script, /moment-slide-caption/);
+  assert.match(script, /moment-archive-stamp/);
+  assert.match(script, /momentDetails/);
   assert.match(styles, /animation:moment-marquee 150s linear infinite/);
   assert.match(styles, /prefers-reduced-motion:reduce/);
   assert.match(styles, /animation-play-state:paused/);

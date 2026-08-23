@@ -44,6 +44,12 @@
     return `--moment-x:${x}%;--moment-y:${y}%;--moment-zoom:${zoom}`;
   }
 
+  function momentDetails(moment, lang = language()) {
+    return [copy(moment, 'dateLabel', lang), copy(moment, 'schedule', lang), copy(moment, 'venue', lang)]
+      .filter(Boolean)
+      .join(' · ');
+  }
+
   function openMoment(eventNumber) {
     const event = galleryEvent();
     const photos = event && event.gallery && Array.isArray(event.gallery.photos)
@@ -66,7 +72,7 @@
       const special = moment.type === 'special' ? ' special' : '';
       const load = !duplicate && index === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
       const hidden = duplicate ? ' tabindex="-1"' : '';
-      return `<button class="moment-slide${special}" type="button" data-moment-slide="${moment.eventNumber}" style="${imageStyle(moment)}" onclick="DoveMoments.openMoment(${moment.eventNumber})"${hidden} aria-label="${escapeHtml(text(`全屏查看 EVENT ${moment.paddedNumber} 照片`, `View the Event ${moment.paddedNumber} photo fullscreen`))}"><img src="${escapeHtml(moment.photo.src)}" alt="${escapeHtml(copy(moment.photo, 'alt', lang))}" ${load}><span class="moment-slide-caption"><span>EVENT ${moment.paddedNumber} · ${escapeHtml(copy(moment, 'typeLabel', lang))}</span><strong>${escapeHtml(copy(moment, 'title', lang))}</strong></span></button>`;
+      return `<button class="moment-slide${special}" type="button" data-moment-slide="${moment.eventNumber}" style="${imageStyle(moment)}" onclick="DoveMoments.openMoment(${moment.eventNumber})"${hidden} aria-label="${escapeHtml(text(`全屏查看 EVENT ${moment.paddedNumber} 照片`, `View the Event ${moment.paddedNumber} photo fullscreen`))}"><img src="${escapeHtml(moment.photo.src)}" alt="${escapeHtml(copy(moment.photo, 'alt', lang))}" ${load}><span class="moment-slide-caption"><span class="moment-slide-kicker">EVENT ${moment.paddedNumber} · ${escapeHtml(copy(moment, 'typeLabel', lang))}</span><strong>${escapeHtml(copy(moment, 'title', lang))}</strong><small>${escapeHtml(momentDetails(moment, lang))}</small></span></button>`;
     }
 
     function render() {
@@ -106,7 +112,7 @@
       target.innerHTML = moments.map(moment => {
         const special = moment.type === 'special';
         const body = moment.photo
-          ? `<button class="moment-archive-photo" type="button" data-archive-moment="${moment.eventNumber}" style="${imageStyle(moment)}" aria-label="${escapeHtml(text(`全屏查看 EVENT ${moment.paddedNumber}`, `View Event ${moment.paddedNumber} fullscreen`))}"><img src="${escapeHtml(moment.photo.src)}" alt="${escapeHtml(copy(moment.photo, 'alt', lang))}" loading="lazy"></button>`
+          ? `<button class="moment-archive-photo" type="button" data-archive-moment="${moment.eventNumber}" style="${imageStyle(moment)}" aria-label="${escapeHtml(text(`全屏查看 EVENT ${moment.paddedNumber}`, `View Event ${moment.paddedNumber} fullscreen`))}"><img src="${escapeHtml(moment.photo.src)}" alt="${escapeHtml(copy(moment.photo, 'alt', lang))}" loading="lazy"><span class="moment-archive-stamp"><span>${escapeHtml(copy(moment, 'dateLabel', lang))} · ${escapeHtml(copy(moment, 'schedule', lang))}</span><strong>${escapeHtml(copy(moment, 'venue', lang))}</strong></span></button>`
           : `<div class="moment-archive-photo pending"><img src="golden-dove-mark.webp" alt=""><span>${text('照片待补', 'Photo Pending')}</span></div>`;
         return `<article class="moment-archive-card${special ? ' special' : ''}${moment.photo ? '' : ' pending'}">${body}<div class="moment-archive-copy"><span>EVENT ${moment.paddedNumber}</span><h3>${escapeHtml(copy(moment, 'title', lang))}</h3><p>${escapeHtml(copy(moment, 'typeLabel', lang))}</p></div></article>`;
       }).join('');

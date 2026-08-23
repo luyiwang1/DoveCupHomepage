@@ -17,6 +17,22 @@
     13: { src: 'assets/moments/event-11.webp', focusX: 50, focusY: 100, zoom: 1.12 }
   };
 
+  const eventDates = [
+    { label: '5月24日', labelEn: 'MAY 24' },
+    { label: '5月31日', labelEn: 'MAY 31' },
+    { label: '6月7日', labelEn: 'JUN 07' },
+    { label: '6月14日', labelEn: 'JUN 14' },
+    { label: '6月21日', labelEn: 'JUN 21' },
+    { label: '6月28日', labelEn: 'JUN 28' },
+    { label: '7月5日', labelEn: 'JUL 05' },
+    { label: '7月12日', labelEn: 'JUL 12' },
+    { label: '7月19日', labelEn: 'JUL 19' },
+    { label: '7月26日', labelEn: 'JUL 26' },
+    { label: '8月2日', labelEn: 'AUG 02' },
+    { label: '8月8日', labelEn: 'AUG 08' },
+    { label: '8月15日', labelEn: 'AUG 15' }
+  ];
+
   const specialEvents = {
     5: {
       title: '金鸽男女单打赛',
@@ -48,13 +64,18 @@
     const eventNumber = index + 1;
     const special = specialEvents[eventNumber] || null;
     const photo = photoSlots[eventNumber] || null;
+    const eventDate = eventDates[index];
     const paddedNumber = String(eventNumber).padStart(2, '0');
     const title = special ? special.title : '金鸽巡回赛';
     const titleEn = special ? special.titleEn : 'Golden Dove Tour';
     const typeLabel = special ? special.typeLabel : '常驻巡回赛';
     const typeLabelEn = special ? special.typeLabelEn : 'Resident Tour';
-    const caption = `EVENT ${paddedNumber} · ${special ? special.caption : '金鸽巡回赛活动合影'}`;
-    const captionEn = `EVENT ${paddedNumber} · ${special ? special.captionEn : 'Golden Dove Tour group photo'}`;
+    const schedule = '周六 · 17:00–19:00';
+    const scheduleEn = 'SATURDAY · 5–7 PM';
+    const venue = 'MRTC · 多伦多';
+    const venueEn = 'MRTC · Toronto';
+    const caption = `EVENT ${paddedNumber} · ${eventDate.label} · ${schedule} · ${venue} · ${special ? special.caption : '金鸽巡回赛活动合影'}`;
+    const captionEn = `EVENT ${paddedNumber} · ${eventDate.labelEn} · ${scheduleEn} · ${venueEn} · ${special ? special.captionEn : 'Golden Dove Tour group photo'}`;
 
     return {
       eventNumber,
@@ -64,7 +85,12 @@
       typeLabelEn,
       title,
       titleEn,
-      venue: 'MRTC · Toronto',
+      dateLabel: eventDate.label,
+      dateLabelEn: eventDate.labelEn,
+      schedule,
+      scheduleEn,
+      venue,
+      venueEn,
       summary: '',
       summaryEn: '',
       photo: photo ? {

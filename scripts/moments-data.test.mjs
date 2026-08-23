@@ -17,6 +17,13 @@ test('keeps a complete thirteen-event photo archive', () => {
   assert.equal(moments.find(moment => moment.eventNumber === 5).photo.src, 'assets/moments/event-05-v2.webp');
   assert.equal(moments.find(moment => moment.eventNumber === 8).photo.src, 'assets/moments/event-08-v4.webp');
   assert.equal(moments.find(moment => moment.eventNumber === 11).photo.src, 'assets/moments/event-09.webp');
+  assert.equal(moments.find(moment => moment.eventNumber === 1).dateLabel, '5月24日');
+  assert.equal(moments.find(moment => moment.eventNumber === 12).dateLabel, '8月8日');
+  assert.equal(moments.find(moment => moment.eventNumber === 13).dateLabelEn, 'AUG 15');
+  assert.ok(moments.every(moment => moment.scheduleEn === 'SATURDAY · 5–7 PM'));
+  assert.ok(moments.every(moment => moment.venueEn === 'MRTC · Toronto'));
+  assert.match(moments[0].photo.caption, /5月24日 · 周六 · 17:00–19:00 · MRTC · 多伦多/);
+  assert.match(moments[0].photo.captionEn, /MAY 24 · SATURDAY · 5–7 PM · MRTC · Toronto/);
 });
 
 test('marks Event 05, Event 08, and Event 12 as special events', () => {
