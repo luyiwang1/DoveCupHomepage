@@ -92,6 +92,7 @@ test('translates the Singles Championship desk without mixed-language controls',
   assert.equal(localizeText('This division is full', 'zh'), '这个组别已经满员');
   assert.equal(localizeText('Eight spots are available in each draw. Your name appears on the court board and draw immediately.', 'zh'), '男单、女单各有 8 个席位；报名后姓名会立即同步到签表。');
   assert.equal(localizeText('View Draws', 'zh'), '查看签表');
+  assert.equal(localizeText('Six courts. One draw. Play your way to the title.', 'zh'), '六片球场，同时开拍。一路赢到冠军。');
 });
 
 test('translates the live weekly signup roster on attendance', () => {

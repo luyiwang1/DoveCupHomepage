@@ -206,7 +206,7 @@
   add('Registration cannot reopen after matches start', '比赛开始后不能重新开放报名', 'Registration cannot reopen after matches start');
   add('Unable to close registration', '暂时无法锁定报名', 'Unable to close registration');
   add('Tournament Rules', '赛事规则', 'Tournament Rules');
-  add('Start six QFs, then keep the draw moving.', '先开 6 场四分之一决赛，然后让签表持续推进。', 'Start six QFs, then keep the draw moving.');
+  add('Six courts. One draw. Play your way to the title.', '六片球场，同时开拍。一路赢到冠军。', 'Six courts. One draw. Play your way to the title.');
   add('Main-draw matches always have court priority. Eliminated players may free play on idle courts until the next official match is ready.', '正赛永远优先使用场地。淘汰球员可以在暂时空闲的场地自由打，直到下一场正赛准备好。', 'Main-draw matches always have court priority. Eliminated players may free play on idle courts until the next official match is ready.');
   add('Opening Courts', '开场场地', 'Opening Courts');
   add('Begin with three men\'s QFs and three women\'s QFs. The remaining men\'s QF and women\'s QF start as soon as any court opens.', '开场先打 3 场男单四分之一决赛和 3 场女单四分之一决赛。剩余两场在任意场地空出后立即补上。', 'Begin with three men\'s QFs and three women\'s QFs. The remaining men\'s QF and women\'s QF start as soon as any court opens.');
