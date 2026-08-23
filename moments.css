@@ -33,6 +33,7 @@
 .moments-copy h3{margin:13px 0 16px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(31px,4vw,52px);font-weight:500;line-height:1}
 .moments-copy p{margin:0;color:rgba(248,239,215,.7);font-size:14px;line-height:1.75}
 .moments-meta{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:24px;background:rgba(248,239,215,.18)}
+.moments-copy h3 + .moments-meta{margin-top:8px}
 .moments-meta div{min-width:0;padding:12px;background:#10271e}
 .moments-meta span{display:block;color:#d5ab55;font-size:9px;font-weight:900;text-transform:uppercase}
 .moments-meta strong{display:block;margin-top:6px;overflow-wrap:anywhere;font-family:Georgia,"Times New Roman",serif;font-size:16px;font-weight:500}

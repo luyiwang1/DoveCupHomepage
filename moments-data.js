@@ -17,21 +17,36 @@
     13: { src: 'assets/moments/event-11.webp', focusX: 50, focusY: 100, zoom: 1.12 }
   };
 
+  const specialEvents = {
+    8: {
+      title: '金鸽 × 大鱼杯',
+      titleEn: 'Golden Dove x Big Fish Cup',
+      typeLabel: '特殊赛事',
+      typeLabelEn: 'Special Event',
+      caption: '金鸽 × 大鱼杯活动合影',
+      captionEn: 'Golden Dove x Big Fish Cup group photo'
+    },
+    12: {
+      title: '凤凰 vs 狮鹫',
+      titleEn: 'Phoenix vs Griffin',
+      typeLabel: '特殊团体赛',
+      typeLabelEn: 'Special Team Event',
+      caption: '凤凰 vs 狮鹫团体赛合影',
+      captionEn: 'Phoenix vs Griffin team event group photo'
+    }
+  };
+
   const moments = Array.from({ length: 13 }, (_, index) => {
     const eventNumber = index + 1;
-    const special = eventNumber === 12;
+    const special = specialEvents[eventNumber] || null;
     const photo = photoSlots[eventNumber] || null;
     const paddedNumber = String(eventNumber).padStart(2, '0');
-    const title = special ? '凤凰 vs 狮鹫' : '金鸽巡回赛';
-    const titleEn = special ? 'Phoenix vs Griffin' : 'Golden Dove Tour';
-    const typeLabel = special ? '特殊团体赛' : '常驻巡回赛';
-    const typeLabelEn = special ? 'Special Team Event' : 'Resident Tour';
-    const caption = special
-      ? `EVENT ${paddedNumber} · 凤凰 vs 狮鹫团体赛合影`
-      : `EVENT ${paddedNumber} · 金鸽巡回赛活动合影`;
-    const captionEn = special
-      ? `EVENT ${paddedNumber} · Phoenix vs Griffin team event group photo`
-      : `EVENT ${paddedNumber} · Golden Dove Tour group photo`;
+    const title = special ? special.title : '金鸽巡回赛';
+    const titleEn = special ? special.titleEn : 'Golden Dove Tour';
+    const typeLabel = special ? special.typeLabel : '常驻巡回赛';
+    const typeLabelEn = special ? special.typeLabelEn : 'Resident Tour';
+    const caption = `EVENT ${paddedNumber} · ${special ? special.caption : '金鸽巡回赛活动合影'}`;
+    const captionEn = `EVENT ${paddedNumber} · ${special ? special.captionEn : 'Golden Dove Tour group photo'}`;
 
     return {
       eventNumber,
@@ -42,12 +57,8 @@
       title,
       titleEn,
       venue: 'MRTC · Toronto',
-      summary: special
-        ? `固定混双搭档、两支队伍和完整团队赛果，都留在第 ${eventNumber} 次活动的档案里。`
-        : `第 ${eventNumber} 次金鸽巡回赛的到场合影，记录这一站一起上场的人。`,
-      summaryEn: special
-        ? `Fixed mixed-doubles teams, two squads, and the complete result are preserved in the Event ${paddedNumber} archive.`
-        : `The Event ${paddedNumber} group photo remembers everyone who joined this Golden Dove Tour stop.`,
+      summary: '',
+      summaryEn: '',
       photo: photo ? {
         ...photo,
         alt: caption,

@@ -19,11 +19,14 @@ test('keeps a complete thirteen-event photo archive', () => {
   assert.equal(moments.find(moment => moment.eventNumber === 11).photo.src, 'assets/moments/event-09.webp');
 });
 
-test('marks only Event 12 as the special team event', () => {
+test('marks Event 08 and Event 12 as special events', () => {
   assert.deepEqual(
     JSON.parse(JSON.stringify(moments.filter(moment => moment.type === 'special').map(moment => moment.eventNumber))),
-    [12]
+    [8, 12]
   );
+  assert.equal(moments.find(moment => moment.eventNumber === 8).title, '金鸽 × 大鱼杯');
+  assert.equal(moments.find(moment => moment.eventNumber === 8).titleEn, 'Golden Dove x Big Fish Cup');
+  assert.equal(moments.find(moment => moment.eventNumber === 8).typeLabelEn, 'Special Event');
   assert.equal(moments.find(moment => moment.eventNumber === 12).titleEn, 'Phoenix vs Griffin');
 });
 
