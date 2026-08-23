@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>try{if(!localStorage.getItem('dove_cup_language'))localStorage.setItem('dove_cup_language','en')}catch(error){}</script>
 <link rel="stylesheet" href="language.css?v=1">
-<script src="language.js?v=20"></script>
+<script src="language.js?v=21"></script>
 <title>Golden Dove Cup · Singles Championship</title>
 <meta name="description" content="Golden Dove Cup Singles Championship tournament desk for rolling men's and women's single-elimination draws.">
 <style>
@@ -34,7 +34,6 @@
     <div class="top-links">
       <a class="top-link" href="events.html">Events</a>
       <a class="top-link" href="#signup">Signup</a>
-      <a class="top-link" href="#courts">Court Board</a>
       <a class="top-link" href="#draws">Draws</a>
       <button class="top-link admin-toggle" id="adminBtn" onclick="toggleAdmin()">Admin</button>
     </div>
@@ -51,7 +50,7 @@
     </div>
     <div class="hero-actions">
       <a class="button primary" href="#signup">Join the Signup</a>
-      <a class="button" href="#courts">Open Court Board</a>
+      <a class="button" href="#draws">View Draws</a>
       <button class="button" type="button" onclick="openAdminSetup()">Admin Setup</button>
       <a class="button" href="events.html">Back to Events</a>
     </div>
@@ -87,6 +86,13 @@
         </form>
         <div class="roster-grid" id="signupRosters"></div>
       </div>
+      <div class="admin-panel" id="admin">
+        <div class="toolbar">
+          <div><div class="kicker">Admin Setup</div><h2>Players</h2></div>
+          <div class="toolbar-actions"><button class="tool-button danger" type="button" onclick="resetTournament()">Reset Tournament</button><span class="sync-status" id="syncStatus">Loading live desk...</span></div>
+        </div>
+        <div class="admin-grid" id="playerEditors"></div>
+      </div>
     </div>
   </section>
 
@@ -101,31 +107,6 @@
         <article class="rule"><div class="rule-num">02</div><h3>Rolling Starts</h3><p>Semifinals and finals start immediately when both players are ready and a court is available. No round-wide waiting.</p></article>
         <article class="rule"><div class="rule-num">03</div><h3>Scoring</h3><p>Normal 15/30/40 scoring. First to 6 games wins; at 5-5, play a 7-point tiebreak.</p></article>
         <article class="rule"><div class="rule-num">04</div><h3>Time Cap</h3><p>At 35 minutes, finish the current game. More games wins; if games are tied, play a 7-point tiebreak.</p></article>
-      </div>
-    </div>
-  </section>
-
-  <section class="band desk" id="courts">
-    <div class="band-inner">
-      <div class="toolbar">
-        <div><div class="kicker">Live Court Board</div><h2>Six courts, one clear desk view.</h2></div>
-        <div class="toolbar-actions">
-          <button class="tool-button secondary" type="button" onclick="copyDeskSummary()">Copy Desk Summary</button>
-          <button class="tool-button danger admin-only" type="button" onclick="resetTournament()">Reset Tournament</button>
-          <span class="sync-status" id="syncStatus">Loading live desk...</span>
-        </div>
-      </div>
-      <div class="court-grid" id="courtBoard"></div>
-      <div class="next-strip">
-        <div class="next-panel"><h3>Next Official Matches</h3><div class="next-list" id="nextList"></div></div>
-        <div class="next-panel"><h3>Desk Notes</h3><p class="section-copy">Assign a court, start the match, then record games and winner. Once a QF or SF is finished, the next match automatically becomes Ready.</p></div>
-      </div>
-      <div class="admin-panel" id="admin">
-        <div class="toolbar">
-          <div><div class="kicker">Admin Setup</div><h2>Players</h2></div>
-          <span class="sync-status">Names save live after editing.</span>
-        </div>
-        <div class="admin-grid" id="playerEditors"></div>
       </div>
     </div>
   </section>
@@ -185,7 +166,8 @@ async function removeSignup(entryId){const entry=eventData.registration.entries.
 async function toggleRegistration(){if(!canEdit())return;const opening=!eventData.registration.open;await commitRegistration(current=>{const next=DoveSinglesChampionship.setRegistrationOpen(current,opening);return next.registration.open===current.registration.open?null:next},opening?'Registration reopened':'Registration closed',opening?'Registration cannot reopen after matches start':'Unable to close registration')}
 function openMatchEditor(matchId){if(!canEdit())return;editingMatchId=matchId;renderMatchEditor();const dialog=document.getElementById('matchEditorDialog');if(!dialog.open)dialog.showModal()}
 function closeMatchEditor(){editingMatchId='';const dialog=document.getElementById('matchEditorDialog');if(dialog.open)dialog.close()}
-function queueSave(){if(!eventRef){try{localStorage.setItem('dove_singles_championship_backup',JSON.stringify(eventData));document.getElementById('syncStatus').textContent='Saved locally'}catch(error){}return}document.getElementById('syncStatus').textContent='Saving...';clearTimeout(saveTimer);saveTimer=setTimeout(()=>{eventData.updatedAt=Date.now();eventRef.set(eventData).then(()=>{document.getElementById('syncStatus').textContent='Live saved'}).catch(()=>{document.getElementById('syncStatus').textContent='Save failed';showToast('Save failed. Check your connection.')})},220)}
+function setSyncStatus(message){const status=document.getElementById('syncStatus');if(status)status.textContent=message}
+function queueSave(){if(!eventRef){try{localStorage.setItem('dove_singles_championship_backup',JSON.stringify(eventData));setSyncStatus('Saved locally')}catch(error){}return}setSyncStatus('Saving...');clearTimeout(saveTimer);saveTimer=setTimeout(()=>{eventData.updatedAt=Date.now();eventRef.set(eventData).then(()=>setSyncStatus('Live saved')).catch(()=>{setSyncStatus('Save failed');showToast('Save failed. Check your connection.')})},220)}
 function saveNow(){clearTimeout(saveTimer);saveTimer=null;eventData.updatedAt=Date.now();if(eventRef)return eventRef.set(eventData);try{localStorage.setItem('dove_singles_championship_backup',JSON.stringify(eventData))}catch(error){}return Promise.resolve()}
 function updateAndSave(next,message){eventData=DoveSinglesChampionship.normalizeEvent(next);renderAll();queueSave();if(message)showToast(message)}
 function updatePlayerName(division,index,value){if(!canEdit())return;updateAndSave(DoveSinglesChampionship.updatePlayer(eventData,division,index,value),'Player updated')}
@@ -204,9 +186,9 @@ function bracketRow(match){if(match.round==='qf')return 2+(match.index-1)*2;if(m
 function renderMatch(match){const players=DoveSinglesChampionship.competitors(eventData,match),winner=match.winnerId,scores=[match.scoreA,match.scoreB],metaLeft=match.court?`Court ${match.court}`:'Unassigned',metaRight=match.tiebreak?`Tiebreak ${match.tiebreak}`:'';return `<article class="match-card" style="--bracket-row:${bracketRow(match)}"><div class="match-head"><span class="match-name">${clean(shortMatch(match))}</span><span class="match-head-actions">${statusPill(match.status)}${isAdminMode?`<button class="match-edit" type="button" title="Edit Match" aria-label="Edit Match" onclick="openMatchEditor('${match.id}')">✎</button>`:''}</span></div><div class="match-body">${players.map((player,index)=>`<div class="player-line ${player&&player.id===winner?'winner':''}"><span ${player?'data-dove-no-translate':''}>${clean(player?player.name:'TBD')}</span><strong class="match-score ${scores[index]===''?'empty':''}">${scores[index]===''?'-':clean(scores[index])}</strong></div>`).join('')}<div class="match-meta"><span>${clean(metaLeft)}</span><span>${clean(metaRight)}</span></div></div></article>`}
 function renderMatchEditor(){const target=document.getElementById('matchEditorContent');if(!editingMatchId){target.innerHTML='';return}const match=DoveSinglesChampionship.matchById(eventData,editingMatchId);if(!match){closeMatchEditor();return}const players=DoveSinglesChampionship.competitors(eventData,match),winner=match.winnerId,options=players.map(player=>player?`<option value="${clean(player.id)}" data-dove-no-translate ${winner===player.id?'selected':''}>${clean(player.name)}</option>`:'').join('');target.innerHTML=`<div class="dialog-head"><div><div class="kicker">Match Editor</div><h3>${clean(shortMatch(match))}</h3></div><button class="dialog-close" type="button" aria-label="Close" onclick="closeMatchEditor()">×</button></div><div class="dialog-body"><div class="dialog-players" data-dove-no-translate>${clean(playerLabel(match))}</div><div class="dialog-fields"><div class="dialog-field"><label>Court</label><select onchange="setMatchCourt('${match.id}',this.value)"><option value="">Unassigned</option>${Array.from({length:6},(_,i)=>`<option value="${i+1}" ${Number(match.court)===i+1?'selected':''}>Court ${i+1}</option>`).join('')}</select></div><div class="dialog-field"><label>Status</label><select onchange="setMatchStatus('${match.id}',this.value)">${DoveSinglesChampionship.STATUS.map(status=>`<option value="${status}" ${match.status===status?'selected':''}>${status}</option>`).join('')}</select></div><div class="dialog-field"><label>Games</label><div class="dialog-scores"><input id="scoreA-${match.id}" type="number" min="0" max="6" value="${clean(match.scoreA)}"><span>:</span><input id="scoreB-${match.id}" type="number" min="0" max="6" value="${clean(match.scoreB)}"></div></div><div class="dialog-field"><label>Tiebreak</label><input id="tb-${match.id}" value="${clean(match.tiebreak)}" placeholder="7-5"></div><div class="dialog-field"><label>Winner</label><select id="winner-${match.id}"><option value="">Choose</option>${options}</select></div></div><div class="match-actions"><button class="small-button secondary" type="button" onclick="startMatch('${match.id}','')" ${match.status==='Playing'?'disabled':''}>Start</button><button class="small-button" type="button" onclick="finishMatch('${match.id}')">Finish & Advance</button></div></div>`}
 function renderDraws(){document.getElementById('drawGrid').innerHTML=DoveSinglesChampionship.DIVISIONS.map(division=>{const meta=DoveSinglesChampionship.DIVISION_META[division],matches=eventData.matches.filter(match=>match.division===division);return `<section class="draw-panel ${meta.accent}"><div class="draw-head"><div><div class="kicker">${clean(meta.short)} Singles</div><h3>${clean(meta.title)}</h3></div></div><div class="bracket-scroll"><div class="rounds">${['qf','sf','final'].map(round=>`<div class="round-col ${round}"><div class="round-title">${DoveSinglesChampionship.ROUND_META[round].title}<span>${DoveSinglesChampionship.ROUND_META[round].label}</span></div>${matches.filter(match=>match.round===round).map(renderMatch).join('')}</div>`).join('')}</div></div></section>`}).join('')}
-function renderAll(){renderAdmin();renderSignups();renderSummary();renderCourtBoard();renderNextList();renderPlayerEditors();renderDraws();renderMatchEditor()}
+function renderAll(){renderAdmin();renderSignups();renderSummary();renderPlayerEditors();renderDraws();renderMatchEditor()}
 function copyDeskSummary(){const lines=[];DoveSinglesChampionship.courtBoard(eventData).forEach(item=>{lines.push(`Court ${item.court}: ${item.current?`${shortMatch(item.current)} - ${playerLabel(item.current)} (${item.mode})`:item.mode}`)});navigator.clipboard.writeText(lines.join('\n')).then(()=>showToast('Desk summary copied')).catch(()=>showToast('Copy failed'))}
-function start(){renderAll();if(!window.firebase||!firebase.database){document.getElementById('syncStatus').textContent='Firebase unavailable; using local view';try{eventData=DoveSinglesChampionship.normalizeEvent(JSON.parse(localStorage.getItem('dove_singles_championship_backup')||'null'))}catch(error){}renderAll();return}if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);eventRef=firebase.database().ref(EVENT_DB_PATH);eventRef.on('value',snapshot=>{eventData=DoveSinglesChampionship.normalizeEvent(snapshot.val());document.getElementById('syncStatus').textContent='Live synced';renderAll()},()=>{document.getElementById('syncStatus').textContent='Live data read failed'})}
+function start(){renderAll();if(!window.firebase||!firebase.database){setSyncStatus('Firebase unavailable; using local view');try{eventData=DoveSinglesChampionship.normalizeEvent(JSON.parse(localStorage.getItem('dove_singles_championship_backup')||'null'))}catch(error){}renderAll();return}if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);eventRef=firebase.database().ref(EVENT_DB_PATH);eventRef.on('value',snapshot=>{eventData=DoveSinglesChampionship.normalizeEvent(snapshot.val());setSyncStatus('Live synced');renderAll()},()=>setSyncStatus('Live data read failed'))}
 start();
 </script>
 </body>
