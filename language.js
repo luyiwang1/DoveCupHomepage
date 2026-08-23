@@ -646,6 +646,15 @@
     return value === 'en' ? 'en' : 'zh';
   }
 
+  function languageFromQuery(search) {
+    try {
+      const value = new URLSearchParams(String(search || '')).get('lang');
+      return value === 'en' || value === 'zh' ? value : null;
+    } catch (error) {
+      return null;
+    }
+  }
+
   function translatePatterns(text, language) {
     let next = text;
     if (language === 'en') {
@@ -844,7 +853,13 @@
   function init() {
     if (initialized) return;
     initialized = true;
-    try { currentLanguage = normalizeLanguage(localStorage.getItem(STORAGE_KEY)); } catch (error) {}
+    const requestedLanguage = typeof location !== 'undefined' ? languageFromQuery(location.search) : null;
+    if (requestedLanguage) {
+      currentLanguage = requestedLanguage;
+      try { localStorage.setItem(STORAGE_KEY, currentLanguage); } catch (error) {}
+    } else {
+      try { currentLanguage = normalizeLanguage(localStorage.getItem(STORAGE_KEY)); } catch (error) {}
+    }
     installDialogTranslation();
     if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', ready, { once: true });
     else ready();
@@ -854,6 +869,7 @@
     init,
     getLanguage: () => currentLanguage,
     setLanguage,
+    languageFromQuery,
     localizeText
   };
 }));

@@ -3,7 +3,13 @@ import assert from 'node:assert/strict';
 
 await import('../language.js');
 
-const { localizeText } = globalThis.DoveLanguage;
+const { languageFromQuery, localizeText } = globalThis.DoveLanguage;
+
+test('reads an explicit language from a shared URL', () => {
+  assert.equal(languageFromQuery('?lang=en'), 'en');
+  assert.equal(languageFromQuery('?lang=zh'), 'zh');
+  assert.equal(languageFromQuery('?lang=fr'), null);
+});
 
 test('translates the team event title into English', () => {
   assert.equal(localizeText('凤凰 vs 狮鹫', 'en'), 'Phoenix vs Griffin');
