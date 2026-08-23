@@ -57,6 +57,26 @@ window.DOVE_EVENTS = [
       ]
     },
     href: 'team-event.html'
+  },
+  {
+    id: '2026-singles-championship',
+    eventNumber: 14,
+    featured: true,
+    eyebrow: 'Singles Championship',
+    date: '2026-08-23',
+    dateLabel: 'AUG 23 · SUNDAY',
+    title: 'Golden Dove Cup · Singles Championship',
+    summary: '男女各 8 人独立单淘汰签表，6 片场地滚动开赛。现场赛事桌可以录入选手、分配场地、开始比赛、记录比分，并自动推进胜者。',
+    venue: 'Toronto',
+    format: '6 Courts · Men + Women Singles · Rolling Tournament',
+    attendeeCount: 16,
+    archiveStats: [
+      { label: '参赛人数', value: '16 人参赛' },
+      { label: '签表', value: '男单 + 女单' },
+      { label: '赛制', value: '单淘汰' }
+    ],
+    archiveAction: '查看赛事桌',
+    href: 'singles-championship.html'
   }
 ];
 

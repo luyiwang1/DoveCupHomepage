@@ -8,6 +8,7 @@ const context = { window: {} };
 vm.runInNewContext(source, context);
 
 const event = context.window.DOVE_EVENTS[0];
+const singlesEvent = context.window.DOVE_EVENTS.find(item => item.id === '2026-singles-championship');
 const status = context.window.DoveEventStatus;
 
 test('stores the archived team-event result shown in the past-event card', () => {
@@ -38,4 +39,18 @@ test('maps each automatic status to its visual color class', () => {
   assert.equal(status.classFor('即将开始'), 'status-upcoming');
   assert.equal(status.classFor('进行中'), 'status-live');
   assert.equal(status.classFor('已结束'), 'status-ended');
+});
+
+test('keeps the Singles Championship as the next numbered special event', () => {
+  assert.equal(singlesEvent.eventNumber, 14);
+  assert.equal(singlesEvent.date, '2026-08-23');
+  assert.equal(singlesEvent.href, 'singles-championship.html');
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(singlesEvent.archiveStats)),
+    [
+      { label: '参赛人数', value: '16 人参赛' },
+      { label: '签表', value: '男单 + 女单' },
+      { label: '赛制', value: '单淘汰' }
+    ]
+  );
 });

@@ -70,6 +70,19 @@ test('translates the event gallery experience without mixed-language labels', ()
   );
 });
 
+test('translates the Singles Championship desk without mixed-language controls', () => {
+  assert.equal(localizeText('Draws', 'zh'), '签表');
+  assert.equal(localizeText('Live synced', 'zh'), '实时已同步');
+  assert.equal(localizeText('Men QF4', 'zh'), '男单四分之一决赛 4');
+  assert.equal(localizeText('Women SF2', 'zh'), '女单半决赛 2');
+  assert.equal(localizeText('Men 2 vs Men 7', 'zh'), '男选手 2 对阵 男选手 7');
+  assert.equal(localizeText('Games', 'zh'), '局数');
+  assert.equal(localizeText('Winner', 'zh'), '胜者');
+  assert.equal(localizeText('Unassigned', 'zh'), '未分配');
+  assert.equal(localizeText('Start on Court 3', 'zh'), '在场地 3 开始');
+  assert.equal(localizeText('Finish & Advance', 'zh'), '完成并晋级');
+});
+
 test('translates the live weekly signup roster on attendance', () => {
   assert.equal(localizeText('本周报名名单', 'en'), 'This Week\'s Registration');
   assert.equal(localizeText('有历史到场记录', 'en'), 'Previous Attendance');

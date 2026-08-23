@@ -14,6 +14,7 @@
   // Shared navigation, labels, and mixed-language sports terms.
   add('Golden Dove Cup / 金鸽杯', '金鸽杯', 'Golden Dove Cup');
   add('Golden Dove Cup · Team Special', '金鸽杯 · 团体特别赛', 'Golden Dove Cup · Team Special');
+  add('Golden Dove Cup · Singles Championship', '金鸽杯 · 单打冠军赛', 'Golden Dove Cup · Singles Championship');
   add('Golden Dove Cup', '金鸽杯', 'Golden Dove Cup');
   add('金鸽杯', '金鸽杯', 'Golden Dove Cup');
   add('Dove Cup Calendar', '金鸽杯活动日历', 'Dove Cup Calendar');
@@ -47,6 +48,9 @@
   add('Fixed Partnerships', '固定搭档', 'Fixed Partnerships');
   add('Admin Setup', '管理员设置', 'Admin Setup');
   add('Tournament Desk', '赛事中心', 'Tournament Desk');
+  add('Singles Championship', '单打冠军赛', 'Singles Championship');
+  add('Court Board', '场地看板', 'Court Board');
+  add('Draws', '签表', 'Draws');
   add('Event Archive', '活动档案', 'Event Archive');
   add('Upcoming & Past', '即将举行与往期活动', 'Upcoming & Past');
   add('Special Events', '特别活动', 'Special Events');
@@ -141,6 +145,11 @@
   add('团队比分', '团队比分', 'Team Score');
   add('总局数', '总局数', 'Total Games');
   add('16 人参赛', '16 人参赛', '16 Players');
+  add('签表', '签表', 'Draws');
+  add('男单 + 女单', '男单 + 女单', "Men's + Women's Singles");
+  add('赛制', '赛制', 'Competition');
+  add('单淘汰', '单淘汰', 'Single Elimination');
+  add('查看赛事桌', '查看赛事桌', 'Open Tournament Desk');
   add('狮鹫 8:4 获胜', '狮鹫 8:4 获胜', 'Griffin Won 8-4');
   add('总局数 54:37', '总局数 54:37', 'Total Games 54-37');
   add('查看往期活动', '查看往期活动', 'View Past Events');
@@ -153,6 +162,90 @@
   add('进入活动页面', '进入活动页面', 'Open Event');
   add('查看活动', '查看活动', 'View Event');
   add('返回主页', '返回主页', 'Back to Home');
+  add('AUG 23 · SUNDAY', '8月23日 · 周日', 'AUG 23 · SUNDAY');
+  add('男女各 8 人独立单淘汰签表，6 片场地滚动开赛。现场赛事桌可以录入选手、分配场地、开始比赛、记录比分，并自动推进胜者。', '男女各 8 人独立单淘汰签表，6 片场地滚动开赛。现场赛事桌可以录入选手、分配场地、开始比赛、记录比分，并自动推进胜者。', 'Separate 8-player men\'s and women\'s single-elimination draws on six courts with rolling starts. The live desk can enter players, assign courts, start matches, record scores, and advance winners automatically.');
+  add('6 Courts · Men + Women Singles · Rolling Tournament', '6 片场地 · 男单 + 女单 · 滚动赛程', '6 Courts · Men + Women Singles · Rolling Tournament');
+  add('Golden Dove Cup Singles Championship tournament desk for rolling men\'s and women\'s single-elimination draws.', '金鸽杯单打冠军赛现场赛事桌，用于男女单打单淘汰滚动签表。', 'Golden Dove Cup Singles Championship tournament desk for rolling men\'s and women\'s single-elimination draws.');
+  add('A rolling tournament desk for 8 men and 8 women, two independent single-elimination draws, six courts, and a two-hour event window.', '现场赛事桌：8 名男子、8 名女子，男女独立单淘汰签表，6 片场地，2 小时活动窗口。', 'A rolling tournament desk for 8 men and 8 women, two independent single-elimination draws, six courts, and a two-hour event window.');
+  add('8 Men + 8 Women', '8 男 + 8 女', '8 Men + 8 Women');
+  add('6 Courts', '6 片场地', '6 Courts');
+  add('35 Min / Match', '每场 35 分钟', '35 Min / Match');
+  add('Rolling Tournament', '滚动开赛', 'Rolling Tournament');
+  add('Open Court Board', '打开场地看板', 'Open Court Board');
+  add('Back to Events', '返回活动中心', 'Back to Events');
+  add('Tournament Rules', '赛事规则', 'Tournament Rules');
+  add('Start six QFs, then keep the draw moving.', '先开 6 场四分之一决赛，然后让签表持续推进。', 'Start six QFs, then keep the draw moving.');
+  add('Main-draw matches always have court priority. Eliminated players may free play on idle courts until the next official match is ready.', '正赛永远优先使用场地。淘汰球员可以在暂时空闲的场地自由打，直到下一场正赛准备好。', 'Main-draw matches always have court priority. Eliminated players may free play on idle courts until the next official match is ready.');
+  add('Opening Courts', '开场场地', 'Opening Courts');
+  add('Begin with three men\'s QFs and three women\'s QFs. The remaining men\'s QF and women\'s QF start as soon as any court opens.', '开场先打 3 场男单四分之一决赛和 3 场女单四分之一决赛。剩余两场在任意场地空出后立即补上。', 'Begin with three men\'s QFs and three women\'s QFs. The remaining men\'s QF and women\'s QF start as soon as any court opens.');
+  add('Rolling Starts', '滚动开赛', 'Rolling Starts');
+  add('Semifinals and finals start immediately when both players are ready and a court is available. No round-wide waiting.', '半决赛和决赛只要双方就绪且有场地就立刻开打，不等待统一轮次。', 'Semifinals and finals start immediately when both players are ready and a court is available. No round-wide waiting.');
+  add('Scoring', '计分', 'Scoring');
+  add('Normal 15/30/40 scoring. First to 6 games wins; at 5-5, play a 7-point tiebreak.', '正常 15/30/40 计分。先到 6 局获胜；5-5 时直接打 7 分抢七。', 'Normal 15/30/40 scoring. First to 6 games wins; at 5-5, play a 7-point tiebreak.');
+  add('Time Cap', '时间上限', 'Time Cap');
+  add('At 35 minutes, finish the current game. More games wins; if games are tied, play a 7-point tiebreak.', '35 分钟到时打完当前局。局数领先者获胜；局数相同则打 7 分抢七。', 'At 35 minutes, finish the current game. More games wins; if games are tied, play a 7-point tiebreak.');
+  add('Live Court Board', '实时场地看板', 'Live Court Board');
+  add('Six courts, one clear desk view.', '6 片场地，一眼看清现场。', 'Six courts, one clear desk view.');
+  add('Copy Desk Summary', '复制现场摘要', 'Copy Desk Summary');
+  add('Reset Tournament', '重置赛事', 'Reset Tournament');
+  add('Loading live desk...', '正在读取现场赛事桌...', 'Loading live desk...');
+  add('Next Official Matches', '下一批正赛', 'Next Official Matches');
+  add('Desk Notes', '赛事桌提示', 'Desk Notes');
+  add('Assign a court, start the match, then record games and winner. Once a QF or SF is finished, the next match automatically becomes Ready.', '分配场地、开始比赛，然后录入局数和胜者。四分之一决赛或半决赛完成后，下一场会自动进入已准备状态。', 'Assign a court, start the match, then record games and winner. Once a QF or SF is finished, the next match automatically becomes Ready.');
+  add('Names save live after editing.', '修改姓名后会实时保存。', 'Names save live after editing.');
+  add('Men\'s Draw and Women\'s Draw', '男单签表与女单签表', 'Men\'s Draw and Women\'s Draw');
+  add('Each draw is independent: QF, SF, Final. There is no third-place match or formal ranking after elimination.', '男女签表互相独立，依次进行四分之一决赛、半决赛和决赛。淘汰后不安排正式季军赛或排名赛。', 'Each draw is independent: QF, SF, Final. There is no third-place match or formal ranking after elimination.');
+  add('Men\'s Draw', '男单签表', 'Men\'s Draw');
+  add('Women\'s Draw', '女单签表', 'Women\'s Draw');
+  add('Men Singles', '男单', 'Men Singles');
+  add('Women Singles', '女单', 'Women Singles');
+  add('Quarterfinals', '四分之一决赛', 'Quarterfinals');
+  add('Semifinals', '半决赛', 'Semifinals');
+  add('Final', '决赛', 'Final');
+  add('Finished', '已完成', 'Finished');
+  add('Playing', '比赛中', 'Playing');
+  add('Ready', '已准备', 'Ready');
+  add('Waiting', '等待中', 'Waiting');
+  add('Champions', '冠军', 'Champions');
+  add('Pending', '待定', 'Pending');
+  add('TBD', '待定', 'TBD');
+  add('Free Play', '自由打', 'Free Play');
+  add('Official matches take priority when ready.', '下一场正赛准备好后需要让出场地。', 'Official matches take priority when ready.');
+  add('No unassigned Ready matches.', '没有已准备但尚未分配场地的比赛。', 'No unassigned Ready matches.');
+  add('Live synced', '实时已同步', 'Live synced');
+  add('Live saved', '实时已保存', 'Live saved');
+  add('Saved locally', '已保存到本机', 'Saved locally');
+  add('Saving...', '正在保存...', 'Saving...');
+  add('Save failed', '保存失败', 'Save failed');
+  add('Save failed. Check your connection.', '保存失败，请检查网络连接。', 'Save failed. Check your connection.');
+  add('Firebase unavailable; using local view', '云端服务不可用，当前使用本机数据', 'Firebase unavailable; using local view');
+  add('Live data read failed', '实时数据读取失败', 'Live data read failed');
+  add('Admin signed in', '管理员已登录', 'Admin signed in');
+  add('Only an admin can edit the tournament desk', '只有管理员可以编辑赛事桌', 'Only an admin can edit the tournament desk');
+  add('Enter admin password', '请输入管理员密码', 'Enter admin password');
+  add('Wrong password', '密码错误', 'Wrong password');
+  add('Reset players, courts, statuses, and scores for this Singles Championship?', '确定重置本场单打冠军赛的选手、场地、状态和比分吗？', 'Reset players, courts, statuses, and scores for this Singles Championship?');
+  add('Tournament reset', '赛事已重置', 'Tournament reset');
+  add('Status', '状态', 'Status');
+  add('Games', '局数', 'Games');
+  add('Tiebreak', '抢七', 'Tiebreak');
+  add('Winner', '胜者', 'Winner');
+  add('Choose', '选择', 'Choose');
+  add('Unassigned', '未分配', 'Unassigned');
+  add('Start', '开始', 'Start');
+  add('Finish & Advance', '完成并晋级', 'Finish & Advance');
+  add('Copy failed', '复制失败', 'Copy failed');
+  add('Players', '选手', 'Players');
+  add('Court updated', '场地已更新', 'Court updated');
+  add('Status updated', '状态已更新', 'Status updated');
+  add('Player updated', '选手已更新', 'Player updated');
+  add('Match started', '比赛已开始', 'Match started');
+  add('Winner advanced', '胜者已晋级', 'Winner advanced');
+  add('Choose a winner', '请选择胜者', 'Choose a winner');
+  add('Assign a court first', '请先分配场地', 'Assign a court first');
+  add('Both players are not ready yet', '双方选手尚未就绪', 'Both players are not ready yet');
+  add('Desk summary copied', '现场摘要已复制', 'Desk summary copied');
+  add('Singles Championship tournament desk.', '单打冠军赛现场赛事桌。', 'Singles Championship tournament desk.');
   add('Dove Cup Moments', '金鸽影集', 'Dove Cup Moments');
   add('Photo Archive', '活动影集', 'Photo Archive');
   add('Event Archive', '活动档案', 'Event Archive');
@@ -545,6 +638,17 @@
         .replace(/(\d+)\s*分(?!钟)/g, '$1 pts');
     } else {
       next = next
+        .replace(/^Men QF(\d+)$/i, '男单四分之一决赛 $1')
+        .replace(/^Women QF(\d+)$/i, '女单四分之一决赛 $1')
+        .replace(/^Men SF(\d+)$/i, '男单半决赛 $1')
+        .replace(/^Women SF(\d+)$/i, '女单半决赛 $1')
+        .replace(/^Men Final$/i, '男单决赛')
+        .replace(/^Women Final$/i, '女单决赛')
+        .replace(/^Men (\d+) vs Men (\d+)$/i, '男选手 $1 对阵 男选手 $2')
+        .replace(/^Women (\d+) vs Women (\d+)$/i, '女选手 $1 对阵 女选手 $2')
+        .replace(/^Men (\d+)$/i, '男选手 $1')
+        .replace(/^Women (\d+)$/i, '女选手 $1')
+        .replace(/^Start on Court (\d+)$/i, '在场地 $1 开始')
         .replace(/Round\s*(\d+)/gi, '第 $1 轮')
         .replace(/Court\s*(\d+)/gi, '场地 $1')
         .replace(/(\d+)\s*COURTS?/gi, '$1 片场地')
