@@ -18,6 +18,14 @@
   };
 
   const specialEvents = {
+    5: {
+      title: '金鸽男女单打赛',
+      titleEn: 'Golden Dove Singles',
+      typeLabel: '男单 · 女单',
+      typeLabelEn: 'Men\'s + Women\'s Singles',
+      caption: '金鸽男女单打赛活动合影',
+      captionEn: 'Golden Dove men\'s and women\'s singles group photo'
+    },
     8: {
       title: '金鸽 × 大鱼杯',
       titleEn: 'Golden Dove x Big Fish Cup',
