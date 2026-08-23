@@ -252,6 +252,10 @@
   add('Firebase unavailable; using local view', '云端服务不可用，当前使用本机数据', 'Firebase unavailable; using local view');
   add('Live data read failed', '实时数据读取失败', 'Live data read failed');
   add('Admin signed in', '管理员已登录', 'Admin signed in');
+  add('Admin Login', '管理员登录', 'Admin Login');
+  add('Password', '密码', 'Password');
+  add('Sign In', '登录', 'Sign In');
+  add('Cancel', '取消', 'Cancel');
   add('Only an admin can edit the tournament desk', '只有管理员可以编辑赛事桌', 'Only an admin can edit the tournament desk');
   add('Enter admin password', '请输入管理员密码', 'Enter admin password');
   add('Wrong password', '密码错误', 'Wrong password');
