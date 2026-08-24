@@ -4,8 +4,10 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" href="language.css?v=1">
+<link rel="stylesheet" href="site-nav.css?v=1">
 <link rel="stylesheet" href="gallery.css?v=3">
 <script src="language.js?v=26"></script>
+<script src="site-nav.js?v=1" defer></script>
 <title>8.8 混双团体赛 · 金鸽杯</title>
 <meta name="description" content="金鸽杯 8 月 8 日凤凰与狮鹫混双团体赛，实时阵容、比分和团队结果。">
 <style>
@@ -51,11 +53,8 @@ footer{display:flex;justify-content:space-between;gap:16px;padding:28px clamp(18
 </head>
 <body>
 <header class="event-hero">
-  <div class="topbar">
-    <a class="brand" href="./">Golden Dove Cup</a>
+  <div class="topbar" style="justify-content:flex-end">
     <div class="top-links">
-      <a class="top-link" href="events.html">全部活动</a>
-      <a class="top-link" href="./">主页</a>
       <button class="top-link admin-toggle" id="adminBtn" onclick="toggleAdmin()">Admin</button>
     </div>
   </div>

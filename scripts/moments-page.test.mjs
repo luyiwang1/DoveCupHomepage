@@ -6,9 +6,11 @@ const root = new URL('../', import.meta.url);
 const homepage = await readFile(new URL('index.html', root), 'utf8');
 const eventsPage = await readFile(new URL('events.html', root), 'utf8');
 const momentsPage = await readFile(new URL('moments.html', root), 'utf8');
+const siteNav = await readFile(new URL('site-nav.js', root), 'utf8');
 
 test('puts the complete photo archive on its own page', () => {
-  assert.match(homepage, /class="moments-nav" href="moments\.html">Moments<\/a>/);
+  assert.match(homepage, /site-nav\.js\?v=1/);
+  assert.match(siteNav, /href: 'moments\.html'/);
   assert.match(momentsPage, /assets\/moments\/event-14\.jpg/);
   assert.match(momentsPage, /mountArchive\('momentArchiveList','momentArchiveCount'\)/);
   assert.doesNotMatch(eventsPage, /id="momentArchiveList"/);

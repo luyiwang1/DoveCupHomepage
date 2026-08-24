@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <script>try{if(!localStorage.getItem('dove_cup_language'))localStorage.setItem('dove_cup_language','en')}catch(error){}</script>
 <link rel="stylesheet" href="language.css?v=1">
+<link rel="stylesheet" href="site-nav.css?v=1">
 <script src="language.js?v=26"></script>
+<script src="site-nav.js?v=1" defer></script>
 <title>Dove King Championship · Golden Dove Cup</title>
 <meta name="description" content="Dove King Championship tournament desk for rolling men's and women's single-elimination draws on August 29 from 5–7 PM in Toronto.">
 <style>
@@ -30,10 +32,8 @@
 </head>
 <body>
 <header class="event-hero">
-  <div class="topbar">
-    <a class="brand" href="./"><span class="brand-mark"><img src="golden-dove-mark.webp" alt=""></span><span>Golden Dove Cup</span></a>
+  <div class="topbar" style="justify-content:flex-end">
     <div class="top-links">
-      <a class="top-link" href="events.html">Events</a>
       <a class="top-link" href="#signup">Signup</a>
       <a class="top-link" href="#draws">Draws</a>
       <button class="top-link admin-toggle" id="adminBtn" onclick="toggleAdmin()">Admin</button>
