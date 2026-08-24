@@ -64,7 +64,7 @@
   add('Dove Attendance', '金鸽到场记录', 'Dove Attendance');
   add('Details', '详情', 'Details');
   add('Vintage Tennis Social', '复古网球社交赛', 'Vintage Tennis Social');
-  add('Play with elegance. Compete with warmth. Leave with new partners.', '优雅上场，热情竞争，带着新搭档离开。', 'Play with elegance. Compete with warmth. Leave with new partners.');
+  add('Health is wealth. Every rally is an investment in yourself.', '健康是财富，每一次回合，都是对自己的投资。', 'Health is wealth. Every rally is an investment in yourself.');
   add('Vintage tennis social for the weekend court crowd.', '为周末球场上的朋友而设的复古网球社交赛。', 'Vintage tennis social for the weekend court crowd.');
   add('Toronto tennis events and team specials.', '多伦多网球活动与团体特别赛。', 'Toronto tennis events and team specials.');
   add('MRTC · Toronto · August 08, 2026', 'MRTC · 多伦多 · 2026年8月8日', 'MRTC · Toronto · August 08, 2026');
