@@ -60,7 +60,9 @@ test('translates the past-event summary and empty upcoming state', () => {
 });
 
 test('translates the event gallery experience without mixed-language labels', () => {
+  assert.equal(localizeText('Moments', 'zh'), '照片');
   assert.equal(localizeText('Dove Cup Moments', 'zh'), '金鸽影集');
+  assert.equal(localizeText('完整影集', 'en'), 'Full Archive');
   assert.equal(localizeText('Photo Archive', 'zh'), '活动影集');
   assert.equal(localizeText('Event Archive', 'zh'), '活动档案');
   assert.equal(localizeText('活动照片档案', 'en'), 'Event Photo Archive');

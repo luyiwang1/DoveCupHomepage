@@ -287,9 +287,12 @@
   add('Desk summary copied', '现场摘要已复制', 'Desk summary copied');
   add('Dove King Championship tournament desk.', '鸽王争霸赛现场赛事桌。', 'Dove King Championship tournament desk.');
   add('Dove Cup Moments', '金鸽影集', 'Dove Cup Moments');
+  add('Moments', '照片', 'Moments');
   add('Photo Archive', '活动影集', 'Photo Archive');
+  add('完整影集', '完整影集', 'Full Archive');
   add('Event Archive', '活动档案', 'Event Archive');
   add('活动照片档案', '活动照片档案', 'Event Photo Archive');
+  add('活动照片从第一场排到最新一场，点击任意照片即可全屏查看。', '活动照片从第一场排到最新一场，点击任意照片即可全屏查看。', 'Browse every event from the first gathering to the latest. Select any photo to view it fullscreen.');
   add('活动影集', '活动影集', 'Event Album');
   add('现场照片整理中', '现场照片整理中', 'Event Photos in Preparation');
   add('查看影集位置', '查看影集位置', 'Open Album');

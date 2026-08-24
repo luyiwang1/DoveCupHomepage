@@ -18,7 +18,7 @@
 </script>
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="gallery.css?v=3">
-<script src="language.js?v=25"></script>
+<script src="language.js?v=26"></script>
 <title>金鸽杯 Golden Dove Cup</title>
 <meta name="description" content="金鸽杯 Golden Dove Cup 是一场复古俱乐部气质的网球社交杯赛。">
 <style>
@@ -132,7 +132,7 @@ details p{margin:10px 0 0;color:rgba(23,36,30,.7);font-size:14px;line-height:1.7
 footer{display:flex;justify-content:space-between;gap:14px;padding:30px clamp(18px,5vw,72px);color:var(--ivory);background:#10271e;font-size:13px}
 body *{letter-spacing:0!important}
 @media(max-width:860px){
-  .nav{position:absolute}.links a:not(.ticket){display:none}
+  .nav{position:absolute}.links a:not(.ticket):not(.moments-nav){display:none}
   .hero:before{background-position:76% center}
   .hero{min-height:72svh;padding:94px 18px 34px}.hero h1{font-size:clamp(58px,20vw,86px)}
   .hero-copy{margin-top:16px;font-size:15px;line-height:1.6}.actions{margin-top:18px}
@@ -159,6 +159,7 @@ body *{letter-spacing:0!important}
   <div class="links">
     <a href="#about">About</a>
     <a href="events.html">Events</a>
+    <a class="moments-nav" href="moments.html">Moments</a>
     <a href="#format">Format</a>
     <a class="ticket" href="signup.html">金鸽巡回赛报名</a>
   </div>

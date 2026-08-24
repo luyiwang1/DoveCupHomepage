@@ -5,7 +5,7 @@ import test from 'node:test';
 const root = new URL('../', import.meta.url);
 const homepage = await readFile(new URL('index.html', root), 'utf8');
 const linkedPages = await Promise.all(
-  ['events.html', 'singles-championship.html', 'team-event.html', 'signup.html']
+  ['events.html', 'moments.html', 'singles-championship.html', 'team-event.html', 'signup.html']
     .map(file => readFile(new URL(file, root), 'utf8'))
 );
 
