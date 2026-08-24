@@ -16,6 +16,7 @@
     const lang = currentLanguage();
     const text = (zh, en) => lang === 'en' ? en : zh;
     const page = pageName();
+    document.body.classList.toggle('dove-tour-tool', ['signup.html', 'courts.html', 'scores.html'].includes(page));
     let nav = document.querySelector('.dove-site-nav');
     if (!nav) {
       nav = document.createElement('nav');

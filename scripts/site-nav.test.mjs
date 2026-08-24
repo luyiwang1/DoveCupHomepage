@@ -10,8 +10,8 @@ const navStyles = await readFile(new URL('site-nav.css', root), 'utf8');
 
 test('loads one shared site navigation on every public interface', () => {
   sources.forEach(source => {
-    assert.match(source, /site-nav\.css\?v=1/);
-    assert.match(source, /site-nav\.js\?v=1/);
+    assert.match(source, /site-nav\.css\?v=2/);
+    assert.match(source, /site-nav\.js\?v=2/);
   });
 });
 
@@ -22,4 +22,7 @@ test('shared navigation connects About, Events, Moments, Format, and registratio
   assert.match(navScript, /href: '\.\/#format'/);
   assert.match(navScript, /href="signup\.html"/);
   assert.match(navStyles, /grid-template-columns:repeat\(4,minmax\(0,1fr\)\)/);
+  assert.match(navScript, /\['signup\.html', 'courts\.html', 'scores\.html'\]/);
+  assert.match(navStyles, /\.dove-tour-tool \.dove-site-nav\{width:100vw/);
+  assert.match(navStyles, /\.dove-tour-tool\{--dove-site-nav-height:86px\}/);
 });
