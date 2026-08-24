@@ -13,4 +13,7 @@ test('puts the complete photo archive on its own page', () => {
   assert.match(momentsPage, /mountArchive\('momentArchiveList','momentArchiveCount'\)/);
   assert.doesNotMatch(eventsPage, /id="momentArchiveList"/);
   assert.doesNotMatch(eventsPage, /moments-data\.js/);
+  assert.doesNotMatch(eventsPage, /Photo Archive/);
+  assert.doesNotMatch(eventsPage, /gallery-link/);
+  assert.doesNotMatch(eventsPage, /gallery\.js/);
 });
