@@ -60,17 +60,28 @@
     return root.DoveGallery.openEventGallery(event, index);
   }
 
+  function randomStartIndex(length, random = Math.random) {
+    const total = Math.max(0, Math.floor(Number(length) || 0));
+    if (total < 2) return 0;
+    const sample = Number(random());
+    const normalized = Number.isFinite(sample) ? Math.min(Math.max(sample, 0), 0.999999999) : 0;
+    return Math.floor(normalized * total);
+  }
+
   function mountCarousel(targetOrId) {
     if (typeof document === 'undefined') return null;
     const target = typeof targetOrId === 'string' ? document.getElementById(targetOrId) : targetOrId;
     const moments = photoMoments();
     if (!target || !moments.length) return null;
+    const compact = typeof root.matchMedia === 'function' && root.matchMedia('(max-width: 560px)').matches;
+    const startIndex = compact ? 0 : randomStartIndex(moments.length);
+    const startDelay = (190 * startIndex / moments.length).toFixed(3);
 
     function card(moment, index, duplicate) {
       const lang = language();
       const text = (zh, en) => lang === 'en' ? en : zh;
       const special = moment.type === 'special' ? ' special' : '';
-      const load = !duplicate && index === 0 ? 'fetchpriority="high"' : 'loading="lazy"';
+      const load = !duplicate && index === startIndex ? 'fetchpriority="high"' : 'loading="lazy"';
       const hidden = duplicate ? ' tabindex="-1"' : '';
       return `<button class="moment-slide${special}" type="button" data-moment-slide="${moment.eventNumber}" style="${imageStyle(moment)}" onclick="DoveMoments.openMoment(${moment.eventNumber})"${hidden} aria-label="${escapeHtml(text(`全屏查看 EVENT ${moment.paddedNumber} 照片`, `View the Event ${moment.paddedNumber} photo fullscreen`))}"><img src="${escapeHtml(moment.photo.src)}" alt="${escapeHtml(copy(moment.photo, 'alt', lang))}" ${load}><span class="moment-slide-caption"><span class="moment-slide-kicker">EVENT ${moment.paddedNumber} · ${escapeHtml(copy(moment, 'typeLabel', lang))}</span><strong>${escapeHtml(copy(moment, 'title', lang))}</strong><small>${escapeHtml(momentDetails(moment, lang))}</small></span></button>`;
     }
@@ -81,7 +92,7 @@
       const primary = moments.map((moment, index) => card(moment, index, false)).join('');
       const duplicate = moments.map((moment, index) => card(moment, index, true)).join('');
       target.setAttribute('data-dove-no-translate', '');
-      target.innerHTML = `<div class="moments-head moments-head-simple"><h2>Dove Cup Moments</h2></div><div class="moment-marquee" aria-label="${text('金鸽杯活动照片', 'Golden Dove event photos')}"><div class="moment-marquee-track"><div class="moment-marquee-group">${primary}</div><div class="moment-marquee-group" aria-hidden="true">${duplicate}</div></div></div>`;
+      target.innerHTML = `<div class="moments-head moments-head-simple"><h2>Dove Cup Moments</h2></div><div class="moment-marquee" aria-label="${text('金鸽杯活动照片', 'Golden Dove event photos')}"><div class="moment-marquee-track" style="--moment-marquee-delay:-${startDelay}s"><div class="moment-marquee-group">${primary}</div><div class="moment-marquee-group" aria-hidden="true">${duplicate}</div></div></div>`;
 
       const marquee = target.querySelector('.moment-marquee');
       const resume = () => marquee.classList.remove('is-paused');
@@ -126,5 +137,5 @@
     return target;
   }
 
-  return { allMoments, photoMoments, galleryEvent, openMoment, mountCarousel, mountArchive };
+  return { allMoments, photoMoments, galleryEvent, openMoment, randomStartIndex, mountCarousel, mountArchive };
 }));
