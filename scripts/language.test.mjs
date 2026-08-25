@@ -11,6 +11,11 @@ test('reads an explicit language from a shared URL', () => {
   assert.equal(languageFromQuery('?lang=fr'), null);
 });
 
+test('shows both Dove Cup cities in either language', () => {
+  assert.equal(localizeText('Toronto · Aurora', 'zh'), '多伦多 · Aurora');
+  assert.equal(localizeText('Toronto · Aurora', 'en'), 'Toronto · Aurora');
+});
+
 test('translates the team event title into English', () => {
   assert.equal(localizeText('凤凰 vs 狮鹫', 'en'), 'Phoenix vs Griffin');
 });

@@ -32,6 +32,7 @@
   add('Admin 已登录', '管理员已登录', 'Admin signed in');
   add('Venue', '场地', 'Venue');
   add('City', '城市', 'City');
+  add('Toronto · Aurora', '多伦多 · Aurora', 'Toronto · Aurora');
   add('Toronto', '多伦多', 'Toronto');
   add('Level', '分级', 'Level');
   add('Tools', '工具', 'Tools');
