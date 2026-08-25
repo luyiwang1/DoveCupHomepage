@@ -117,12 +117,12 @@ section{padding:clamp(58px,8vw,108px) clamp(18px,5vw,72px)}
 .intro{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(340px,.72fr);gap:0;align-items:stretch;padding:0;background:var(--paper);overflow:hidden}
 .intro-copy{position:relative;z-index:2;display:grid;align-content:center;gap:clamp(22px,2.5vw,32px);padding:clamp(58px,7vw,92px) clamp(18px,5vw,72px)}
 .intro-photo{position:relative;min-height:clamp(620px,62vw,780px);margin-left:clamp(-190px,-13vw,-110px);background:url("assets/home/invitation-court.jpg") center 54%/cover no-repeat}
-.intro-photo:before{position:absolute;inset:0 auto 0 0;z-index:1;width:clamp(120px,14vw,200px);background:linear-gradient(90deg,var(--paper) 0%,rgba(255,248,231,.84) 20%,rgba(255,248,231,.38) 56%,rgba(255,248,231,0) 100%);pointer-events:none;content:""}
+.intro-photo:before{position:absolute;inset:0 auto 0 -3px;z-index:1;width:calc(clamp(120px,14vw,200px) + 4px);background:linear-gradient(90deg,var(--paper) 0%,rgba(255,248,231,.84) 20%,rgba(255,248,231,.38) 56%,rgba(255,248,231,0) 100%);pointer-events:none;content:""}
 .intro-photo:after{position:absolute;inset:0;background:linear-gradient(180deg,transparent 68%,rgba(8,24,17,.22));pointer-events:none;content:""}
 .intro h2,.format h2{margin:12px 0 0;font-family:Georgia,"Times New Roman",serif;font-weight:500;line-height:1}
 .intro h2{max-width:660px;font-size:clamp(44px,4.8vw,64px);line-height:1.04}.format h2{font-size:clamp(38px,5.5vw,74px)}
 .intro-copy>p{max-width:640px;margin:0 0 0 clamp(44px,5vw,64px);color:rgba(23,36,30,.7);font-size:15px;line-height:1.8}
-.quote{max-width:620px;margin-left:clamp(44px,5vw,64px);padding:22px 0 0;color:var(--green);background:transparent;border-top:1px solid rgba(201,154,60,.72);border-radius:0;box-shadow:none}
+.quote{max-width:620px;margin-left:clamp(44px,5vw,64px);padding:0;color:var(--green);background:transparent;border:0;border-radius:0;box-shadow:none}
 .quote p{margin:0;color:var(--green);font-family:Georgia,"Times New Roman",serif;font-size:clamp(25px,2.6vw,35px);line-height:1.22}
 @media(min-width:861px){.intro-copy{padding-left:clamp(92px,10vw,156px);padding-right:clamp(28px,4vw,64px)}}
 .format{color:var(--ivory);background:var(--green)}
