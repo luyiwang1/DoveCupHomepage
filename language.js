@@ -65,6 +65,7 @@
   add('Details', '详情', 'Details');
   add('Vintage Tennis Social', '复古网球社交赛', 'Vintage Tennis Social');
   add('Health is wealth. Every rally is an investment in yourself.', '健康是财富，每一次回合，都是对自己的投资。', 'Health is wealth. Every rally is an investment in yourself.');
+  add('MRTC 室内网球场上的金鸽巡回赛双打现场', 'MRTC 室内网球场上的金鸽巡回赛双打现场', 'Golden Dove Tour doubles action at MRTC indoor courts');
   add('Vintage tennis social for the weekend court crowd.', '为周末球场上的朋友而设的复古网球社交赛。', 'Vintage tennis social for the weekend court crowd.');
   add('Toronto tennis events and team specials.', '多伦多网球活动与团体特别赛。', 'Toronto tennis events and team specials.');
   add('MRTC · Toronto · August 08, 2026', 'MRTC · 多伦多 · 2026年8月8日', 'MRTC · Toronto · August 08, 2026');
