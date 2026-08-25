@@ -1,5 +1,5 @@
 import assert from 'node:assert/strict';
-import { readFile } from 'node:fs/promises';
+import { access, readFile } from 'node:fs/promises';
 import test from 'node:test';
 
 const root = new URL('../', import.meta.url);
@@ -24,4 +24,10 @@ test('puts the complete photo archive on its own page', () => {
 test('keeps the invitation court photo on the homepage only', () => {
   assert.match(homepage, /assets\/home\/invitation-court\.jpg/);
   assert.doesNotMatch(momentsData, /invitation-court\.jpg/);
+});
+
+test('uses the net-side social photo only as the events hero', async () => {
+  assert.match(eventsPage, /assets\/events\/events-hero-net-social\.webp/);
+  assert.doesNotMatch(momentsData, /events-hero-net-social\.webp/);
+  await access(new URL('assets/events/events-hero-net-social.webp', root));
 });
