@@ -28,7 +28,8 @@ test('keeps the invitation court photo on the homepage only', () => {
 
 test('uses the net-side social photo only as the events hero', async () => {
   assert.match(eventsPage, /assets\/events\/events-hero-net-social\.webp/);
-  assert.match(eventsPage, /min\(62vw,900px\) auto no-repeat/);
+  assert.match(eventsPage, /width:min\(68vw,980px\)/);
+  assert.match(eventsPage, /mask-image:linear-gradient/);
   assert.match(eventsPage, /center 64%\/cover no-repeat/);
   assert.doesNotMatch(momentsData, /events-hero-net-social\.webp/);
   await access(new URL('assets/events/events-hero-net-social.webp', root));
