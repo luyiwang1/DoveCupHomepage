@@ -42,12 +42,14 @@ test('maps each automatic status to its visual color class', () => {
 });
 
 test('keeps the Dove King Championship as the next numbered special event', () => {
-  assert.equal(singlesEvent.eventNumber, 14);
+  assert.equal(singlesEvent.eventNumber, 15);
   assert.equal(singlesEvent.date, '2026-08-29');
   assert.equal(singlesEvent.dateLabel, 'AUG 29 · SATURDAY · 5–7 PM');
   assert.equal(singlesEvent.title, 'Dove King Championship');
   assert.equal(singlesEvent.format, '6 Courts · Men + Women Singles · 5–7 PM');
-  assert.equal(singlesEvent.href, 'singles-championship.html?v=2');
+  assert.equal(singlesEvent.href, 'singles-championship.html');
+  assert.equal(singlesEvent.gallery.cover, 'assets/events/2026-08-29/dove-king-group-photo.jpg');
+  assert.equal(singlesEvent.gallery.photos[0].caption, 'EVENT 15 · 8 月 29 日鸽王争霸赛 · 赛后合影');
   assert.deepEqual(
     JSON.parse(JSON.stringify(singlesEvent.archiveStats)),
     [

@@ -60,7 +60,7 @@ window.DOVE_EVENTS = [
   },
   {
     id: '2026-singles-championship',
-    eventNumber: 14,
+    eventNumber: 15,
     featured: true,
     eyebrow: 'Dove King Championship',
     date: '2026-08-29',
@@ -75,8 +75,24 @@ window.DOVE_EVENTS = [
       { label: '签表', value: '男单 + 女单' },
       { label: '赛制', value: '单淘汰' }
     ],
+    gallery: {
+      title: '鸽王争霸赛',
+      titleEn: 'Dove King Championship',
+      cover: 'assets/events/2026-08-29/dove-king-group-photo.jpg',
+      coverAlt: '鸽王争霸赛参赛选手在多伦多室内网球场合影',
+      coverAltEn: 'Dove King Championship players posing on an indoor tennis court in Toronto',
+      photos: [
+        {
+          src: 'assets/events/2026-08-29/dove-king-group-photo.jpg',
+          alt: '鸽王争霸赛参赛选手在多伦多室内网球场合影',
+          altEn: 'Dove King Championship players posing on an indoor tennis court in Toronto',
+          caption: 'EVENT 15 · 8 月 29 日鸽王争霸赛 · 赛后合影',
+          captionEn: 'EVENT 15 · Aug 29 Dove King Championship · Post-match group photo'
+        }
+      ]
+    },
     archiveAction: '查看赛事桌',
-    href: 'singles-championship.html?v=2'
+    href: 'singles-championship.html'
   }
 ];
 

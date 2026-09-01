@@ -12,7 +12,7 @@ const momentsData = await readFile(new URL('moments-data.js', root), 'utf8');
 test('puts the complete photo archive on its own page', () => {
   assert.match(homepage, /site-nav\.js\?v=2/);
   assert.match(siteNav, /href: 'moments\.html'/);
-  assert.match(momentsPage, /assets\/moments\/event-14\.jpg/);
+  assert.match(momentsPage, /assets\/events\/2026-08-29\/dove-king-group-photo\.jpg/);
   assert.match(momentsPage, /mountArchive\('momentArchiveList','momentArchiveCount'\)/);
   assert.doesNotMatch(eventsPage, /id="momentArchiveList"/);
   assert.doesNotMatch(eventsPage, /moments-data\.js/);

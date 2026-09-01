@@ -15,7 +15,8 @@
     11: { src: 'assets/moments/event-09.webp', focusX: 50, focusY: 100, zoom: 1.24 },
     12: { src: 'assets/events/2026-08-08/team-group-photo-01.webp', focusX: 40, focusY: 100, zoom: 1.5 },
     13: { src: 'assets/moments/event-11.webp', focusX: 50, focusY: 100, zoom: 1.12 },
-    14: { src: 'assets/moments/event-14.jpg', focusX: 50, focusY: 100, zoom: 1.02 }
+    14: { src: 'assets/moments/event-14.jpg', focusX: 50, focusY: 100, zoom: 1.02 },
+    15: { src: 'assets/events/2026-08-29/dove-king-group-photo.jpg', focusX: 50, focusY: 72, zoom: 1.08 }
   };
 
   const eventDates = [
@@ -32,7 +33,8 @@
     { label: '8月2日', labelEn: 'AUG 02' },
     { label: '8月8日', labelEn: 'AUG 08' },
     { label: '8月15日', labelEn: 'AUG 15' },
-    { label: '8月22日', labelEn: 'AUG 22' }
+    { label: '8月22日', labelEn: 'AUG 22' },
+    { label: '8月29日', labelEn: 'AUG 29' }
   ];
 
   const specialEvents = {
@@ -59,10 +61,18 @@
       typeLabelEn: 'Special Team Event',
       caption: '凤凰 vs 狮鹫团体赛合影',
       captionEn: 'Phoenix vs Griffin team event group photo'
+    },
+    15: {
+      title: '鸽王争霸赛',
+      titleEn: 'Dove King Championship',
+      typeLabel: '男单 · 女单',
+      typeLabelEn: 'Men\'s + Women\'s Singles',
+      caption: '鸽王争霸赛赛后合影',
+      captionEn: 'Dove King Championship group photo'
     }
   };
 
-  const moments = Array.from({ length: 14 }, (_, index) => {
+  const moments = Array.from({ length: 15 }, (_, index) => {
     const eventNumber = index + 1;
     const special = specialEvents[eventNumber] || null;
     const photo = photoSlots[eventNumber] || null;
