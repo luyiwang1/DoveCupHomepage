@@ -23,7 +23,11 @@ test('puts the complete photo archive on its own page', () => {
 
 test('keeps the invitation court photo on the homepage only', () => {
   assert.match(homepage, /assets\/home\/invitation-court\.jpg/);
+  assert.match(homepage, /assets\/home\/invitation-court-02\.jpg/);
+  assert.match(homepage, /intro-photo-primary 18s ease-in-out infinite/);
+  assert.match(homepage, /prefers-reduced-motion:reduce/);
   assert.doesNotMatch(momentsData, /invitation-court\.jpg/);
+  assert.doesNotMatch(momentsData, /invitation-court-02\.jpg/);
 });
 
 test('uses the net-side social photo only as the events hero', async () => {

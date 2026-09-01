@@ -116,9 +116,14 @@ section{padding:clamp(58px,8vw,108px) clamp(18px,5vw,72px)}
 .moments-media img{object-position:40% 100%;transform:scale(1.5);transform-origin:40% 100%}
 .intro{display:grid;grid-template-columns:minmax(0,1.08fr) minmax(340px,.72fr);gap:0;align-items:stretch;padding:0;background:var(--paper);overflow:hidden}
 .intro-copy{position:relative;z-index:2;display:grid;align-content:center;gap:clamp(22px,2.5vw,32px);padding:clamp(58px,7vw,92px) clamp(18px,5vw,72px)}
-.intro-photo{position:relative;min-height:clamp(620px,62vw,780px);margin-left:clamp(-190px,-13vw,-110px);background:url("assets/home/invitation-court.jpg") center 54%/cover no-repeat}
+.intro-photo{position:relative;min-height:clamp(620px,62vw,780px);margin-left:clamp(-190px,-13vw,-110px);isolation:isolate;overflow:hidden;background:#163d52}
+.intro-photo-frame{position:absolute;inset:0;z-index:0;background-position:center 54%;background-size:cover;background-repeat:no-repeat;will-change:opacity}
+.intro-photo-frame:first-child{background-image:url("assets/home/invitation-court.jpg");animation:intro-photo-primary 18s ease-in-out infinite}
+.intro-photo-frame:nth-child(2){background-image:url("assets/home/invitation-court-02.jpg");opacity:0;animation:intro-photo-secondary 18s ease-in-out infinite}
 .intro-photo:before{position:absolute;inset:0 auto 0 -3px;z-index:1;width:calc(clamp(120px,14vw,200px) + 4px);background:linear-gradient(90deg,var(--paper) 0%,rgba(255,248,231,.84) 20%,rgba(255,248,231,.38) 56%,rgba(255,248,231,0) 100%);pointer-events:none;content:""}
-.intro-photo:after{position:absolute;inset:0;background:linear-gradient(180deg,transparent 68%,rgba(8,24,17,.22));pointer-events:none;content:""}
+.intro-photo:after{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 68%,rgba(8,24,17,.22));pointer-events:none;content:""}
+@keyframes intro-photo-primary{0%,35%{opacity:1}50%,85%{opacity:0}100%{opacity:1}}
+@keyframes intro-photo-secondary{0%,35%{opacity:0}50%,85%{opacity:1}100%{opacity:0}}
 .intro h2,.format h2{margin:12px 0 0;font-family:Georgia,"Times New Roman",serif;font-weight:500;line-height:1}
 .intro h2{max-width:660px;font-size:clamp(44px,4.8vw,64px);line-height:1.04}.format h2{font-size:clamp(38px,5.5vw,74px)}
 .intro-copy>p{max-width:640px;margin:0 0 0 clamp(44px,5vw,64px);color:rgba(23,36,30,.7);font-size:15px;line-height:1.8}
@@ -156,9 +161,10 @@ body *{letter-spacing:0!important}
   html[lang="en"] .events-head h2{font-size:30px;line-height:1.04}
   html[lang="en"] .event-feature{margin-top:18px}
   .moments{padding-top:30px;padding-bottom:30px}.moments-head{align-items:flex-start;flex-direction:column}.moments-layout{margin-top:24px}.moments-media,.moments-media img{min-height:280px}.moments-media img{transform:scale(1.35)}.moments-copy{border-top:1px solid rgba(248,239,215,.2);border-left:0}
-  .intro{position:relative;display:block;min-height:740px;color:var(--ivory)}.intro-photo{position:absolute;inset:0;min-height:0;margin-left:0;background-position:center 48%}.intro-photo:before{display:none}.intro-photo:after{background:linear-gradient(180deg,rgba(8,24,17,.08) 12%,rgba(8,24,17,.32) 43%,rgba(8,24,17,.94) 78%)}.intro-copy{position:relative;z-index:1;display:flex;min-height:740px;flex-direction:column;justify-content:flex-end;gap:22px;padding:250px 18px 42px}.intro .kicker{color:#e3bc65}.intro h2{color:var(--ivory);font-size:clamp(40px,13vw,58px)}.intro-copy>p{margin-left:0;color:rgba(248,239,215,.82);font-size:14px;line-height:1.7}.intro .quote{margin-left:0;padding:20px;background:rgba(20,51,35,.86);box-shadow:none;backdrop-filter:blur(8px)}.intro .quote p{color:var(--ivory);font-size:clamp(24px,8vw,34px)}
+  .intro{position:relative;display:block;min-height:740px;color:var(--ivory)}.intro-photo{position:absolute;inset:0;min-height:0;margin-left:0}.intro-photo-frame{background-position:center 48%}.intro-photo:before{display:none}.intro-photo:after{background:linear-gradient(180deg,rgba(8,24,17,.08) 12%,rgba(8,24,17,.32) 43%,rgba(8,24,17,.94) 78%)}.intro-copy{position:relative;z-index:1;display:flex;min-height:740px;flex-direction:column;justify-content:flex-end;gap:22px;padding:250px 18px 42px}.intro .kicker{color:#e3bc65}.intro h2{color:var(--ivory);font-size:clamp(40px,13vw,58px)}.intro-copy>p{margin-left:0;color:rgba(248,239,215,.82);font-size:14px;line-height:1.7}.intro .quote{margin-left:0;padding:20px;background:rgba(20,51,35,.86);box-shadow:none;backdrop-filter:blur(8px)}.intro .quote p{color:var(--ivory);font-size:clamp(24px,8vw,34px)}
   footer{flex-direction:column}
 }
+@media(prefers-reduced-motion:reduce){.intro-photo-frame{animation:none!important}.intro-photo-frame:first-child{opacity:1}.intro-photo-frame:nth-child(2){opacity:0}}
 </style>
 <link rel="stylesheet" href="moments.css?v=8">
 </head>
@@ -204,7 +210,10 @@ body *{letter-spacing:0!important}
     <div class="quote"><p>Health is wealth. Every rally is an investment in yourself.</p></div>
     <p>金鸽杯为想认真打球、也想认识同频朋友的人设计。你可以带搭档，也可以单人报名；现场会安排轻竞技轮转、分级对局、合影和赛后交流，让比赛有张力，周末有余韵。</p>
   </div>
-  <div class="intro-photo" role="img" aria-label="MRTC 室内网球场上的金鸽巡回赛双打现场"></div>
+  <div class="intro-photo" role="img" aria-label="MRTC 室内网球场上的金鸽巡回赛现场照片轮播">
+    <span class="intro-photo-frame" aria-hidden="true"></span>
+    <span class="intro-photo-frame" aria-hidden="true"></span>
+  </div>
 </section>
 
 <section id="format" class="format">
