@@ -49,7 +49,7 @@ test('uses the net-side social photo only as the events hero', async () => {
 
 test('starts the merged section on the requested scene without desynchronizing photos', () => {
   const script = homepage.match(/\(function mountIntroScenes\(\)\{[\s\S]*?\n\}\(\)\);/)[0];
-  const animations = Array.from({ length: 6 }, () => ({ currentTime: 5000 }));
+  const animations = Array.from({ length: 5 }, () => ({ currentTime: 5000 }));
   const handlers = {};
   const location = { hash: '#about' };
   let onVisible;
@@ -79,4 +79,13 @@ test('starts the merged section on the requested scene without desynchronizing p
   location.hash = '#about';
   handlers.hashchange();
   assert.ok(animations.every(animation => animation.currentTime === 0));
+});
+
+test('places the second scene photo left of its copy while keeping mobile full width', () => {
+  assert.match(homepage, /\.intro-copy-panel-secondary\{inset:0 0 0 auto/);
+  assert.match(homepage, /\.intro-photo-frame-primary\{right:0/);
+  assert.match(homepage, /\.intro-photo-frame-secondary\{left:0/);
+  assert.match(homepage, /linear-gradient\(270deg,transparent 0%,#000 clamp\(120px,14vw,200px\)\)/);
+  assert.match(homepage, /\.intro-copy-panel\{inset:0;width:100%;display:flex/);
+  assert.match(homepage, /\.intro-photo-frame\{inset:0;width:100%;background-position:center 48%/);
 });
