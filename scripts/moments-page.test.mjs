@@ -89,3 +89,9 @@ test('places the second scene photo left of its copy while keeping mobile full w
   assert.match(homepage, /\.intro-copy-panel\{inset:0;width:100%;display:flex/);
   assert.match(homepage, /\.intro-photo-frame\{inset:0;width:100%;background-position:center 48%/);
 });
+
+test('centers the format copy within the right half on desktop', () => {
+  const desktopStyles = homepage.match(/@media\(min-width:861px\)\{[^\n]+/)[0];
+  assert.match(desktopStyles, /\.intro-copy-panel-secondary\{width:50%;grid-template-columns:minmax\(0,550px\);justify-content:center/);
+  assert.match(desktopStyles, /padding-left:clamp\(32px,4vw,64px\);padding-right:clamp\(32px,4vw,64px\)/);
+});
