@@ -65,6 +65,28 @@ test('does not archive or count the same week twice', () => {
   assert.equal(Object.values(second.data.signupStats)[0].signupCount, 1);
 });
 
+test('skips a cancelled week even after later resets and does not backfill its archive', () => {
+  const input = {
+    main: { state: { joined: [{ name: 'Gill' }], waitlist: [] } },
+    signupHistory: { '2026-09-05': { joined: [{ name: 'Gill' }] } },
+    weeklyReset: {
+      lastResetId: '2026-09-12',
+      cancelledWeeks: { '2026-09-05': { reason: 'event-cancelled' } }
+    }
+  };
+  const result = buildReset(input, '2026-09-05');
+  assert.equal(result.changed, false);
+  assert.equal(result.summary.reason, 'event-cancelled');
+  assert.deepEqual(result.data, input);
+
+  delete input.signupHistory['2026-09-05'];
+  assert.deepEqual(buildReset(input, '2026-09-05').data, input);
+  const nextWeek = buildReset(input, '2026-09-19');
+  assert.equal(nextWeek.summary.attendanceRecorded, 1);
+  assert.deepEqual(nextWeek.data.main.state.joined, []);
+  assert.ok(nextWeek.data.weeklyReset.cancelledWeeks['2026-09-05']);
+});
+
 test('backfills attendance from an existing archive exactly once', () => {
   const input = {
     main: { state: { joined: [], waitlist: [] } },

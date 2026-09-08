@@ -199,6 +199,13 @@ export function buildReset(input, resetId, now = new Date()) {
 
   const system = JSON.parse(JSON.stringify(input || {}));
   const history = system.signupHistory && typeof system.signupHistory === 'object' ? system.signupHistory : {};
+  if (system.weeklyReset?.cancelledWeeks?.[resetId]) {
+    return {
+      changed: false,
+      data: system,
+      summary: { resetId, reason: 'event-cancelled', attendanceRecorded: 0 }
+    };
+  }
   if (history[resetId] || system.weeklyReset?.lastResetId === resetId) {
     const attendance = history[resetId]
       ? recordAttendance(system, history[resetId].joined, resetId, now.getTime())
