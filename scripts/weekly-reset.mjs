@@ -270,6 +270,7 @@ export function buildReset(input, resetId, now = new Date()) {
   };
   system.signupHistory = history;
   system.signupStats = stats;
+  delete system.courtsPage;
   system.weeklyReset = {
     ...(system.weeklyReset || {}),
     lastResetId: resetId,

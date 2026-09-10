@@ -34,7 +34,8 @@ test('archives both lists, counts joined players once, and clears the signup for
         irene: { key: 'irene', name: 'Irene', appearances: 3, wins: 2, points: 70 }
       },
       events: []
-    }
+    },
+    courtsPage: { courtCount: 5, courtLevelMap: { '20_25': '25_30' } }
   };
 
   const result = buildReset(input, '2026-08-01', new Date('2026-08-02T00:05:00Z'));
@@ -45,6 +46,7 @@ test('archives both lists, counts joined players once, and clears the signup for
   assert.equal(result.data.signupHistory['2026-08-01'].waitlistCount, 1);
   assert.equal(result.data.signupHistory['2026-08-01'].scheduledFor, '2026-08-01T19:00:00[America/Toronto]');
   assert.equal(result.data.weeklyReset.archiveHour, 19);
+  assert.equal(result.data.courtsPage, undefined);
   assert.equal(result.summary.uniqueSignupsCounted, 2);
   assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'irene').signupCount, 1);
   assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'alvin').waitlistCount, 1);

@@ -557,6 +557,11 @@
   add('正在快速读取接龙名单...', '正在快速读取接龙名单...', 'Quickly loading the registration list...');
   add('三轮总表', '三轮总表', 'Three-Round Summary');
   add('方便截图/打印', '方便截图/打印', 'Ready for screenshots or printing');
+  add('本周场地表', '本周场地表', 'This Week\'s Court Table');
+  add('2.0-2.5 与 2.5-3.0 本周合组', '2.0-2.5 与 2.5-3.0 本周合组', '2.0-2.5 and 2.5-3.0 are combined this week');
+  add('按本周分级安排', '按本周分级安排', 'Arranged by this week\'s divisions');
+  add('2.0-3.0 · 本周合组', '2.0-3.0 · 本周合组', '2.0-3.0 · Combined This Week');
+  add('合组', '合组', 'Combined');
   add('轮次', '轮次', 'Round');
   add('分级', '分级', 'Division');
   add('场地', '场地', 'Court');
