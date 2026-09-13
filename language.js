@@ -530,6 +530,18 @@
   add('直接生成赛程。', '直接生成赛程。', 'Generate the schedule directly.');
 
   // Courts page.
+  add('金鸽巡回赛 · 第一轮场地安排', '金鸽巡回赛 · 第一轮场地安排', 'Golden Dove Tour · Round 1 Court Assignments');
+  add('第一轮场地安排', '第一轮场地安排', 'Round 1 Court Assignments');
+  add('📋 复制第一轮场地表', '📋 复制第一轮场地表', '📋 Copy Round 1 Court Table');
+  add('复制第一轮场地表', '复制第一轮场地表', 'Copy Round 1 Court Table');
+  add('直接在本周场地表查找自己的名字和场地。下方第一轮对阵保留管理员拖拽调整与比分录入。', '直接在本周场地表查找自己的名字和场地。下方第一轮对阵保留管理员拖拽调整与比分录入。', 'Find your name and court in this week\'s table. Admin drag-and-drop and score entry remain available in the Round 1 match cards below.');
+  add('清空第一轮比分', '清空第一轮比分', 'Clear Round 1 Scores');
+  add('本周第一轮场地表', '本周第一轮场地表', 'This Week\'s Round 1 Court Table');
+  add('对阵', '对阵', 'Matchup');
+  add('第一轮对阵与比分', '第一轮对阵与比分', 'Round 1 Matchups and Scores');
+  add('管理员可在同一分组内拖拽调整', '管理员可在同一分组内拖拽调整', 'Admins can drag players within the same division');
+  add('手动名单 · 第一轮场地安排', '手动名单 · 第一轮场地安排', 'Manual Roster · Round 1 Court Assignments');
+  add('确定清空第一轮比分吗？', '确定清空第一轮比分吗？', 'Clear all Round 1 scores?');
   add('Dove Cup 三轮升降级赛程', '金鸽杯三轮升降级赛程', 'Dove Cup Three-Round Court Schedule');
   add('三轮升降级赛程', '三轮升降级赛程', 'Three-Round Court Schedule');
   add('正在读取接龙报名名单...', '正在读取接龙报名名单...', 'Loading the registration list...');
