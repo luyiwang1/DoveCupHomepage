@@ -124,7 +124,11 @@
   add('每周名单归档后自动记录实际到场次数，不计算胜局和积分，长期参加一目了然。', '每周名单归档后自动记录实际到场次数，不计算胜局和积分，长期参加一目了然。', 'Each weekly archive records actual attendance only, without wins or points, so long-term participation stays easy to see.');
   add('主页负责心动，工具页负责办赛。', '主页负责心动，工具页负责办赛。', 'The homepage sets the mood. The tools run the tournament.');
   add('你可以把这个页面发给新朋友看活动质感；真正要报名、排场地、看出勤时，再进入对应工具页。这样宣传和管理分开，观感就不会互相打架。', '你可以把这个页面发给新朋友看活动质感；真正要报名、排场地、看出勤时，再进入对应工具页。这样宣传和管理分开，观感就不会互相打架。', 'Share this page to introduce the event. When it is time to register, assign courts, or check attendance, use the dedicated tools so promotion and administration stay cleanly separated.');
-  add('不需要。活动设有新手场（2.0-）、2.0-2.5、2.5-3.0、3.0+ 四个分级，每个分级最多 8 人，核心是有质量地打球和认识新朋友。', '不需要。活动设有新手场（2.0-）、2.0-2.5、2.5-3.0、3.0+ 四个分级，每个分级最多 8 人，核心是有质量地打球和认识新朋友。', 'No. There are four divisions: beginner (under 2.0), 2.0-2.5, 2.5-3.0, and 3.0+, with up to eight players in each. The goal is quality tennis and meeting good people.');
+  add('不需要。活动设有新手场（2.0-）、2.0-2.5、2.5-3.0、3.0+ 四个分级，四组共享 32 个报名名额，核心是有质量地打球和认识新朋友。', '不需要。活动设有新手场（2.0-）、2.0-2.5、2.5-3.0、3.0+ 四个分级，四组共享 32 个报名名额，核心是有质量地打球和认识新朋友。', 'No. There are four divisions: beginner (under 2.0), 2.0-2.5, 2.5-3.0, and 3.0+. All four divisions share 32 registration spots. The goal is quality tennis and meeting good people.');
+  add('四个分级共享 32 个名额，满员后新报名会进入候补', '四个分级共享 32 个名额，满员后新报名会进入候补', 'All four divisions share 32 spots. New registrations join the waitlist once full.');
+  add('总名额已满，已加入 Waitlist', '总名额已满，已加入候补名单', 'All spots are full. Added to the waitlist.');
+  add('总名额已满，无法补位', '总名额已满，无法补位', 'All spots are full. Promotion is unavailable.');
+  add('请输入 1-32 的总名额', '请输入 1-32 的总名额', 'Enter a total capacity from 1 to 32.');
   add('点击“进入金鸽巡回赛报名”会打开独立的报名接龙系统，那里可以报名、进入 waitlist，也能由管理员确认付款。', '点击“进入金鸽巡回赛报名”会打开独立的报名接龙系统，那里可以报名、进入候补名单，也能由管理员确认付款。', 'Select “Golden Dove Tour Registration” to open the separate signup system, where players can register, join the waitlist, and have payment confirmed by an admin.');
   add('场地页面和到场记录是单独工具页，比赛当天使用，不会干扰这个宣传主页的观感。', '场地页面和到场记录是单独工具页，比赛当天使用，不会干扰这个宣传主页的观感。', 'Court assignments and attendance are separate tools used on match day, keeping this promotional homepage focused.');
   add('可以。当前部署在 GitHub Pages，后续可以绑定自定义域名，也可以继续替换日期、地点、价格和社媒链接。', '可以。当前部署在 GitHub Pages，后续可以绑定自定义域名，也可以继续替换日期、地点、价格和社媒链接。', 'Yes. The site is currently on GitHub Pages and can later use a custom domain, with dates, venues, prices, and social links updated anytime.');

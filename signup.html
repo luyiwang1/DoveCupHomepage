@@ -782,7 +782,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
       <div class="bar-track"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
       <div class="capacity-edit admin-only">
         <label>总名额上限</label>
-        <input type="number" id="capInput" placeholder="25" min="1" max="999">
+        <input type="number" id="capInput" placeholder="32" min="1" max="32">
         <button class="set-btn" onclick="setCapacity()">设置</button>
       </div>
       <div class="weekly-reset-note">报名表每周六 19:00（多伦多时间）归档并更新为空。</div>
@@ -876,9 +876,9 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 <script>
 const COLORS = ['#07C160','#10AEFF','#FF8C00','#FA5151','#9B59B6','#E67E22','#2ECC71','#E74C3C','#3498DB','#1ABC9C'];
 const ADMIN_PASSWORD = '8888';
-const SITE_VERSION = '30';
+const SITE_VERSION = '31';
 const WAITLIST_CAPACITY = 24;
-const LEVEL_CAPACITY = 8;
+const DEFAULT_CAPACITY = 32;
 const LEVEL_GROUPS = [
   { key: 'u20', label: '新手场 · 2.0-' },
   { key: '20_25', label: '2.0-2.5' },
@@ -908,7 +908,7 @@ const ADMIN_STORAGE = 'signup_is_admin';
 
 let state = {
   title: '🎉 活动接龙',
-  capacity: null,
+  capacity: DEFAULT_CAPACITY,
   joined: [],   // {id, name, ownerKey, confirmed, paid, ts}
   waitlist: []  // {id, name, ownerKey, ts}
 };
@@ -955,14 +955,15 @@ function remotePayload() {
   };
 }
 function defaultState() {
-  return { title: '金鸽巡回赛 · 报名接龙', capacity: null, joined: [], waitlist: [] };
+  return { title: '金鸽巡回赛 · 报名接龙', capacity: DEFAULT_CAPACITY, joined: [], waitlist: [] };
 }
 function normalizeState(input) {
   const next = Object.assign(defaultState(), input || {});
   if (next.title === '金鸽杯报名接龙' || next.title === '🎉 活动接龙') next.title = '金鸽巡回赛 · 报名接龙';
+  next.capacity = Math.min(DEFAULT_CAPACITY, Number(next.capacity) > 0 ? Number(next.capacity) : DEFAULT_CAPACITY);
   next.joined = Array.isArray(next.joined) ? next.joined : [];
   next.waitlist = Array.isArray(next.waitlist) ? next.waitlist : [];
-  return enforceLevelCapacityForState(next);
+  return enforceTotalCapacityForState(next);
 }
 function normalizePersonName(name) {
   return String(name || '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-CA');
@@ -982,24 +983,20 @@ function groupedByLevel(list) {
     people: list.filter(p => levelKeyOf(p) === group.key)
   }));
 }
-function enforceLevelCapacityForState(nextState) {
-  const counts = {};
+function enforceTotalCapacityForState(nextState) {
   const overflow = [];
-  nextState.joined = nextState.joined.filter(p => {
-    const key = levelKeyOf(p);
-    p.levelGroup = key;
-    counts[key] = counts[key] || 0;
-    if (counts[key] >= LEVEL_CAPACITY) {
+  nextState.joined = nextState.joined.filter((p, index) => {
+    p.levelGroup = levelKeyOf(p);
+    if (index >= nextState.capacity) {
       overflow.push({
         id: p.id,
         name: p.name,
-        levelGroup: key,
+        levelGroup: p.levelGroup,
         ownerKey: p.ownerKey,
         ts: p.ts || Date.now()
       });
       return false;
     }
-    counts[key] += 1;
     return true;
   });
   nextState.waitlist = overflow.concat(nextState.waitlist.map(p => Object.assign({}, p, {
@@ -1007,23 +1004,14 @@ function enforceLevelCapacityForState(nextState) {
   })));
   return nextState;
 }
-function joinedCountForLevel(levelKey) {
-  return state.joined.filter(p => levelKeyOf(p) === levelKey).length;
+function openSignupSlots() {
+  return Math.max(0, (state.capacity || DEFAULT_CAPACITY) - state.joined.length);
 }
-function openSlotsForLevel(levelKey) {
-  const levelSlots = Math.max(0, LEVEL_CAPACITY - joinedCountForLevel(levelKey));
-  const globalSlots = state.capacity ? Math.max(0, state.capacity - state.joined.length) : levelSlots;
-  return Math.min(levelSlots, globalSlots);
+function canJoinSignup() {
+  return openSignupSlots() > 0;
 }
-function canJoinLevel(levelKey) {
-  return openSlotsForLevel(levelKey) > 0;
-}
-function waitlistIndexForOpenLevel(preferredLevel) {
-  if (preferredLevel && canJoinLevel(preferredLevel)) {
-    const preferredIdx = state.waitlist.findIndex(p => levelKeyOf(p) === preferredLevel);
-    if (preferredIdx !== -1) return preferredIdx;
-  }
-  return state.waitlist.findIndex(p => canJoinLevel(levelKeyOf(p)));
+function waitlistIndexForOpenSlot() {
+  return canJoinSignup() && state.waitlist.length ? 0 : -1;
 }
 function escapeHtml(v) {
   return String(v).replace(/[&<>"']/g, ch => ({
@@ -1218,7 +1206,7 @@ function renderJoined() {
       : `<div class="waitlist-empty"><p>暂无报名</p></div>`;
     return `
       <section class="level-section">
-        <div class="level-section-title">${group.label}<span>${group.people.length} / ${LEVEL_CAPACITY} 人</span></div>
+        <div class="level-section-title">${group.label}<span>${group.people.length} 人</span></div>
         ${cards}
       </section>`;
   }).join('');
@@ -1226,10 +1214,10 @@ function renderJoined() {
 
 function renderWaitlist() {
   const el = document.getElementById('waitlistContent');
-  const slots = LEVEL_GROUPS.reduce((sum, group) => sum + openSlotsForLevel(group.key), 0);
+  const slots = openSignupSlots();
 
   if (!state.waitlist.length) {
-    el.innerHTML = `<div class="waitlist-empty"><div class="icon">⏳</div><p>Waitlist 暂时为空<br>每个分级最多 ${LEVEL_CAPACITY} 人，有人取消时会按同分级自动补位</p></div>`;
+    el.innerHTML = `<div class="waitlist-empty"><div class="icon">⏳</div><p>Waitlist 暂时为空<br>四个分级共享 ${state.capacity || DEFAULT_CAPACITY} 个名额，满员后新报名会进入候补</p></div>`;
     return;
   }
 
@@ -1370,7 +1358,7 @@ function copyList() {
   let text = `${title} ${cap}\n\n`;
   text += `📋 报名名单：\n`;
   groupedByLevel(state.joined).forEach(group => {
-    text += `\n【${group.label}】${group.people.length}/${LEVEL_CAPACITY} 人\n`;
+    text += `\n【${group.label}】${group.people.length} 人\n`;
     group.people.forEach((p, i) => {
       const confirm = p.confirmed ? '✅' : '❓';
       const paid = p.paid ? '💰' : '  ';
@@ -1491,12 +1479,12 @@ function addPerson(list) {
   const levelGroup = LEVEL_GROUPS.some(group => group.key === selectedLevel) ? selectedLevel : '20_25';
   if (!name) { showToast('请输入姓名'); return; }
 
-  if (list === 'joined' && (!canJoinLevel(levelGroup) || (state.capacity && state.joined.length >= state.capacity))) {
+  if (list === 'joined' && !canJoinSignup()) {
     if (state.waitlist.length >= WAITLIST_CAPACITY) {
       showToast(`名额已满，Waitlist 也已满（最多 ${WAITLIST_CAPACITY} 人）`);
       return;
     }
-    showToast(`${levelLabelOf({ levelGroup })} 已满，已加入 Waitlist`);
+    showToast(`总名额已满，已加入 Waitlist`);
     list = 'waitlist';
   }
 
@@ -1562,8 +1550,8 @@ function promoteOne(id) {
   const idx = state.waitlist.findIndex(x=>x.id===id);
   if (idx === -1) return;
   const w = state.waitlist[idx];
-  if (!canJoinLevel(levelKeyOf(w))) {
-    showToast(`${levelLabelOf(w)} 已满，无法补位`);
+  if (!canJoinSignup()) {
+    showToast(`总名额已满，无法补位`);
     return;
   }
   state.waitlist.splice(idx, 1);
@@ -1575,15 +1563,15 @@ function promoteOne(id) {
 
 function promoteAll() {
   if (!requireAdmin()) return;
-  const slots = LEVEL_GROUPS.reduce((sum, group) => sum + openSlotsForLevel(group.key), 0);
+  const slots = openSignupSlots();
   if (slots <= 0) { showToast('名额已满'); return; }
   let promoted = 0;
-  let idx = waitlistIndexForOpenLevel();
+  let idx = waitlistIndexForOpenSlot();
   while (idx !== -1 && promoted < slots) {
     const w = state.waitlist.splice(idx, 1)[0];
     state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
     promoted += 1;
-    idx = waitlistIndexForOpenLevel();
+    idx = waitlistIndexForOpenSlot();
   }
   showToast(`${promoted} 人已成功补位`, 'green');
   render();
@@ -1592,7 +1580,7 @@ function promoteAll() {
 
 function autoPromote() {
   if (state.waitlist.length === 0) return;
-  const idx = waitlistIndexForOpenLevel();
+  const idx = waitlistIndexForOpenSlot();
   if (idx === -1) return;
   const w = state.waitlist.splice(idx, 1)[0];
   state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
@@ -1602,7 +1590,7 @@ function autoPromote() {
 function setCapacity() {
   if (!requireAdmin()) return;
   const val = parseInt(document.getElementById('capInput').value);
-  if (isNaN(val) || val < 1) { showToast('请输入有效名额'); return; }
+  if (isNaN(val) || val < 1 || val > DEFAULT_CAPACITY) { showToast('请输入 1-32 的总名额'); return; }
   state.capacity = val;
   let moved = 0;
   if (state.joined.length > val) {
