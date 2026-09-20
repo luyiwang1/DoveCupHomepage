@@ -10,10 +10,10 @@ vm.runInNewContext(source, context);
 const moments = context.globalThis.DOVE_MOMENTS;
 const gallery = context.globalThis.DOVE_MOMENTS_GALLERY;
 
-test('keeps a complete sixteen-event photo archive', () => {
-  assert.equal(moments.length, 16);
-  assert.deepEqual(JSON.parse(JSON.stringify(moments.map(moment => moment.eventNumber))), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]);
-  assert.equal(moments.filter(moment => moment.photo).length, 16);
+test('keeps a complete seventeen-event photo archive', () => {
+  assert.equal(moments.length, 17);
+  assert.deepEqual(JSON.parse(JSON.stringify(moments.map(moment => moment.eventNumber))), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]);
+  assert.equal(moments.filter(moment => moment.photo).length, 17);
   assert.equal(moments.find(moment => moment.eventNumber === 5).photo.src, 'assets/moments/event-05-v2.webp');
   assert.equal(moments.find(moment => moment.eventNumber === 8).photo.src, 'assets/moments/event-08-v4.webp');
   assert.equal(moments.find(moment => moment.eventNumber === 11).photo.src, 'assets/moments/event-09.webp');
@@ -27,6 +27,9 @@ test('keeps a complete sixteen-event photo archive', () => {
   assert.equal(moments.find(moment => moment.eventNumber === 16).dateLabel, '9月12日');
   assert.equal(moments.find(moment => moment.eventNumber === 16).dateLabelEn, 'SEP 12');
   assert.equal(moments.find(moment => moment.eventNumber === 16).photo.src, 'assets/moments/event-16.webp');
+  assert.equal(moments.find(moment => moment.eventNumber === 17).dateLabel, '9月19日');
+  assert.equal(moments.find(moment => moment.eventNumber === 17).dateLabelEn, 'SEP 19');
+  assert.equal(moments.find(moment => moment.eventNumber === 17).photo.src, 'assets/moments/event-17.webp');
   assert.ok(moments.every(moment => moment.scheduleEn === 'SATURDAY · 5–7 PM'));
   assert.ok(moments.every(moment => moment.venueEn === 'MRTC · Toronto'));
   assert.match(moments[0].photo.caption, /5月24日 · 周六 · 17:00–19:00 · MRTC · 多伦多/);
@@ -51,10 +54,10 @@ test('marks Event 05, Event 08, Event 12, and Event 15 as special events', () =>
 });
 
 test('builds the fullscreen gallery in chronological order', () => {
-  assert.equal(gallery.gallery.photos.length, 16);
+  assert.equal(gallery.gallery.photos.length, 17);
   assert.deepEqual(
     JSON.parse(JSON.stringify(gallery.gallery.photos.map(photo => photo.eventNumber))),
-    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16]
+    [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17]
   );
 });
 

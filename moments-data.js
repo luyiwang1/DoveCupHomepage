@@ -17,7 +17,8 @@
     13: { src: 'assets/moments/event-11.webp', focusX: 50, focusY: 100, zoom: 1.12 },
     14: { src: 'assets/moments/event-14.jpg', focusX: 50, focusY: 100, zoom: 1.02 },
     15: { src: 'assets/events/2026-08-29/dove-king-group-photo.jpg', focusX: 50, focusY: 72, zoom: 1.08 },
-    16: { src: 'assets/moments/event-16.webp', focusX: 50, focusY: 70, zoom: 1.04 }
+    16: { src: 'assets/moments/event-16.webp', focusX: 50, focusY: 70, zoom: 1.04 },
+    17: { src: 'assets/moments/event-17.webp', focusX: 50, focusY: 72, zoom: 1.03 }
   };
 
   const eventDates = [
@@ -36,7 +37,8 @@
     { label: '8月15日', labelEn: 'AUG 15' },
     { label: '8月22日', labelEn: 'AUG 22' },
     { label: '8月29日', labelEn: 'AUG 29' },
-    { label: '9月12日', labelEn: 'SEP 12' }
+    { label: '9月12日', labelEn: 'SEP 12' },
+    { label: '9月19日', labelEn: 'SEP 19' }
   ];
 
   const specialEvents = {
@@ -74,7 +76,7 @@
     }
   };
 
-  const moments = Array.from({ length: 16 }, (_, index) => {
+  const moments = Array.from({ length: 17 }, (_, index) => {
     const eventNumber = index + 1;
     const special = specialEvents[eventNumber] || null;
     const photo = photoSlots[eventNumber] || null;
