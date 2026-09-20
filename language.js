@@ -533,6 +533,58 @@
   add('正在连接实时数据', '正在连接实时数据', 'Connecting to live data');
   add('直接生成赛程。', '直接生成赛程。', 'Generate the schedule directly.');
 
+  // Verified member account and registration identity.
+  add('金鸽会员账户', '金鸽会员账户', 'Golden Dove Member Account');
+  add('报名需要邮箱验证账户', '报名需要邮箱验证账户', 'A verified email account is required to register');
+  add('登录 / 注册', '登录 / 注册', 'Sign In / Register');
+  add('登录', '登录', 'Sign In');
+  add('注册并验证', '注册并验证', 'Register & Verify');
+  add('邮箱', '邮箱', 'Email');
+  add('密码', '密码', 'Password');
+  add('至少 6 位', '至少 6 位', 'At least 6 characters');
+  add('首次注册姓名', '首次注册姓名', 'Registration Name');
+  add('公开显示的姓名 / 微信名', '公开显示的姓名 / 微信名', 'Public Name / WeChat Name');
+  add('默认分级', '默认分级', 'Default Division');
+  add('注册后请点击验证邮件。以后每次报名和到场都会记录到同一个会员身份。', '注册后请点击验证邮件。以后每次报名和到场都会记录到同一个会员身份。', 'Open the verification email after registering. Future registrations and attendance will stay with this member identity.');
+  add('忘记密码？发送重置邮件', '忘记密码？发送重置邮件', 'Forgot password? Send reset email');
+  add('验证邮件已经发送。点击邮件中的链接后回到这里刷新验证状态。', '验证邮件已经发送。点击邮件中的链接后回到这里刷新验证状态。', 'A verification email has been sent. Open its link, then return here to refresh your status.');
+  add('重新发送', '重新发送', 'Resend');
+  add('我已完成验证', '我已完成验证', 'I Have Verified');
+  add('退出这个账户', '退出这个账户', 'Sign Out');
+  add('公开姓名', '公开姓名', 'Public Name');
+  add('本周状态', '本周状态', 'This Week');
+  add('未报名', '未报名', 'Not Registered');
+  add('我的账户', '我的账户', 'My Account');
+  add('保存资料', '保存资料', 'Save Profile');
+  add('退出登录', '退出登录', 'Sign Out');
+  add('请先登录并完成邮箱验证', '请先登录并完成邮箱验证', 'Sign in and verify your email first');
+  add('这个会员本周已经报名或进入 Waitlist', '这个会员本周已经报名或进入候补名单', 'This member is already registered or waitlisted this week');
+  add('正在连接会员账户…', '正在连接会员账户…', 'Connecting member account…');
+  add('请稍候', '请稍候', 'Please Wait');
+  add('等待邮箱验证', '等待邮箱验证', 'Awaiting Email Verification');
+  add('完成验证', '完成验证', 'Complete Verification');
+  add('已验证', '已验证', 'Verified');
+  add('登录成功', '登录成功', 'Signed in');
+  add('验证邮件已发送', '验证邮件已发送', 'Verification email sent');
+  add('密码重置邮件已发送', '密码重置邮件已发送', 'Password reset email sent');
+  add('验证邮件已重新发送', '验证邮件已重新发送', 'Verification email resent');
+  add('邮箱验证成功', '邮箱验证成功', 'Email verified');
+  add('还没有检测到验证', '还没有检测到验证', 'Verification not detected yet');
+  add('会员资料已保存', '会员资料已保存', 'Member profile saved');
+  add('已退出登录', '已退出登录', 'Signed out');
+  add('账户姓名', '账户姓名', 'Account Name');
+  add('账户服务还未启用，请联系管理员。', '账户服务还未启用，请联系管理员。', 'Member accounts are not enabled yet. Contact the administrator.');
+  add('这个邮箱已经注册，请直接登录。', '这个邮箱已经注册，请直接登录。', 'This email is already registered. Please sign in.');
+  add('邮箱格式不正确。', '邮箱格式不正确。', 'Enter a valid email address.');
+  add('邮箱或密码不正确。', '邮箱或密码不正确。', 'Incorrect email or password.');
+  add('没有找到这个账户。', '没有找到这个账户。', 'Account not found.');
+  add('密码至少需要 6 位。', '密码至少需要 6 位。', 'Password must be at least 6 characters.');
+  add('尝试次数过多，请稍后再试。', '尝试次数过多，请稍后再试。', 'Too many attempts. Please try again later.');
+  add('请输入公开姓名。', '请输入公开姓名。', 'Enter a public name.');
+  add('请先完成邮箱验证。', '请先完成邮箱验证。', 'Verify your email first.');
+  add('账户组件加载失败，请刷新页面。', '账户组件加载失败，请刷新页面。', 'The account component did not load. Refresh the page.');
+  add('操作没有完成，请稍后重试。', '操作没有完成，请稍后重试。', 'The action could not be completed. Please try again.');
+
   // Courts page.
   add('金鸽巡回赛 · 第一轮场地安排', '金鸽巡回赛 · 第一轮场地安排', 'Golden Dove Tour · Round 1 Court Assignments');
   add('第一轮场地安排', '第一轮场地安排', 'Round 1 Court Assignments');

@@ -37,6 +37,20 @@ function playerKey(name) {
   return `p_${createHash('sha256').update(normalizeName(name)).digest('hex').slice(0, 24)}`;
 }
 
+function memberUidOf(person) {
+  return String(person?.memberUid || '').trim();
+}
+
+function signupPlayerKey(person) {
+  const memberUid = memberUidOf(person);
+  return memberUid ? `u_${memberUid}` : playerKey(person?.name);
+}
+
+function attendancePlayerKey(person) {
+  const memberUid = memberUidOf(person);
+  return memberUid ? `u_${memberUid}` : scoreKeyForName(person?.name);
+}
+
 export function scoreKeyForName(name) {
   return String(name || '').trim().toLocaleLowerCase('en-CA').replace(/[.#$/[\]]/g, '_');
 }
@@ -45,6 +59,7 @@ function cleanPerson(person) {
   return {
     id: person.id ?? null,
     name: String(person.name || '').trim(),
+    memberUid: memberUidOf(person) || null,
     levelGroup: person.levelGroup || '20_25',
     confirmed: Boolean(person.confirmed),
     paid: Boolean(person.paid),
@@ -56,7 +71,7 @@ function updatePlayerStat(stats, person, kind, resetId, archivedAt) {
   const normalizedName = normalizeName(person.name);
   if (!normalizedName) return null;
 
-  const key = playerKey(person.name);
+  const key = signupPlayerKey(person);
   const previous = stats[key] || {};
   const name = String(person.name || '').trim();
   const aliases = Array.isArray(previous.aliases) ? previous.aliases.slice(0, 4) : [];
@@ -65,6 +80,7 @@ function updatePlayerStat(stats, person, kind, resetId, archivedAt) {
 
   const next = {
     ...previous,
+    memberUid: memberUidOf(person) || previous.memberUid || null,
     name,
     normalizedName,
     aliases,
@@ -103,21 +119,28 @@ function recordAttendance(system, people, resetId, recordedAt) {
   }
 
   const names = [];
+  const attendees = [];
   const seen = new Set();
   (Array.isArray(people) ? people : []).forEach(person => {
     const name = String(person?.name || '').trim();
-    const key = scoreKeyForName(name);
+    const memberUid = memberUidOf(person);
+    const key = attendancePlayerKey(person);
     if (!key || seen.has(key)) return;
     seen.add(key);
     names.push(name);
+    attendees.push({ memberUid: memberUid || null, name });
 
     const existing = players[key] || {
       key,
       name,
       appearances: 0
     };
+    const aliases = Array.isArray(existing.aliases) ? existing.aliases.slice(0, 4) : [];
+    if (existing.name && existing.name !== name && !aliases.includes(existing.name)) aliases.unshift(existing.name);
     existing.key = key;
+    existing.memberUid = memberUid || existing.memberUid || null;
     existing.name = name;
+    existing.aliases = aliases;
     existing.appearances = (Number(existing.appearances) || 0) + 1;
     delete existing.manualWins;
     delete existing.courtWins;
@@ -133,10 +156,11 @@ function recordAttendance(system, people, resetId, recordedAt) {
     resetId,
     count: names.length,
     names,
+    attendees,
     recordedAt,
     source: 'weekly-signup-archive'
   };
-  events.unshift({ type: 'weeklyAttendance', resetId, names, count: names.length, ts: recordedAt });
+  events.unshift({ type: 'weeklyAttendance', resetId, names, attendees, count: names.length, ts: recordedAt });
   system.scores = {
     ...scores,
     players,
@@ -230,7 +254,7 @@ export function buildReset(input, resetId, now = new Date()) {
 
   const joinedKeys = new Set();
   joined.forEach(person => {
-    const key = playerKey(person.name);
+    const key = signupPlayerKey(person);
     if (joinedKeys.has(key)) return;
     joinedKeys.add(key);
     updatePlayerStat(stats, person, 'joined', resetId, archivedAt);
@@ -238,7 +262,7 @@ export function buildReset(input, resetId, now = new Date()) {
 
   const waitlistKeys = new Set();
   waitlist.forEach(person => {
-    const key = playerKey(person.name);
+    const key = signupPlayerKey(person);
     if (joinedKeys.has(key) || waitlistKeys.has(key)) return;
     waitlistKeys.add(key);
     updatePlayerStat(stats, person, 'waitlist', resetId, archivedAt);

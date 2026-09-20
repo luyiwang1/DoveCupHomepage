@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=31"></script>
+<script src="language.js?v=32"></script>
 <script src="site-nav.js?v=2" defer></script>
 <title>金鸽巡回赛 · 报名接龙</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -130,6 +130,32 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 .stat-chip .dot.orange { background: var(--orange); }
 .stat-chip .dot.gray { background: var(--gray-300); }
 .stat-chip strong { font-weight: 700; color: var(--ink); }
+.account-strip {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  margin-bottom: 10px;
+  padding: 9px 11px;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+  background: var(--gray-100);
+  color: var(--gray-700);
+  font-size: 12px;
+}
+.account-strip strong { color: var(--ink); }
+.account-open-btn {
+  flex: none;
+  border: 0;
+  border-radius: 16px;
+  padding: 7px 12px;
+  background: var(--green);
+  color: white;
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.account-open-btn.pending { background: var(--orange); }
 
 /* ── Tabs ── */
 .tabs {
@@ -688,6 +714,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   margin-bottom: 14px;
 }
 .modal-input:focus { border-color: var(--green); }
+.modal-input[readonly] { color: var(--gray-700); background: var(--gray-100); }
 .modal-btns { display: flex; gap: 10px; }
 .modal-btn {
   flex: 1;
@@ -701,6 +728,18 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 }
 .modal-btn.cancel { background: var(--gray-100); color: var(--gray-700); }
 .modal-btn.confirm { background: var(--green); color: white; }
+.account-sheet { max-height: min(90dvh, 720px); overflow-y: auto; }
+.account-panel { display: none; }
+.account-panel.active { display: block; }
+.account-note { margin: -4px 0 14px; color: var(--gray-500); font-size: 12px; line-height: 1.6; }
+.account-email { margin-bottom: 14px; padding: 10px 12px; border-radius: var(--radius-sm); background: var(--gray-100); font-size: 13px; overflow-wrap: anywhere; }
+.account-status-card { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 8px; margin: 14px 0; }
+.account-status-card div { padding: 11px; border-radius: var(--radius-sm); background: var(--green-light); }
+.account-status-card strong { display: block; font-size: 17px; color: var(--green-dark); }
+.account-status-card span { color: var(--gray-500); font-size: 11px; }
+.account-link-btn { width: 100%; margin-top: 10px; border: 0; background: transparent; color: var(--green-dark); font: inherit; font-size: 12px; cursor: pointer; }
+.account-error { min-height: 18px; margin: 8px 0; color: var(--red); font-size: 12px; }
+.field-label { display: block; margin: 0 0 6px; color: var(--gray-700); font-size: 12px; font-weight: 700; }
 
 /* ── Floating add btn ── */
 .fab {
@@ -738,6 +777,10 @@ body.is-admin .summary-card.admin-only { display: block !important; }
     <button class="admin-btn" onclick="goPage('scores.html')">到场</button>
     <button class="admin-btn" onclick="goPage('events.html')">活动中心</button>
     <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">Admin</button>
+  </div>
+  <div class="account-strip">
+    <span id="accountSummary">报名需要邮箱验证账户</span>
+    <button class="account-open-btn pending" id="accountOpenBtn" onclick="showAccountModal()">登录 / 注册</button>
   </div>
   <div class="stats-row">
     <div class="stat-chip">
@@ -846,7 +889,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-title">➕ 添加人员</div>
-    <input class="modal-input" id="addName" placeholder="姓名 / 微信名" autocomplete="off">
+    <input class="modal-input" id="addName" placeholder="账户姓名" autocomplete="off" readonly>
     <select class="modal-input" id="addLevel">
       <option value="u20">新手场 · 2.0-</option>
       <option value="20_25">2.0-2.5</option>
@@ -857,6 +900,70 @@ body.is-admin .summary-card.admin-only { display: block !important; }
       <button class="modal-btn cancel" onclick="closeModalById('addModal')">取消</button>
       <button class="modal-btn confirm" style="background:var(--orange);color:white" onclick="addPerson('waitlist')">加 Waitlist</button>
       <button class="modal-btn confirm" onclick="addPerson('joined')">直接报名</button>
+    </div>
+  </div>
+</div>
+
+<!-- Member account modal -->
+<div class="modal-overlay" id="accountModal" onclick="closeModal(event,'accountModal')">
+  <div class="modal-sheet account-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">金鸽会员账户</div>
+
+    <div class="account-panel active" id="accountSignedOut">
+      <p class="account-note">注册后请点击验证邮件。以后每次报名和到场都会记录到同一个会员身份。</p>
+      <label class="field-label" for="accountEmail">邮箱</label>
+      <input class="modal-input" id="accountEmail" type="email" placeholder="name@example.com" autocomplete="email">
+      <label class="field-label" for="accountPassword">密码</label>
+      <input class="modal-input" id="accountPassword" type="password" placeholder="至少 6 位" autocomplete="current-password">
+      <label class="field-label" for="accountRegisterName">首次注册姓名</label>
+      <input class="modal-input" id="accountRegisterName" placeholder="公开显示的姓名 / 微信名" autocomplete="name">
+      <label class="field-label" for="accountRegisterLevel">默认分级</label>
+      <select class="modal-input" id="accountRegisterLevel">
+        <option value="u20">新手场 · 2.0-</option>
+        <option value="20_25">2.0-2.5</option>
+        <option value="25_30">2.5-3.0</option>
+        <option value="30_plus">3.0+</option>
+      </select>
+      <div class="account-error" id="accountSignedOutError"></div>
+      <div class="modal-btns">
+        <button class="modal-btn cancel" onclick="accountLogin()">登录</button>
+        <button class="modal-btn confirm" onclick="accountRegister()">注册并验证</button>
+      </div>
+      <button class="account-link-btn" onclick="accountResetPassword()">忘记密码？发送重置邮件</button>
+    </div>
+
+    <div class="account-panel" id="accountPending">
+      <p class="account-note">验证邮件已经发送。点击邮件中的链接后回到这里刷新验证状态。</p>
+      <div class="account-email" id="accountPendingEmail"></div>
+      <div class="account-error" id="accountPendingError"></div>
+      <div class="modal-btns">
+        <button class="modal-btn cancel" onclick="accountResendVerification()">重新发送</button>
+        <button class="modal-btn confirm" onclick="accountRefreshVerification()">我已完成验证</button>
+      </div>
+      <button class="account-link-btn" onclick="accountLogout()">退出这个账户</button>
+    </div>
+
+    <div class="account-panel" id="accountProfile">
+      <div class="account-email" id="accountProfileEmail"></div>
+      <label class="field-label" for="accountProfileName">公开姓名</label>
+      <input class="modal-input" id="accountProfileName" autocomplete="name">
+      <label class="field-label" for="accountProfileLevel">默认分级</label>
+      <select class="modal-input" id="accountProfileLevel">
+        <option value="u20">新手场 · 2.0-</option>
+        <option value="20_25">2.0-2.5</option>
+        <option value="25_30">2.5-3.0</option>
+        <option value="30_plus">3.0+</option>
+      </select>
+      <div class="account-status-card">
+        <div><strong id="accountCurrentSignup">未报名</strong><span>本周状态</span></div>
+        <div><strong id="accountAppearances">0</strong><span>累计到场</span></div>
+      </div>
+      <div class="account-error" id="accountProfileError"></div>
+      <div class="modal-btns">
+        <button class="modal-btn cancel" onclick="accountLogout()">退出登录</button>
+        <button class="modal-btn confirm" onclick="accountSaveProfile()">保存资料</button>
+      </div>
     </div>
   </div>
 </div>
@@ -875,11 +982,13 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 </div>
 
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script src="member-account.js?v=1"></script>
 <script>
 const COLORS = ['#07C160','#10AEFF','#FF8C00','#FA5151','#9B59B6','#E67E22','#2ECC71','#E74C3C','#3498DB','#1ABC9C'];
 const ADMIN_PASSWORD = '8888';
-const SITE_VERSION = '32';
+const SITE_VERSION = '33';
 const WAITLIST_CAPACITY = 24;
 const DEFAULT_CAPACITY = 32;
 const LEVEL_GROUPS = [
@@ -934,12 +1043,17 @@ if (!currentUserKey) {
 }
 let currentUserName = localStorage.getItem(USER_NAME_STORAGE) || '';
 let isAdminMode = sessionStorage.getItem(ADMIN_STORAGE) === '1';
+let memberAccount = { ready: false, user: null, profile: null, error: '' };
+let memberAttendanceRef = null;
+let memberAttendance = 0;
 
 function goPage(page) {
   location.href = page;
 }
 if (new URLSearchParams(location.search).has('v')) {
-  history.replaceState(null, '', location.pathname);
+  const cleanParams = new URLSearchParams(location.search);
+  cleanParams.delete('v');
+  history.replaceState(null, '', `${location.pathname}${cleanParams.size ? `?${cleanParams}` : ''}${location.hash}`);
 }
 function newId() { return idSeq++; }
 function hasFirebaseConfig() {
@@ -996,6 +1110,7 @@ function enforceTotalCapacityForState(nextState) {
         name: p.name,
         levelGroup: p.levelGroup,
         ownerKey: p.ownerKey,
+        memberUid: p.memberUid || null,
         ts: p.ts || Date.now()
       });
       return false;
@@ -1026,6 +1141,7 @@ function escapeHtml(v) {
   }[ch]));
 }
 function ownsPerson(p) {
+  if (p && p.memberUid) return Boolean(memberAccount.user && p.memberUid === memberAccount.user.uid);
   return Boolean(p && (
     p.ownerKey === currentUserKey ||
     (!p.ownerKey && currentUserName && p.name === currentUserName)
@@ -1160,6 +1276,7 @@ function stopAdminDataSync() {
 // ── Render ──
 function render() {
   renderAuth();
+  renderAccountState();
   renderJoined();
   renderWaitlist();
   renderSummary();
@@ -1402,8 +1519,16 @@ function switchTab(name) {
 }
 
 function showAddModal() {
+  const identity = window.DoveMemberAccount && DoveMemberAccount.identity(memberAccount);
+  if (!identity) {
+    showAccountModal();
+    showToast('请先登录并完成邮箱验证');
+    return;
+  }
+  document.getElementById('addName').value = identity.name;
+  document.getElementById('addLevel').value = identity.levelGroup;
   document.getElementById('addModal').classList.add('open');
-  setTimeout(() => document.getElementById('addName').focus(), 200);
+  setTimeout(() => document.getElementById('addLevel').focus(), 200);
 }
 function closeModal(e, id) {
   if (e.target === document.getElementById(id)) closeModalById(id);
@@ -1419,6 +1544,216 @@ function showToast(msg, type='') {
   t.className = type === 'green' ? 'show green' : 'show';
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => { t.className = ''; }, 2200);
+}
+
+function accountIdentity() {
+  return window.DoveMemberAccount ? DoveMemberAccount.identity(memberAccount) : null;
+}
+
+function accountErrorMessage(error) {
+  const code = String(error && (error.code || error.message) || error || '');
+  const messages = {
+    'auth/configuration-not-found': '账户服务还未启用，请联系管理员。',
+    'auth/operation-not-allowed': '账户服务还未启用，请联系管理员。',
+    'auth/email-already-in-use': '这个邮箱已经注册，请直接登录。',
+    'auth/invalid-email': '邮箱格式不正确。',
+    'auth/invalid-credential': '邮箱或密码不正确。',
+    'auth/user-not-found': '没有找到这个账户。',
+    'auth/wrong-password': '邮箱或密码不正确。',
+    'auth/weak-password': '密码至少需要 6 位。',
+    'auth/too-many-requests': '尝试次数过多，请稍后再试。',
+    'profile/name-required': '请输入公开姓名。',
+    'auth/verified-user-required': '请先完成邮箱验证。',
+    'auth/sdk-unavailable': '账户组件加载失败，请刷新页面。'
+  };
+  return messages[code] || '操作没有完成，请稍后重试。';
+}
+
+function setAccountError(id, value) {
+  const el = document.getElementById(id);
+  if (el) el.textContent = value || '';
+}
+
+function showAccountModal() {
+  renderAccountState();
+  document.getElementById('accountModal').classList.add('open');
+}
+
+function accountPanel(id) {
+  document.querySelectorAll('.account-panel').forEach(panel => panel.classList.toggle('active', panel.id === id));
+}
+
+function currentMemberSignup(uid) {
+  if (!uid) return null;
+  const joined = state.joined.find(person => person.memberUid === uid);
+  if (joined) return { kind: 'joined', person: joined };
+  const waitlisted = state.waitlist.find(person => person.memberUid === uid);
+  return waitlisted ? { kind: 'waitlist', person: waitlisted } : null;
+}
+
+function renderAccountState() {
+  const summary = document.getElementById('accountSummary');
+  const button = document.getElementById('accountOpenBtn');
+  if (!summary || !button) return;
+
+  const user = memberAccount.user;
+  const profile = memberAccount.profile;
+  if (!memberAccount.ready) {
+    summary.textContent = '正在连接会员账户…';
+    button.textContent = '请稍候';
+    button.classList.add('pending');
+    return;
+  }
+  if (!user) {
+    summary.textContent = '报名需要邮箱验证账户';
+    button.textContent = '登录 / 注册';
+    button.classList.add('pending');
+    accountPanel('accountSignedOut');
+    setAccountError('accountSignedOutError', memberAccount.error ? accountErrorMessage(memberAccount.error) : '');
+    return;
+  }
+  if (!user.emailVerified || !profile) {
+    summary.textContent = `${user.email || '会员账户'} · 等待邮箱验证`;
+    button.textContent = '完成验证';
+    button.classList.add('pending');
+    accountPanel('accountPending');
+    document.getElementById('accountPendingEmail').textContent = user.email || '';
+    setAccountError('accountPendingError', memberAccount.error ? accountErrorMessage(memberAccount.error) : '');
+    return;
+  }
+
+  const signup = currentMemberSignup(user.uid);
+  summary.textContent = signup
+    ? `${profile.displayName} · ${signup.kind === 'joined' ? '本周已报名' : 'Waitlist'}`
+    : `${profile.displayName} · 已验证`;
+  button.textContent = '我的账户';
+  button.classList.remove('pending');
+  accountPanel('accountProfile');
+  document.getElementById('accountProfileEmail').textContent = user.email || '';
+  document.getElementById('accountProfileName').value = profile.displayName || '';
+  document.getElementById('accountProfileLevel').value = profile.defaultLevel || '20_25';
+  document.getElementById('accountCurrentSignup').textContent = signup
+    ? (signup.kind === 'joined' ? '已报名' : 'Waitlist')
+    : '未报名';
+  document.getElementById('accountAppearances').textContent = memberAttendance;
+  setAccountError('accountProfileError', memberAccount.error ? accountErrorMessage(memberAccount.error) : '');
+}
+
+function stopMemberAttendanceSync() {
+  if (memberAttendanceRef) memberAttendanceRef.off();
+  memberAttendanceRef = null;
+  memberAttendance = 0;
+}
+
+function startMemberAttendanceSync(uid) {
+  stopMemberAttendanceSync();
+  if (!uid || !window.firebase || !firebase.database) return;
+  memberAttendanceRef = firebase.database().ref(`doveCupWaitlistSystem/scores/players/u_${uid}`);
+  memberAttendanceRef.on('value', snapshot => {
+    const value = snapshot.val();
+    memberAttendance = Number(value && value.appearances) || 0;
+    renderAccountState();
+  });
+}
+
+function initMemberAccount() {
+  if (!window.DoveMemberAccount) {
+    memberAccount = { ready: true, user: null, profile: null, error: 'auth/sdk-unavailable' };
+    renderAccountState();
+    return;
+  }
+  DoveMemberAccount.init(FIREBASE_CONFIG, next => {
+    const previousUid = memberAccount.user && memberAccount.user.uid;
+    memberAccount = next;
+    const nextUid = next.user && next.user.emailVerified ? next.user.uid : '';
+    if (previousUid !== nextUid) {
+      if (nextUid) startMemberAttendanceSync(nextUid);
+      else stopMemberAttendanceSync();
+    }
+    render();
+    const params = new URLSearchParams(location.search);
+    if (params.has('verify') && next.ready && next.user) {
+      showAccountModal();
+      params.delete('verify');
+      history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}${location.hash}`);
+    }
+  });
+}
+
+async function accountLogin() {
+  setAccountError('accountSignedOutError', '');
+  try {
+    await DoveMemberAccount.login(document.getElementById('accountEmail').value, document.getElementById('accountPassword').value);
+    showToast('登录成功', 'green');
+  } catch (error) {
+    setAccountError('accountSignedOutError', accountErrorMessage(error));
+  }
+}
+
+async function accountRegister() {
+  setAccountError('accountSignedOutError', '');
+  try {
+    await DoveMemberAccount.register({
+      email: document.getElementById('accountEmail').value,
+      password: document.getElementById('accountPassword').value,
+      displayName: document.getElementById('accountRegisterName').value,
+      defaultLevel: document.getElementById('accountRegisterLevel').value
+    });
+    showToast('验证邮件已发送', 'green');
+  } catch (error) {
+    setAccountError('accountSignedOutError', accountErrorMessage(error));
+  }
+}
+
+async function accountResetPassword() {
+  setAccountError('accountSignedOutError', '');
+  try {
+    await DoveMemberAccount.sendPasswordReset(document.getElementById('accountEmail').value);
+    showToast('密码重置邮件已发送', 'green');
+  } catch (error) {
+    setAccountError('accountSignedOutError', accountErrorMessage(error));
+  }
+}
+
+async function accountResendVerification() {
+  try {
+    await DoveMemberAccount.resendVerification();
+    showToast('验证邮件已重新发送', 'green');
+  } catch (error) {
+    setAccountError('accountPendingError', accountErrorMessage(error));
+  }
+}
+
+async function accountRefreshVerification() {
+  try {
+    const verified = await DoveMemberAccount.refreshVerification();
+    showToast(verified ? '邮箱验证成功' : '还没有检测到验证', verified ? 'green' : '');
+  } catch (error) {
+    setAccountError('accountPendingError', accountErrorMessage(error));
+  }
+}
+
+async function accountSaveProfile() {
+  try {
+    const profile = await DoveMemberAccount.saveProfile({
+      displayName: document.getElementById('accountProfileName').value,
+      defaultLevel: document.getElementById('accountProfileLevel').value
+    });
+    const uid = memberAccount.user && memberAccount.user.uid;
+    [...state.joined, ...state.waitlist].forEach(person => {
+      if (person.memberUid === uid) person.name = profile.displayName;
+    });
+    render();
+    showToast('会员资料已保存', 'green');
+  } catch (error) {
+    setAccountError('accountProfileError', accountErrorMessage(error));
+  }
+}
+
+async function accountLogout() {
+  await DoveMemberAccount.logout();
+  closeModalById('accountModal');
+  showToast('已退出登录');
 }
 
 function toggleAdmin() {
@@ -1448,12 +1783,14 @@ function personCard(p, rank, list) {
   const isJoined = list === 'joined';
   const safeName = escapeHtml(p.name);
   const canEdit = canEditPerson(p);
+  const canEditPayment = isAdminMode;
   const lockClass = canEdit ? '' : ' locked';
+  const paymentLockClass = canEditPayment ? '' : ' locked';
   const ownerNote = ownsPerson(p) ? '<div class="owner-note">这是你</div>' : '';
   const badges = isJoined ? `
     <div class="badges">
       <span class="badge badge-confirm ${p.confirmed ? '' : 'off'}${lockClass}" ${canEdit ? `onclick="toggleConfirm(${p.id})"` : ''}>${p.confirmed ? '已确认' : '待确认'}</span>
-      <span class="badge badge-paid ${p.paid ? '' : 'off'}${lockClass}" ${canEdit ? `onclick="togglePaid(${p.id})"` : ''}>${p.paid ? '已付款' : '未付款'}</span>
+      <span class="badge badge-paid ${p.paid ? '' : 'off'}${paymentLockClass}" ${canEditPayment ? `onclick="togglePaid(${p.id})"` : ''}>${p.paid ? '已付款' : '未付款'}</span>
       ${canEdit ? `<span class="badge badge-cancel" onclick="removeJoined(${p.id})">退出</span>` : ''}
     </div>
   ` : `
@@ -1477,10 +1814,20 @@ function personCard(p, rank, list) {
 }
 
 function addPerson(list) {
-  const name = document.getElementById('addName').value.trim();
+  const identity = accountIdentity();
+  if (!identity) {
+    closeModalById('addModal');
+    showAccountModal();
+    showToast('请先登录并完成邮箱验证');
+    return;
+  }
+  const name = identity.name;
   const selectedLevel = document.getElementById('addLevel').value;
   const levelGroup = LEVEL_GROUPS.some(group => group.key === selectedLevel) ? selectedLevel : '20_25';
-  if (!name) { showToast('请输入姓名'); return; }
+  if (state.joined.some(person => person.memberUid === identity.memberUid) || state.waitlist.some(person => person.memberUid === identity.memberUid)) {
+    showToast('这个会员本周已经报名或进入 Waitlist');
+    return;
+  }
 
   if (list === 'joined' && !canJoinSignup()) {
     if (state.waitlist.length >= WAITLIST_CAPACITY) {
@@ -1496,13 +1843,12 @@ function addPerson(list) {
     return;
   }
 
-  rememberUser(name);
-  const person = { id: newId(), name, levelGroup, ownerKey: currentUserKey, confirmed: false, paid: false, ts: Date.now() };
+  const person = { id: newId(), name, levelGroup, ownerKey: identity.ownerKey, memberUid: identity.memberUid, confirmed: false, paid: false, ts: Date.now() };
   if (list === 'joined') {
     state.joined.push(person);
     showToast(`${name} 已报名`, 'green');
   } else {
-    state.waitlist.push({ id: person.id, name, levelGroup, ownerKey: currentUserKey, ts: person.ts });
+    state.waitlist.push({ id: person.id, name, levelGroup, ownerKey: identity.ownerKey, memberUid: identity.memberUid, ts: person.ts });
     showToast(`${name} 已加入 Waitlist`);
   }
 
@@ -1523,7 +1869,7 @@ function toggleConfirm(id) {
 
 function togglePaid(id) {
   const p = state.joined.find(x=>x.id===id);
-  if (!p || !requireOwner(p)) return;
+  if (!p || !requireAdmin()) return;
   p.paid = !p.paid;
   showToast(p.paid ? `${p.name} 已付款` : `${p.name} 标记未付款`, p.paid ? 'green' : '');
   render();
@@ -1558,7 +1904,7 @@ function promoteOne(id) {
     return;
   }
   state.waitlist.splice(idx, 1);
-  state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+  state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, memberUid: w.memberUid || null, confirmed: false, paid: false, ts: Date.now() });
   showToast(`${w.name} 已补位成功`, 'green');
   render();
   switchTab('joined');
@@ -1572,7 +1918,7 @@ function promoteAll() {
   let idx = waitlistIndexForOpenSlot();
   while (idx !== -1 && promoted < slots) {
     const w = state.waitlist.splice(idx, 1)[0];
-    state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+    state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, memberUid: w.memberUid || null, confirmed: false, paid: false, ts: Date.now() });
     promoted += 1;
     idx = waitlistIndexForOpenSlot();
   }
@@ -1586,7 +1932,7 @@ function autoPromote() {
   const idx = waitlistIndexForOpenSlot();
   if (idx === -1) return;
   const w = state.waitlist.splice(idx, 1)[0];
-  state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+  state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, memberUid: w.memberUid || null, confirmed: false, paid: false, ts: Date.now() });
   showToast(`${w.name} 自动补位成功`, 'green');
 }
 
@@ -1609,6 +1955,7 @@ function setCapacity() {
       name: p.name,
       levelGroup: levelKeyOf(p),
       ownerKey: p.ownerKey,
+      memberUid: p.memberUid || null,
       ts: Date.now()
     })).concat(state.waitlist);
   }
@@ -1659,6 +2006,7 @@ document.getElementById('capInput').addEventListener('keydown', e => {
 load();
 render();
 initRealtimeDatabase();
+initMemberAccount();
 </script>
 </body>
 </html>

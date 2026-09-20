@@ -113,6 +113,32 @@ test('backfills attendance from an existing archive exactly once', () => {
   assert.equal(second.data.scores.players.gill.appearances, 1);
 });
 
+test('keeps renamed verified members under one UID for signups and attendance', () => {
+  const first = buildReset({
+    main: {
+      state: {
+        joined: [{ id: 1, name: 'Han', memberUid: 'firebase-user-1', levelGroup: '25_30' }],
+        waitlist: []
+      }
+    }
+  }, '2026-09-12', new Date('2026-09-13T00:00:00Z'));
+
+  first.data.main.state.joined = [{ id: 2, name: 'Han M', memberUid: 'firebase-user-1', levelGroup: '25_30' }];
+  const second = buildReset(first.data, '2026-09-19', new Date('2026-09-20T00:00:00Z'));
+  const scorePlayer = second.data.scores.players['u_firebase-user-1'];
+  const signupPlayer = second.data.signupStats['u_firebase-user-1'];
+
+  assert.equal(scorePlayer.name, 'Han M');
+  assert.equal(scorePlayer.appearances, 2);
+  assert.deepEqual(scorePlayer.aliases, ['Han']);
+  assert.equal(signupPlayer.signupCount, 2);
+  assert.deepEqual(signupPlayer.aliases, ['Han']);
+  assert.equal(second.data.signupHistory['2026-09-19'].joined[0].memberUid, 'firebase-user-1');
+  assert.deepEqual(second.data.scores.attendanceWeeks['2026-09-19'].attendees, [
+    { memberUid: 'firebase-user-1', name: 'Han M' }
+  ]);
+});
+
 test('removes competition stats without changing attendance', () => {
   const input = {
     scores: {

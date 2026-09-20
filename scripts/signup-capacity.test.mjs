@@ -26,3 +26,12 @@ test('keeps 32 as the hard maximum for admin capacity changes', () => {
   assert.match(signup, /id="capInput" placeholder="32" min="1" max="32"/);
   assert.match(signup, /val > DEFAULT_CAPACITY/);
 });
+
+test('requires a verified member identity for new signups', () => {
+  assert.match(signup, /firebase-auth-compat\.js/);
+  assert.match(signup, /DoveMemberAccount\.identity\(memberAccount\)/);
+  assert.match(signup, /memberUid: identity\.memberUid/);
+  assert.match(signup, /id="addName"[^>]+readonly/);
+  assert.match(signup, /这个会员本周已经报名或进入 Waitlist/);
+  assert.match(signup, /function togglePaid\(id\)[\s\S]*requireAdmin\(\)/);
+});
