@@ -22,7 +22,7 @@ export function latestEligibleResetId(now = new Date()) {
   const parts = zonedParts(now);
   const weekday = { Sun: 0, Mon: 1, Tue: 2, Wed: 3, Thu: 4, Fri: 5, Sat: 6 }[parts.weekday];
   let daysSinceSaturday = (weekday - 6 + 7) % 7;
-  if (daysSinceSaturday === 0 && Number(parts.hour) < 19) daysSinceSaturday = 7;
+  if (daysSinceSaturday === 0 && Number(parts.hour) < 23) daysSinceSaturday = 7;
 
   const localDate = new Date(Date.UTC(Number(parts.year), Number(parts.month) - 1, Number(parts.day)));
   localDate.setUTCDate(localDate.getUTCDate() - daysSinceSaturday);
@@ -270,7 +270,7 @@ export function buildReset(input, resetId, now = new Date()) {
 
   history[resetId] = {
     resetId,
-    scheduledFor: `${resetId}T19:00:00[${TIME_ZONE}]`,
+    scheduledFor: `${resetId}T23:00:00[${TIME_ZONE}]`,
     archivedAt,
     title: state.title || '金鸽杯报名接龙',
     capacity: state.capacity ?? null,
@@ -300,7 +300,7 @@ export function buildReset(input, resetId, now = new Date()) {
     lastResetId: resetId,
     lastResetAt: archivedAt,
     timezone: TIME_ZONE,
-    archiveHour: 19
+    archiveHour: 23
   };
 
   return {

@@ -27,8 +27,11 @@ test('keeps 32 as the hard maximum for admin capacity changes', () => {
   assert.match(signup, /val > DEFAULT_CAPACITY/);
 });
 
-test('requires a verified member identity for new signups', () => {
+test('requires a phone-verified member identity for new signups', () => {
   assert.match(signup, /firebase-auth-compat\.js/);
+  assert.match(signup, /id="accountPhone"[^>]+type="tel"/);
+  assert.match(signup, /DoveMemberAccount\.sendCode/);
+  assert.match(signup, /DoveMemberAccount\.confirmCode/);
   assert.match(signup, /DoveMemberAccount\.identity\(memberAccount\)/);
   assert.match(signup, /memberUid: identity\.memberUid/);
   assert.match(signup, /id="addName"[^>]+readonly/);

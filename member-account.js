@@ -11,6 +11,8 @@
   let auth = null;
   let database = null;
   let profileRef = null;
+  let recaptchaVerifier = null;
+  let confirmationResult = null;
   let listener = null;
   let snapshot = { ready: false, user: null, profile: null, error: '' };
 
@@ -20,6 +22,20 @@
 
   function cleanLevel(value) {
     return LEVELS.has(value) ? value : '20_25';
+  }
+
+  function normalizePhone(value) {
+    const raw = String(value || '').trim();
+    const digits = raw.replace(/\D/g, '');
+    if (raw.startsWith('+') && digits.length >= 8 && digits.length <= 15) return `+${digits}`;
+    if (digits.length === 10) return `+1${digits}`;
+    if (digits.length === 11 && digits.startsWith('1')) return `+${digits}`;
+    throw new Error('auth/invalid-phone-number');
+  }
+
+  function maskedPhone(value) {
+    const digits = String(value || '').replace(/\D/g, '');
+    return digits.length >= 4 ? `••• ••• ${digits.slice(-4)}` : '';
   }
 
   function normalizeProfile(value, uid) {
@@ -53,8 +69,8 @@
     if (typeof localStorage !== 'undefined') localStorage.removeItem(DRAFT_STORAGE);
   }
 
-  async function ensureVerifiedProfile(user) {
-    if (!user || !user.emailVerified || !database) return null;
+  async function ensureMemberProfile(user) {
+    if (!user || !user.phoneNumber || !database) return null;
     const ref = database.ref(`${PROFILE_ROOT}/${user.uid}`);
     const current = (await ref.once('value')).val();
     if (current && current.displayName) return normalizeProfile(current, user.uid);
@@ -82,12 +98,12 @@
 
   async function startProfileSync(user) {
     stopProfileSync();
-    if (!user || !user.emailVerified || !database) {
+    if (!user || !user.phoneNumber || !database) {
       emit({ ready: true, profile: null });
       return;
     }
     try {
-      await ensureVerifiedProfile(user);
+      await ensureMemberProfile(user);
       profileRef = database.ref(`${PROFILE_ROOT}/${user.uid}`);
       profileRef.on('value', profileSnapshot => {
         const value = profileSnapshot.val();
@@ -107,57 +123,69 @@
     if (!root.firebase.apps.length) root.firebase.initializeApp(config);
     auth = root.firebase.auth();
     database = root.firebase.database();
-    auth.useDeviceLanguage();
+    const syncLanguage = () => {
+      const language = root.DoveLanguage && root.DoveLanguage.getLanguage ? root.DoveLanguage.getLanguage() : '';
+      auth.languageCode = language === 'en' ? 'en' : 'zh-CN';
+    };
+    syncLanguage();
+    if (root.addEventListener) root.addEventListener('dove:languagechange', syncLanguage);
     auth.onAuthStateChanged(async user => {
       emit({ ready: false, user: user || null, profile: null, error: '' });
       await startProfileSync(user || null);
     }, error => emit({ ready: true, user: null, profile: null, error: error.code || error.message }));
   }
 
-  async function register({ email, password, displayName, defaultLevel }) {
+  function clearPhoneChallenge() {
+    if (recaptchaVerifier) recaptchaVerifier.clear();
+    recaptchaVerifier = null;
+    confirmationResult = null;
+  }
+
+  async function sendCode({ phone, displayName, defaultLevel, recaptchaContainerId }) {
     if (!auth) throw new Error('auth/not-ready');
     const name = cleanName(displayName);
     if (!name) throw new Error('profile/name-required');
+    const normalizedPhone = normalizePhone(phone);
     writeDraft({ displayName: name, defaultLevel: cleanLevel(defaultLevel) });
-    const credential = await auth.createUserWithEmailAndPassword(String(email || '').trim(), String(password || ''));
-    await credential.user.updateProfile({ displayName: name });
-    await credential.user.sendEmailVerification({ url: `${location.origin}${location.pathname}?verify=1` });
-    emit({ user: credential.user });
-    return credential.user;
+    if (recaptchaVerifier) recaptchaVerifier.clear();
+    recaptchaVerifier = new root.firebase.auth.RecaptchaVerifier(recaptchaContainerId, {
+      size: 'normal',
+      'expired-callback': () => emit({ error: 'auth/recaptcha-expired' })
+    });
+    try {
+      confirmationResult = await auth.signInWithPhoneNumber(normalizedPhone, recaptchaVerifier);
+      return { phone: normalizedPhone, maskedPhone: maskedPhone(normalizedPhone) };
+    } catch (error) {
+      if (recaptchaVerifier) recaptchaVerifier.clear();
+      recaptchaVerifier = null;
+      confirmationResult = null;
+      throw error;
+    }
   }
 
-  async function login(email, password) {
-    if (!auth) throw new Error('auth/not-ready');
-    return auth.signInWithEmailAndPassword(String(email || '').trim(), String(password || ''));
+  async function confirmCode(code) {
+    if (!confirmationResult) throw new Error('auth/code-not-sent');
+    const cleanCode = String(code || '').replace(/\D/g, '');
+    if (cleanCode.length !== 6) throw new Error('auth/invalid-verification-code');
+    const credential = await confirmationResult.confirm(cleanCode);
+    const draft = readDraft();
+    if (draft.displayName) await credential.user.updateProfile({ displayName: cleanName(draft.displayName) });
+    if (recaptchaVerifier) recaptchaVerifier.clear();
+    recaptchaVerifier = null;
+    confirmationResult = null;
+    await ensureMemberProfile(credential.user);
+    return credential.user;
   }
 
   async function logout() {
     if (!auth) return;
     stopProfileSync();
+    clearPhoneChallenge();
     await auth.signOut();
   }
 
-  async function sendPasswordReset(email) {
-    if (!auth) throw new Error('auth/not-ready');
-    return auth.sendPasswordResetEmail(String(email || '').trim());
-  }
-
-  async function resendVerification() {
-    if (!auth || !auth.currentUser) throw new Error('auth/not-ready');
-    return auth.currentUser.sendEmailVerification({ url: `${location.origin}${location.pathname}?verify=1` });
-  }
-
-  async function refreshVerification() {
-    if (!auth || !auth.currentUser) throw new Error('auth/not-ready');
-    await auth.currentUser.reload();
-    const user = auth.currentUser;
-    emit({ user, ready: false });
-    await startProfileSync(user);
-    return user.emailVerified;
-  }
-
   async function saveProfile({ displayName, defaultLevel }) {
-    if (!auth || !auth.currentUser || !auth.currentUser.emailVerified || !database) throw new Error('auth/verified-user-required');
+    if (!auth || !auth.currentUser || !auth.currentUser.phoneNumber || !database) throw new Error('auth/verified-user-required');
     const current = snapshot.profile || {};
     const name = cleanName(displayName);
     if (!name) throw new Error('profile/name-required');
@@ -179,7 +207,7 @@
   function identity(accountSnapshot = snapshot) {
     const user = accountSnapshot.user;
     const profile = accountSnapshot.profile;
-    if (!user || !user.emailVerified || !profile || !profile.displayName) return null;
+    if (!user || !user.phoneNumber || !profile || !profile.displayName) return null;
     return {
       memberUid: user.uid,
       ownerKey: user.uid,
@@ -195,16 +223,15 @@
   return {
     cleanLevel,
     cleanName,
+    confirmCode,
     current,
     identity,
     init,
-    login,
     logout,
+    maskedPhone,
     normalizeProfile,
-    refreshVerification,
-    register,
-    resendVerification,
+    normalizePhone,
     saveProfile,
-    sendPasswordReset
+    sendCode
   };
 }));

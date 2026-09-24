@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=32"></script>
+<script src="language.js?v=33"></script>
 <script src="site-nav.js?v=2" defer></script>
 <title>金鸽巡回赛 · 报名接龙</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -740,6 +740,8 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 .account-link-btn { width: 100%; margin-top: 10px; border: 0; background: transparent; color: var(--green-dark); font: inherit; font-size: 12px; cursor: pointer; }
 .account-error { min-height: 18px; margin: 8px 0; color: var(--red); font-size: 12px; }
 .field-label { display: block; margin: 0 0 6px; color: var(--gray-700); font-size: 12px; font-weight: 700; }
+#phoneRecaptcha { display: flex; justify-content: center; margin: 8px 0; overflow: hidden; }
+.modal-overlay.open ~ .dove-language-switch { visibility: hidden; pointer-events: none; }
 
 /* ── Floating add btn ── */
 .fab {
@@ -779,8 +781,8 @@ body.is-admin .summary-card.admin-only { display: block !important; }
     <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">Admin</button>
   </div>
   <div class="account-strip">
-    <span id="accountSummary">报名需要邮箱验证账户</span>
-    <button class="account-open-btn pending" id="accountOpenBtn" onclick="showAccountModal()">登录 / 注册</button>
+    <span id="accountSummary">报名需要手机验证账户</span>
+    <button class="account-open-btn pending" id="accountOpenBtn" onclick="showAccountModal()">手机登录</button>
   </div>
   <div class="stats-row">
     <div class="stat-chip">
@@ -831,7 +833,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
         <input type="number" id="capInput" placeholder="32" min="1" max="32">
         <button class="set-btn" onclick="setCapacity()">设置</button>
       </div>
-      <div class="weekly-reset-note">报名表每周六 19:00（多伦多时间）归档并更新为空。</div>
+      <div class="weekly-reset-note">报名表每周六 23:00（多伦多时间）归档并更新为空。</div>
     </div>
     <div class="section-label">报名列表</div>
     <div id="joinedList"></div>
@@ -911,11 +913,9 @@ body.is-admin .summary-card.admin-only { display: block !important; }
     <div class="modal-title">金鸽会员账户</div>
 
     <div class="account-panel active" id="accountSignedOut">
-      <p class="account-note">注册后请点击验证邮件。以后每次报名和到场都会记录到同一个会员身份。</p>
-      <label class="field-label" for="accountEmail">邮箱</label>
-      <input class="modal-input" id="accountEmail" type="email" placeholder="name@example.com" autocomplete="email">
-      <label class="field-label" for="accountPassword">密码</label>
-      <input class="modal-input" id="accountPassword" type="password" placeholder="至少 6 位" autocomplete="current-password">
+      <p class="account-note">使用手机验证码登录。以后每次报名和到场都会记录到同一个会员身份。</p>
+      <label class="field-label" for="accountPhone">加拿大手机号</label>
+      <input class="modal-input" id="accountPhone" type="tel" inputmode="tel" placeholder="416 555 1234" autocomplete="tel">
       <label class="field-label" for="accountRegisterName">首次注册姓名</label>
       <input class="modal-input" id="accountRegisterName" placeholder="公开显示的姓名 / 微信名" autocomplete="name">
       <label class="field-label" for="accountRegisterLevel">默认分级</label>
@@ -925,27 +925,28 @@ body.is-admin .summary-card.admin-only { display: block !important; }
         <option value="25_30">2.5-3.0</option>
         <option value="30_plus">3.0+</option>
       </select>
+      <p class="account-note">继续即表示同意将手机号发送给 Google / Firebase，用于身份验证和防滥用。</p>
+      <div id="phoneRecaptcha"></div>
       <div class="account-error" id="accountSignedOutError"></div>
       <div class="modal-btns">
-        <button class="modal-btn cancel" onclick="accountLogin()">登录</button>
-        <button class="modal-btn confirm" onclick="accountRegister()">注册并验证</button>
+        <button class="modal-btn confirm" id="phoneSendCodeBtn" onclick="accountSendCode()">发送验证码</button>
       </div>
-      <button class="account-link-btn" onclick="accountResetPassword()">忘记密码？发送重置邮件</button>
     </div>
 
-    <div class="account-panel" id="accountPending">
-      <p class="account-note">验证邮件已经发送。点击邮件中的链接后回到这里刷新验证状态。</p>
-      <div class="account-email" id="accountPendingEmail"></div>
-      <div class="account-error" id="accountPendingError"></div>
+    <div class="account-panel" id="accountCode">
+      <p class="account-note">短信验证码已发送，请输入 6 位数字完成登录。</p>
+      <div class="account-email" id="accountPendingPhone"></div>
+      <label class="field-label" for="accountCodeInput">验证码</label>
+      <input class="modal-input" id="accountCodeInput" type="text" inputmode="numeric" maxlength="6" pattern="[0-9]*" autocomplete="one-time-code" placeholder="6 位验证码">
+      <div class="account-error" id="accountCodeError"></div>
       <div class="modal-btns">
-        <button class="modal-btn cancel" onclick="accountResendVerification()">重新发送</button>
-        <button class="modal-btn confirm" onclick="accountRefreshVerification()">我已完成验证</button>
+        <button class="modal-btn cancel" onclick="accountChangePhone()">重新发送 / 更换号码</button>
+        <button class="modal-btn confirm" onclick="accountConfirmCode()">验证并登录</button>
       </div>
-      <button class="account-link-btn" onclick="accountLogout()">退出这个账户</button>
     </div>
 
     <div class="account-panel" id="accountProfile">
-      <div class="account-email" id="accountProfileEmail"></div>
+      <div class="account-email" id="accountProfilePhone"></div>
       <label class="field-label" for="accountProfileName">公开姓名</label>
       <input class="modal-input" id="accountProfileName" autocomplete="name">
       <label class="field-label" for="accountProfileLevel">默认分级</label>
@@ -984,11 +985,11 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
-<script src="member-account.js?v=1"></script>
+<script src="member-account.js?v=2"></script>
 <script>
 const COLORS = ['#07C160','#10AEFF','#FF8C00','#FA5151','#9B59B6','#E67E22','#2ECC71','#E74C3C','#3498DB','#1ABC9C'];
 const ADMIN_PASSWORD = '8888';
-const SITE_VERSION = '33';
+const SITE_VERSION = '34';
 const WAITLIST_CAPACITY = 24;
 const DEFAULT_CAPACITY = 32;
 const LEVEL_GROUPS = [
@@ -1046,6 +1047,8 @@ let isAdminMode = sessionStorage.getItem(ADMIN_STORAGE) === '1';
 let memberAccount = { ready: false, user: null, profile: null, error: '' };
 let memberAttendanceRef = null;
 let memberAttendance = 0;
+let phoneCodeSent = false;
+let pendingPhoneLabel = '';
 
 function goPage(page) {
   location.href = page;
@@ -1522,7 +1525,7 @@ function showAddModal() {
   const identity = window.DoveMemberAccount && DoveMemberAccount.identity(memberAccount);
   if (!identity) {
     showAccountModal();
-    showToast('请先登录并完成邮箱验证');
+    showToast('请先完成手机验证');
     return;
   }
   document.getElementById('addName').value = identity.name;
@@ -1555,15 +1558,18 @@ function accountErrorMessage(error) {
   const messages = {
     'auth/configuration-not-found': '账户服务还未启用，请联系管理员。',
     'auth/operation-not-allowed': '账户服务还未启用，请联系管理员。',
-    'auth/email-already-in-use': '这个邮箱已经注册，请直接登录。',
-    'auth/invalid-email': '邮箱格式不正确。',
-    'auth/invalid-credential': '邮箱或密码不正确。',
-    'auth/user-not-found': '没有找到这个账户。',
-    'auth/wrong-password': '邮箱或密码不正确。',
-    'auth/weak-password': '密码至少需要 6 位。',
+    'auth/billing-not-enabled': 'Firebase 短信服务需要先启用按量付费方案。',
+    'auth/invalid-phone-number': '请输入正确的加拿大手机号。',
+    'auth/missing-phone-number': '请输入手机号。',
+    'auth/invalid-verification-code': '验证码不正确，请重新输入。',
+    'auth/code-expired': '验证码已经过期，请重新发送。',
+    'auth/code-not-sent': '请先发送验证码。',
+    'auth/captcha-check-failed': '安全验证没有通过，请重试。',
+    'auth/recaptcha-expired': '安全验证已过期，请重新发送。',
+    'auth/quota-exceeded': '短信发送额度已用完，请稍后再试。',
     'auth/too-many-requests': '尝试次数过多，请稍后再试。',
     'profile/name-required': '请输入公开姓名。',
-    'auth/verified-user-required': '请先完成邮箱验证。',
+    'auth/verified-user-required': '请先完成手机验证。',
     'auth/sdk-unavailable': '账户组件加载失败，请刷新页面。'
   };
   return messages[code] || '操作没有完成，请稍后重试。';
@@ -1605,20 +1611,18 @@ function renderAccountState() {
     return;
   }
   if (!user) {
-    summary.textContent = '报名需要邮箱验证账户';
-    button.textContent = '登录 / 注册';
+    summary.textContent = '报名需要手机验证账户';
+    button.textContent = '手机登录';
     button.classList.add('pending');
-    accountPanel('accountSignedOut');
-    setAccountError('accountSignedOutError', memberAccount.error ? accountErrorMessage(memberAccount.error) : '');
+    accountPanel(phoneCodeSent ? 'accountCode' : 'accountSignedOut');
+    document.getElementById('accountPendingPhone').textContent = pendingPhoneLabel;
+    setAccountError(phoneCodeSent ? 'accountCodeError' : 'accountSignedOutError', memberAccount.error ? accountErrorMessage(memberAccount.error) : '');
     return;
   }
-  if (!user.emailVerified || !profile) {
-    summary.textContent = `${user.email || '会员账户'} · 等待邮箱验证`;
-    button.textContent = '完成验证';
+  if (!profile) {
+    summary.textContent = '正在建立会员资料…';
+    button.textContent = '请稍候';
     button.classList.add('pending');
-    accountPanel('accountPending');
-    document.getElementById('accountPendingEmail').textContent = user.email || '';
-    setAccountError('accountPendingError', memberAccount.error ? accountErrorMessage(memberAccount.error) : '');
     return;
   }
 
@@ -1629,7 +1633,7 @@ function renderAccountState() {
   button.textContent = '我的账户';
   button.classList.remove('pending');
   accountPanel('accountProfile');
-  document.getElementById('accountProfileEmail').textContent = user.email || '';
+  document.getElementById('accountProfilePhone').textContent = DoveMemberAccount.maskedPhone(user.phoneNumber || '');
   document.getElementById('accountProfileName').value = profile.displayName || '';
   document.getElementById('accountProfileLevel').value = profile.defaultLevel || '20_25';
   document.getElementById('accountCurrentSignup').textContent = signup
@@ -1665,72 +1669,53 @@ function initMemberAccount() {
   DoveMemberAccount.init(FIREBASE_CONFIG, next => {
     const previousUid = memberAccount.user && memberAccount.user.uid;
     memberAccount = next;
-    const nextUid = next.user && next.user.emailVerified ? next.user.uid : '';
+    const nextUid = next.user && next.user.phoneNumber ? next.user.uid : '';
     if (previousUid !== nextUid) {
       if (nextUid) startMemberAttendanceSync(nextUid);
       else stopMemberAttendanceSync();
     }
     render();
-    const params = new URLSearchParams(location.search);
-    if (params.has('verify') && next.ready && next.user) {
-      showAccountModal();
-      params.delete('verify');
-      history.replaceState(null, '', `${location.pathname}${params.size ? `?${params}` : ''}${location.hash}`);
-    }
   });
 }
 
-async function accountLogin() {
+async function accountSendCode() {
   setAccountError('accountSignedOutError', '');
   try {
-    await DoveMemberAccount.login(document.getElementById('accountEmail').value, document.getElementById('accountPassword').value);
-    showToast('登录成功', 'green');
-  } catch (error) {
-    setAccountError('accountSignedOutError', accountErrorMessage(error));
-  }
-}
-
-async function accountRegister() {
-  setAccountError('accountSignedOutError', '');
-  try {
-    await DoveMemberAccount.register({
-      email: document.getElementById('accountEmail').value,
-      password: document.getElementById('accountPassword').value,
+    const result = await DoveMemberAccount.sendCode({
+      phone: document.getElementById('accountPhone').value,
       displayName: document.getElementById('accountRegisterName').value,
-      defaultLevel: document.getElementById('accountRegisterLevel').value
+      defaultLevel: document.getElementById('accountRegisterLevel').value,
+      recaptchaContainerId: 'phoneRecaptcha'
     });
-    showToast('验证邮件已发送', 'green');
+    phoneCodeSent = true;
+    pendingPhoneLabel = result.maskedPhone;
+    document.getElementById('accountPendingPhone').textContent = pendingPhoneLabel;
+    document.getElementById('accountCodeInput').value = '';
+    accountPanel('accountCode');
+    showToast('短信验证码已发送', 'green');
   } catch (error) {
     setAccountError('accountSignedOutError', accountErrorMessage(error));
   }
 }
 
-async function accountResetPassword() {
-  setAccountError('accountSignedOutError', '');
+async function accountConfirmCode() {
+  setAccountError('accountCodeError', '');
   try {
-    await DoveMemberAccount.sendPasswordReset(document.getElementById('accountEmail').value);
-    showToast('密码重置邮件已发送', 'green');
+    await DoveMemberAccount.confirmCode(document.getElementById('accountCodeInput').value);
+    phoneCodeSent = false;
+    pendingPhoneLabel = '';
+    showToast('手机验证成功', 'green');
   } catch (error) {
-    setAccountError('accountSignedOutError', accountErrorMessage(error));
+    setAccountError('accountCodeError', accountErrorMessage(error));
   }
 }
 
-async function accountResendVerification() {
-  try {
-    await DoveMemberAccount.resendVerification();
-    showToast('验证邮件已重新发送', 'green');
-  } catch (error) {
-    setAccountError('accountPendingError', accountErrorMessage(error));
-  }
-}
-
-async function accountRefreshVerification() {
-  try {
-    const verified = await DoveMemberAccount.refreshVerification();
-    showToast(verified ? '邮箱验证成功' : '还没有检测到验证', verified ? 'green' : '');
-  } catch (error) {
-    setAccountError('accountPendingError', accountErrorMessage(error));
-  }
+function accountChangePhone() {
+  phoneCodeSent = false;
+  pendingPhoneLabel = '';
+  setAccountError('accountCodeError', '');
+  accountPanel('accountSignedOut');
+  showToast('请重新发送验证码');
 }
 
 async function accountSaveProfile() {
@@ -1752,6 +1737,8 @@ async function accountSaveProfile() {
 
 async function accountLogout() {
   await DoveMemberAccount.logout();
+  phoneCodeSent = false;
+  pendingPhoneLabel = '';
   closeModalById('accountModal');
   showToast('已退出登录');
 }
@@ -1818,7 +1805,7 @@ function addPerson(list) {
   if (!identity) {
     closeModalById('addModal');
     showAccountModal();
-    showToast('请先登录并完成邮箱验证');
+    showToast('请先完成手机验证');
     return;
   }
   const name = identity.name;
