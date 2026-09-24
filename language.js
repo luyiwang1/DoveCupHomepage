@@ -479,7 +479,7 @@
   add('名额占用', '名额占用', 'Capacity Used');
   add('总名额上限', '总名额上限', 'Total Capacity');
   add('设置', '设置', 'Set');
-  add('报名表每周六 19:00（多伦多时间）归档并更新为空。', '报名表每周六 19:00（多伦多时间）归档并更新为空。', 'The registration form archives and resets every Saturday at 7:00 PM Toronto time.');
+  add('报名表每周六 23:00（多伦多时间）归档并更新为空。', '报名表每周六 23:00（多伦多时间）归档并更新为空。', 'The registration form archives and resets every Saturday at 11:00 PM Toronto time.');
   add('报名列表', '报名列表', 'Registration List');
   add('📊 报名概况', '📊 报名概况', '📊 Registration Summary');
   add('报名概况', '报名概况', 'Registration Summary');
@@ -607,7 +607,7 @@
   // Attendance page.
   add('Dove Cup 到场记录', '金鸽杯到场记录', 'Dove Cup Attendance');
   add('到场记录', '到场记录', 'Attendance');
-  add('这里只记录每个人实际到场的次数。每周六晚 7 点归档后自动更新，不再记录胜局和积分。', '这里只记录每个人实际到场的次数。每周六晚 7 点归档后自动更新，不再记录胜局和积分。', 'This page records actual attendance only. It updates after the Saturday 7:00 PM archive and does not track wins or points.');
+  add('这里只记录每个人实际到场的次数。每周六晚 11 点归档后自动更新，不再记录胜局和积分。', '这里只记录每个人实际到场的次数。每周六晚 11 点归档后自动更新，不再记录胜局和积分。', 'This page records actual attendance only. It updates after the Saturday 11:00 PM archive and does not track wins or points.');
   add('到场人员', '到场人员', 'Players Attended');
   add('累计到场', '累计到场', 'Total Attendances');
   add('最多到场', '最多到场', 'Most Attendances');
@@ -621,7 +621,7 @@
   add('周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。', '周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。', 'The Saturday archive records the official roster automatically. Use this area only for admin corrections.');
   add('到场次数', '到场次数', 'Attendances');
   add('本周报名名单', '本周报名名单', 'This Week\'s Registration');
-  add('报名后会实时显示在这里；每周六晚 7 点归档后，才会增加本周到场次数。', '报名后会实时显示在这里；每周六晚 7 点归档后，才会增加本周到场次数。', 'Registrations appear here live. This week\'s attendance is added only after the Saturday 7:00 PM archive.');
+  add('报名后会实时显示在这里；每周六晚 11 点归档后，才会增加本周到场次数。', '报名后会实时显示在这里；每周六晚 11 点归档后，才会增加本周到场次数。', 'Registrations appear here live. This week\'s attendance is added only after the Saturday 11:00 PM archive.');
   add('有历史到场记录', '有历史到场记录', 'Previous Attendance');
   add('首次报名，待到场', '首次报名，待到场', 'First Registration · Pending');
   add('本周还没有人报名。', '本周还没有人报名。', 'No one has registered this week yet.');
