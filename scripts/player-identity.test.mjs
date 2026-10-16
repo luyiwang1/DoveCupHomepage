@@ -47,3 +47,15 @@ test('initializes NYTA without changing MRTC and preserves an existing NYTA list
   assert.equal(again.changed, false);
   assert.equal(again.data.venues['nyta-east'].main.state.joined.length, 1);
 });
+
+test('does not clear newly enabled NYTA for a previous week', () => {
+  const setup = prepareVenueData({ main: { state: { joined: [] } } }, Date.parse('2026-10-16T15:00:00Z'));
+  assert.equal(setup.data.venues['nyta-east'].enabledFrom, '2026-10-17');
+  setup.data.venues['nyta-east'].main.state.joined.push({ name: 'Han M' });
+  const previous = buildReset(setup.data, '2026-10-10');
+  assert.equal(previous.data.venues['nyta-east'].main.state.joined.length, 1);
+  assert.equal(previous.data.signupHistory['2026-10-10__nyta-east'], undefined);
+  const due = buildReset(previous.data, '2026-10-17');
+  assert.equal(due.data.venues['nyta-east'].main.state.joined.length, 0);
+  assert.equal(due.data.scores.players['han m'].appearances, 1);
+});

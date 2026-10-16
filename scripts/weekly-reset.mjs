@@ -210,8 +210,10 @@ function venueMain(system, venueKey) {
     : {};
 }
 
-function venueIsEnabled(system, venueKey) {
-  return venueKey === 'mrtc' || Boolean(system.venues?.[venueKey]?.main);
+function venueIsEnabled(system, venueKey, resetId) {
+  if (venueKey === 'mrtc') return true;
+  const venue = system.venues?.[venueKey];
+  return Boolean(venue?.main) && (!venue.enabledFrom || resetId >= venue.enabledFrom);
 }
 
 function saveClearedVenue(system, config, main, state, archivedAt) {
@@ -255,7 +257,7 @@ export function buildReset(input, resetId, now = new Date()) {
   let changed = false;
   let archivedAny = false;
 
-  VENUE_RESET_CONFIGS.filter(config => venueIsEnabled(system, config.key)).forEach(config => {
+  VENUE_RESET_CONFIGS.filter(config => venueIsEnabled(system, config.key, resetId)).forEach(config => {
     const archiveKey = config.key === 'mrtc' ? resetId : `${resetId}__${config.key}`;
     const attendanceKey = archiveKey;
     const existing = history[archiveKey];

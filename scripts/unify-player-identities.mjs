@@ -112,10 +112,14 @@ export function buildIdentityMigration(input, now = Date.now()) {
 
 export function prepareVenueData(input, now = Date.now()) {
   const data = structuredClone(input);
-  if (data.venues?.['nyta-east']?.main) return { changed: false, data };
+  if (data.venues?.['nyta-east']?.enabledFrom && data.venues['nyta-east'].main) return { changed: false, data };
+  const localDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+  const saturday = new Date(`${localDate}T12:00:00Z`);
+  saturday.setUTCDate(saturday.getUTCDate() + (6 - saturday.getUTCDay() + 7) % 7);
   data.venues = { ...data.venues, 'nyta-east': {
     ...data.venues?.['nyta-east'],
-    main: { idSeq: 1, state: { title: 'NYTA East Bubble · 报名接龙', capacity: 12, joined: [], waitlist: [] }, updatedAt: now }
+    enabledFrom: saturday.toISOString().slice(0, 10),
+    main: data.venues?.['nyta-east']?.main || { idSeq: 1, state: { title: 'NYTA East Bubble · 报名接龙', capacity: 12, joined: [], waitlist: [] }, updatedAt: now }
   } };
   return { changed: true, data };
 }
