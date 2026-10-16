@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=38"></script>
+<script src="language.js?v=39"></script>
 <script src="payments.js?v=1"></script>
 <script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=1"></script>
@@ -919,6 +919,16 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   </div>
 </div>
 
+<div class="modal-overlay" id="adminLoginModal" onclick="closeModal(event,'adminLoginModal')" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle">
+  <form class="modal-sheet" onsubmit="event.preventDefault();submitAdminLogin()">
+    <div class="modal-handle"></div><div class="modal-title" id="adminLoginTitle">管理员登录</div>
+    <label for="adminPasswordInput" style="display:block;margin-bottom:8px;font-size:13px">管理员密码</label>
+    <input class="modal-input" type="password" id="adminPasswordInput" autocomplete="current-password" required aria-describedby="adminLoginError">
+    <div id="adminLoginError" role="alert" style="min-height:24px;color:var(--red);font-size:13px;margin-bottom:10px"></div>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('adminLoginModal')">取消</button><button type="submit" class="modal-btn confirm">登录</button></div>
+  </form>
+</div>
+
 <div class="modal-overlay" id="attendanceModal" onclick="closeModal(event,'attendanceModal')" role="dialog" aria-modal="true" aria-labelledby="attendanceTitle">
   <div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="attendanceTitle">到场登记</div>
     <div class="payment-details"><strong id="attendanceName" data-dove-no-translate></strong><div><label for="attendanceDate">活动日期</label><input id="attendanceDate" type="date"></div><div><label for="attendanceMethod">本次方式</label><select id="attendanceMethod"><option value="attendance">单次到场 · 不扣套餐</option><option value="usage">套餐到场 · 扣1次</option></select></div><span id="attendanceBalance"></span><p class="payment-notice">本机预览记录，仅保存在当前浏览器。与线上到场统计分开。</p></div>
@@ -1528,15 +1538,25 @@ function toggleAdmin() {
     render();
     return;
   }
-  const pass = prompt('请输入管理员密码');
+  document.getElementById('adminPasswordInput').value = '';
+  document.getElementById('adminLoginError').textContent = '';
+  document.getElementById('adminLoginModal').classList.add('open');
+  setTimeout(() => document.getElementById('adminPasswordInput').focus(), 200);
+}
+
+function submitAdminLogin() {
+  const pass = document.getElementById('adminPasswordInput').value;
   if (pass === ADMIN_PASSWORD) {
     isAdminMode = true;
     sessionStorage.setItem(ADMIN_STORAGE, '1');
+    closeModalById('adminLoginModal');
+    document.getElementById('adminPasswordInput').value = '';
     startAdminDataSync();
     showToast('管理员已登录', 'green');
     render();
-  } else if (pass !== null) {
-    showToast('管理员密码错误');
+  } else {
+    document.getElementById('adminLoginError').textContent = '管理员密码错误';
+    document.getElementById('adminPasswordInput').select();
   }
 }
 
@@ -1843,6 +1863,9 @@ document.getElementById('titleInput').addEventListener('keydown', e => {
 });
 document.getElementById('capInput').addEventListener('keydown', e => {
   if (e.key === 'Enter') setCapacity();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModalById('adminLoginModal');
 });
 
 load();

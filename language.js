@@ -10,6 +10,9 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('管理员登录', '管理员登录', 'Admin Sign In');
+  add('管理员密码', '管理员密码', 'Admin Password');
+  add('登录', '登录', 'Sign In');
   add('选择备份文件', '选择备份文件', 'Choose Backup File');
   [
     ['收款与套餐', 'Payments & Packages'], ['收款与套餐 · 金鸽杯', 'Payments & Packages · Golden Dove Cup'],
