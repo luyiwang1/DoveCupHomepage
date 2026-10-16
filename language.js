@@ -10,6 +10,10 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('清零收款与套餐', '清零收款与套餐', 'Reset Payments & Packages');
+  add('导出清零前备份', '导出清零前备份', 'Export Pre-Reset Backup');
+  add('确认归零', '确认归零', 'Confirm Reset');
+  add('将累计实收和套餐次数归零，保留确认到场记录。当前账本会先自动备份，旧收款不会重新同步。此操作只影响本浏览器。', '将累计实收和套餐次数归零，保留确认到场记录。当前账本会先自动备份，旧收款不会重新同步。此操作只影响本浏览器。', 'Reset receipts and package visits while preserving confirmed attendance. A backup is saved first, and old receipts will not sync again. This affects only this browser.');
   add('管理员登录', '管理员登录', 'Admin Sign In');
   add('管理员密码', '管理员密码', 'Admin Password');
   add('登录', '登录', 'Sign In');

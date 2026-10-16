@@ -57,5 +57,10 @@
     }
     return rebuilt;
   }
-  root.DoveFinance = { summary, members, append, active, validate };
+  function zeroFinance(entries) {
+    return validate(entries).filter(row => ['usage', 'attendance'].includes(row.type) && active(entries, row))
+      .map(row => ({ id: row.id, name: row.name, date: row.date, venueKey: row.venueKey, ts: row.ts,
+        type: 'attendance', amountCents: 0, visits: 0, note: row.note || '' }));
+  }
+  root.DoveFinance = { summary, members, append, active, validate, zeroFinance };
 })(typeof window !== 'undefined' ? window : globalThis);

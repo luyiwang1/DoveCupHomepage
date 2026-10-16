@@ -49,6 +49,8 @@
     $('exportButton').disabled = !admin() || demo;
     $('importPayments').disabled = !admin() || demo;
     $('restoreButton').disabled = !admin() || demo;
+    $('resetFinanceButton').disabled = !admin() || demo;
+    $('resetBackupButton').disabled = !admin() || demo || !store.resetBackup();
     $('demoButton').textContent = demo ? text('返回本机账本', 'Back to Local Ledger') : text('查看示例', 'View Demo');
     $('demoNotice').hidden = !demo;
     if (!allowed) return;
@@ -134,14 +136,24 @@
   $('sessionTab').onclick = () => { view = 'session'; render(); };
   for (const id of ['search', 'filterDate', 'filterVenue']) $(id).addEventListener('input', render);
   $('demoButton').onclick = () => { demo = !demo; if (demo) demoRows = makeDemo(); selected = ''; render(); };
-  function download() {
+  function download(backup = null, filename = `dove-finance-${today()}.json`) {
     if (!admin() || demo) return;
-    const blob = new Blob([JSON.stringify({ format: 'dove-finance-v1', exportedAt: new Date().toISOString(), entries: store.read() }, null, 2)], { type: 'application/json' });
+    const blob = new Blob([JSON.stringify(backup || { format: 'dove-finance-v1', exportedAt: new Date().toISOString(), entries: store.read() }, null, 2)], { type: 'application/json' });
     const url = URL.createObjectURL(blob), anchor = document.createElement('a');
-    anchor.href = url; anchor.download = `dove-finance-${today()}.json`; anchor.click();
+    anchor.href = url; anchor.download = filename; anchor.click();
     setTimeout(() => URL.revokeObjectURL(url), 1000);
   }
-  $('exportButton').onclick = download;
+  $('exportButton').onclick = () => download();
+  $('resetFinanceButton').onclick = () => { if (admin() && !demo) $('resetFinanceDialog').showModal(); };
+  $('cancelFinanceReset').onclick = () => $('resetFinanceDialog').close();
+  $('confirmFinanceReset').onclick = async () => {
+    if (!admin() || demo) return;
+    $('confirmFinanceReset').disabled = true;
+    try { await store.resetFinance(); selected = ''; $('resetFinanceDialog').close(); render(); message(text('收款与套餐已归零，到场记录保留。', 'Payments and packages reset. Attendance records preserved.')); }
+    catch (error) { $('resetFinanceError').textContent = error.message; }
+    finally { $('confirmFinanceReset').disabled = false; }
+  };
+  $('resetBackupButton').onclick = () => { const backup = store.resetBackup(); if (backup) download(backup, `dove-finance-before-reset-${today()}.json`); };
   $('restoreButton').onclick = () => $('restoreFile').click();
   $('importPayments').onclick = async () => {
     if (!admin() || demo) return;
@@ -185,4 +197,5 @@
   for (const name of ['dove:languagechange', 'dove:financechange', 'storage']) window.addEventListener(name, render);
   $('entryDate').value = today(); $('filterDate').value = today();
   render();
+  if (location.hash === '#reset-finance' && admin()) $('resetFinanceDialog').showModal();
 })();

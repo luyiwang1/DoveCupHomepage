@@ -53,6 +53,18 @@ test('validates backup totals, duplicates and calendar dates', () => {
   assert.throws(() => ledger.append([], row('bad-date', { date: '2026-02-30' })), /活动日期/);
   assert.equal(ledger.append(rows, row('one')), rows);
 });
+test('financial reset preserves only active attendance with zero money and visits', () => {
+  let rows = ledger.append([], row('buy'));
+  rows = ledger.append(rows, row('used', { type: 'usage' }));
+  rows = ledger.append(rows, row('cancelled', { type: 'attendance', date: '2026-10-24' }));
+  rows = ledger.append(rows, row('undo', { type: 'reversal', reverses: 'cancelled' }));
+  const reset = ledger.zeroFinance(rows);
+  assert.equal(reset.length, 1);
+  assert.equal(ledger.summary(reset, 'Han').received, 0);
+  assert.equal(ledger.summary(reset, 'Han').remaining, 0);
+  assert.equal(ledger.summary(reset, 'Han').attended, 1);
+  assert.equal(rows[0].amountCents, 35000);
+});
 test('local receipt imports are idempotent and never infer unknown historic amounts', async () => {
   const values = new Map();
   const root = { DoveFinance: ledger, dispatchEvent() {} };
@@ -69,4 +81,13 @@ test('local receipt imports are idempotent and never infer unknown historic amou
   assert.equal(ledger.summary(root.DoveFinanceStore.read(), 'Han M').remaining, 10);
   await assert.rejects(() => root.DoveFinanceStore.restore([{ ...root.DoveFinanceStore.read()[0], visits: 50 }]), /重复或无效/);
   assert.equal(root.DoveFinanceStore.read().length, 1);
+  await root.DoveFinanceStore.add(row('attendance', { type: 'usage' }));
+  await root.DoveFinanceStore.resetFinance();
+  assert.equal(root.DoveFinanceStore.resetBackup().entries.length, 2);
+  assert.equal(ledger.summary(root.DoveFinanceStore.read(), 'Han').received, 0);
+  assert.equal(ledger.summary(root.DoveFinanceStore.read(), 'Han').attended, 1);
+  await root.DoveFinanceStore.recordPayment(person, context);
+  assert.equal(root.DoveFinanceStore.read().length, 1);
+  await root.DoveFinanceStore.recordPayment({ ...person, id: 4, paymentVerifiedAt: Date.now() + 1000 }, context);
+  assert.equal(ledger.summary(root.DoveFinanceStore.read(), 'Han').remaining, 10);
 });
