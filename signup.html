@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=36"></script>
+<script src="language.js?v=37"></script>
+<script src="payments.js?v=1"></script>
 <script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=1"></script>
 <script src="player-identity.js?v=1"></script>
@@ -382,6 +383,16 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   color: var(--gray-500);
   border-color: var(--gray-300);
 }
+.badge-paid.pending{background:var(--orange-light);color:#985600;border-color:#efc476}
+.badge-paid.received{background:var(--green-light);color:var(--green-dark);border-color:#a8d7be}
+.payment-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#fffaf0;border-bottom:1px solid #e1d4b8;font-size:13px;line-height:1.6}
+.payment-strip strong{display:block;color:#143323;font-size:14px}
+.payment-strip button{flex:none;padding:8px 12px;border:1px solid #b4bfae;border-radius:4px;background:white;color:#143323;font:inherit;cursor:pointer}
+.payment-details{display:grid;gap:14px;margin:16px 0;font-size:14px;line-height:1.6}
+.payment-details label{display:block;margin-bottom:4px;color:#666;font-size:12px}
+.payment-details input,.payment-details select{width:100%;min-width:0;padding:10px;border:1px solid #ccc;border-radius:4px;background:#fff;font:inherit;color:#17241e}
+.payment-copy-row{display:flex;gap:8px;min-width:0}.payment-copy-row input{flex:1}.payment-copy-row button{flex:none;border:1px solid #ccc;background:#f7f7f7;padding:8px;font:inherit;border-radius:4px;cursor:pointer}
+.payment-notice{margin:0;color:#666;font-size:12px;line-height:1.6}
 .badge-cancel {
   background: var(--red-light);
   color: var(--red);
@@ -769,7 +780,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
     </div>
     <div class="stat-chip">
       <div class="dot gray"></div>
-      已付 <strong id="statPaid">0</strong>
+      已收款 <strong id="statPaid">0</strong>
     </div>
   </div>
 </div>
@@ -785,6 +796,8 @@ body.is-admin .summary-card.admin-only { display: block !important; }
     </a>
   </div>
 </section>
+
+<div class="payment-strip"><div><strong>单次 CAD $40 · 10次套餐 CAD $350</strong><span>Interac e-Transfer · 转账后由管理员核对到账</span></div><button type="button" onclick="openPayment()">付款信息</button></div>
 
 <!-- Tabs -->
 <div class="tabs">
@@ -841,16 +854,16 @@ body.is-admin .summary-card.admin-only { display: block !important; }
         </div>
         <div class="summary-item">
           <div class="s-num s-blue" id="sum-paid">0</div>
-          <div class="s-label">已付款</div>
+          <div class="s-label">已收款</div>
         </div>
         <div class="summary-item">
           <div class="s-num s-red" id="sum-unpaid">0</div>
-          <div class="s-label">未付款</div>
+          <div class="s-label">未收款</div>
         </div>
       </div>
     </div>
     <div class="summary-card" id="unpaidSection" style="display:none">
-      <h3>⏳ 未付款名单</h3>
+      <h3>⏳ 未收款名单</h3>
       <div class="unpaid-list" id="unpaidList"></div>
     </div>
     <div class="summary-card admin-only" id="adminHistorySection">
@@ -889,6 +902,20 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 </div>
 
 <!-- Edit title modal -->
+<div class="modal-overlay" id="paymentModal" onclick="closeModal(event,'paymentModal')" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div><div class="modal-title" id="paymentTitle">付款信息</div>
+    <div class="payment-details">
+      <div><label for="paymentPlan">付款项目</label><select id="paymentPlan"><option value="single">单次 · CAD $40 / 人</option><option value="package10">10次套餐 · CAD $350 / 人</option></select></div>
+      <div><label for="paymentEmail">EMT 收款邮箱</label><div class="payment-copy-row"><input id="paymentEmail" value="wangluyi1997@gmail.com" readonly aria-label="EMT 收款邮箱"><button type="button" onclick="copyPaymentField('paymentEmail')">复制</button></div></div>
+      <div><label for="paymentMemo">转账备注</label><div class="payment-copy-row"><input id="paymentMemo" readonly><button type="button" onclick="copyPaymentField('paymentMemo')">复制</button></div></div>
+      <p class="payment-notice">到账确认以管理员核对为准。套餐购买与剩余次数由管理员手动记录。</p>
+      <strong id="paymentStatusText"></strong>
+    </div>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('paymentModal')">关闭</button><button type="button" class="modal-btn confirm" id="paymentSubmit" onclick="submitTransfer()">我已转账</button></div>
+  </div>
+</div>
+
 <div class="modal-overlay" id="titleModal" onclick="closeModal(event,'titleModal')">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
@@ -1222,7 +1249,7 @@ function renderStats() {
   document.getElementById('statCap').textContent = cap ?? '不限';
   document.getElementById('statJoined').textContent = state.joined.length;
   document.getElementById('statWait').textContent = state.waitlist.length;
-  document.getElementById('statPaid').textContent = state.joined.filter(p=>p.paid).length;
+  document.getElementById('statPaid').textContent = state.joined.filter(p=>DovePayments.status(p)==='received').length;
   document.getElementById('cnt-joined').textContent = state.joined.length;
   document.getElementById('cnt-waitlist').textContent = `${state.waitlist.length}/${WAITLIST_CAPACITY}`;
 
@@ -1278,21 +1305,21 @@ function renderWaitlist() {
 function renderSummary() {
   const joined = state.joined.length;
   const wait = state.waitlist.length;
-  const paid = state.joined.filter(p=>p.paid).length;
+  const paid = state.joined.filter(p=>DovePayments.status(p)==='received').length;
   const unpaid = joined - paid;
   document.getElementById('sum-joined').textContent = joined;
   document.getElementById('sum-wait').textContent = wait;
   document.getElementById('sum-paid').textContent = paid;
   document.getElementById('sum-unpaid').textContent = unpaid;
 
-  const unpaidPeople = state.joined.filter(p=>!p.paid);
+  const unpaidPeople = state.joined.filter(p=>DovePayments.status(p)!=='received');
   const sec = document.getElementById('unpaidSection');
   if (unpaidPeople.length) {
     sec.style.display = '';
     document.getElementById('unpaidList').innerHTML = unpaidPeople.map(p =>
       `<div class="unpaid-row">
-        <span class="unpaid-name">${p.name}</span>
-        <span class="unpaid-tag">未付款</span>
+        <span class="unpaid-name">${escapeHtml(p.name)}</span>
+        <span class="unpaid-tag">${DovePayments.label(p)}</span>
       </div>`
     ).join('');
   } else {
@@ -1353,7 +1380,7 @@ function renderAdminHistory() {
     ...player,
     totalCount: player.archivedCount + (player.current === 'joined' ? 1 : 0)
   })).sort((a, b) => b.totalCount - a.totalCount || a.name.localeCompare(b.name, 'zh-CN'));
-  const archives = Object.values(adminSignupHistory)
+  const archives = Object.entries(adminSignupHistory).map(([storageKey, archive]) => ({ ...archive, storageKey }))
     .filter(archive => archive && archive.resetId)
     .sort((a, b) => String(b.resetId).localeCompare(String(a.resetId)));
 
@@ -1379,9 +1406,10 @@ function renderAdminHistory() {
   const archiveHtml = archives.length ? archives.slice(0, 12).map(archive => {
     const joinedNames = (Array.isArray(archive.joined) ? archive.joined : []).map(person => escapeHtml(person.name)).join('、') || '无';
     const waitlistNames = (Array.isArray(archive.waitlist) ? archive.waitlist : []).map(person => escapeHtml(person.name)).join('、') || '无';
+    const payments = (Array.isArray(archive.joined) ? archive.joined : []).map((person, index) => `<div class="unpaid-row"><span>${escapeHtml(person.name)}</span><span>${DovePayments.label(person)}${person.paymentAmount ? ` · CAD $${Number(person.paymentAmount)}` : ''}</span>${DovePayments.status(person) === 'pending' ? `<button type="button" class="admin-btn" data-archive-key="${escapeHtml(archive.storageKey)}" data-person-index="${index}" onclick="verifyArchivedPayment(this)">确认收款</button>` : ''}</div>`).join('');
     return `<details class="archive-week">
       <summary>${escapeHtml(archive.resetId)} · ${escapeHtml(archive.venue || 'MRTC')} · 报名 ${Number(archive.joinedCount) || 0} 人 · Waitlist ${Number(archive.waitlistCount) || 0} 人</summary>
-      <div class="archive-week-body"><strong>报名：</strong>${joinedNames}<br><strong>Waitlist：</strong>${waitlistNames}</div>
+      <div class="archive-week-body"><strong>报名：</strong>${joinedNames}<br><strong>Waitlist：</strong>${waitlistNames}${payments}</div>
     </details>`;
   }).join('') : '<div class="admin-data-empty">第一次周六归档后，历史名单会显示在这里。</div>';
 
@@ -1396,6 +1424,20 @@ function renderAdminHistory() {
     ${archiveHtml}`;
 }
 
+async function verifyArchivedPayment(button) {
+  if (!requireAdmin() || !adminHistoryRef || !confirm('确认已核实这笔转账到账？')) return;
+  const key = button.dataset.archiveKey;
+  const index = Number(button.dataset.personIndex);
+  if (!Object.hasOwn(adminSignupHistory, key) || !Number.isInteger(index) || index < 0) return;
+  try {
+    await adminHistoryRef.child(key).child('joined').child(String(index)).transaction(person => {
+      if (!person || DovePayments.status(person) !== 'pending') return;
+      return DovePayments.verify(person, true);
+    });
+    showToast('已确认收款', 'green');
+  } catch (error) { showToast('云端保存失败，请检查网络'); }
+}
+
 function copyList() {
   const title = state.title;
   const cap = state.capacity ? `（名额 ${state.joined.length}/${state.capacity}）` : `（共 ${state.joined.length} 人）`;
@@ -1405,7 +1447,7 @@ function copyList() {
     text += `\n【${group.label}】${group.people.length} 人\n`;
     group.people.forEach((p, i) => {
       const confirm = p.confirmed ? '✅' : '❓';
-      const paid = p.paid ? '💰' : '  ';
+      const paid = DovePayments.status(p) === 'received' ? '💰' : DovePayments.status(p) === 'pending' ? '[待核实]' : '  ';
       text += `${i+1}. ${p.name} ${confirm}${paid}\n`;
     });
   });
@@ -1494,7 +1536,7 @@ function personCard(p, rank, list) {
   const badges = isJoined ? `
     <div class="badges">
       <span class="badge badge-confirm ${p.confirmed ? '' : 'off'}${lockClass}" ${canEdit ? `onclick="toggleConfirm(${p.id})"` : ''}>${p.confirmed ? '已确认' : '待确认'}</span>
-      <span class="badge badge-paid ${p.paid ? '' : 'off'}${lockClass}" ${canEdit ? `onclick="togglePaid(${p.id})"` : ''}>${p.paid ? '已付款' : '未付款'}</span>
+      <button type="button" class="badge badge-paid ${DovePayments.status(p)} ${DovePayments.status(p)==='unpaid'?'off':''}" ${canEdit && (DovePayments.status(p)==='unpaid' || isAdminMode) ? `onclick="togglePaid(${p.id})"` : 'disabled'}>${DovePayments.label(p)}</button>
       ${canEdit ? `<span class="badge badge-cancel" onclick="removeJoined(${p.id})">退出</span>` : ''}
     </div>
   ` : `
@@ -1556,6 +1598,7 @@ function addPerson(list) {
   document.getElementById('addLevel').value = 'u20';
   render();
   switchTab(list === 'joined' ? 'joined' : 'waitlist');
+  if (list === 'joined') openPayment(person.id);
 }
 
 function toggleConfirm(id) {
@@ -1569,9 +1612,56 @@ function toggleConfirm(id) {
 function togglePaid(id) {
   const p = state.joined.find(x=>x.id===id);
   if (!p || !requireOwner(p)) return;
-  p.paid = !p.paid;
-  showToast(p.paid ? `${p.name} 已付款` : `${p.name} 标记未付款`, p.paid ? 'green' : '');
+  if (DovePayments.status(p) === 'unpaid') { openPayment(id); return; }
+  if (!isAdminMode) return;
+  if (DovePayments.status(p) === 'pending') {
+    openPayment(id);
+    return;
+  } else {
+    if (!confirm('将这条记录恢复为未付款？')) return;
+    const next = DovePayments.reset(p, true);
+    state.joined[state.joined.indexOf(p)] = next;
+  }
   render();
+}
+
+let paymentTargetId = null;
+function openPayment(id = null) {
+  paymentTargetId = id;
+  document.getElementById('paymentEmail').value = DovePayments.email;
+  const person = state.joined.find(p => p.id === id);
+  const localDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const date = new Date(`${localDate}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + (6 - date.getUTCDay() + 7) % 7);
+  const namePlaceholder = window.DoveLanguage?.getLanguage() === 'en' ? 'Registration Name' : '报名姓名';
+  document.getElementById('paymentMemo').value = `${person?.name || currentUserName || namePlaceholder} · ${date.toISOString().slice(0,10)} · ${ACTIVE_VENUE.name}`;
+  document.getElementById('paymentPlan').value = person?.paymentPlan || 'single';
+  document.getElementById('paymentPlan').disabled = Boolean(person && DovePayments.status(person) !== 'unpaid');
+  document.getElementById('paymentStatusText').textContent = person ? DovePayments.label(person) : '';
+  const canSubmit = person && canEditPerson(person) && (DovePayments.status(person) === 'unpaid' || (isAdminMode && DovePayments.status(person) === 'pending'));
+  document.getElementById('paymentSubmit').hidden = !canSubmit;
+  document.getElementById('paymentSubmit').textContent = person && DovePayments.status(person) === 'pending' ? '确认收款' : '我已转账';
+  document.getElementById('paymentModal').classList.add('open');
+}
+function submitTransfer() {
+  const person = state.joined.find(p => p.id === paymentTargetId);
+  if (!person || !requireOwner(person)) return;
+  const verifying = DovePayments.status(person) === 'pending';
+  if (verifying && (!isAdminMode || !confirm('确认已核实这笔转账到账？'))) return;
+  const next = verifying ? DovePayments.verify(person, isAdminMode) : DovePayments.submit(person, document.getElementById('paymentPlan').value, true);
+  if (next === person) return;
+  Object.assign(person, next);
+  closeModalById('paymentModal');
+  showToast(verifying ? '已确认收款' : '已提交，等待管理员核实');
+  render();
+}
+async function copyPaymentField(id) {
+  const input = document.getElementById(id);
+  try {
+    if (navigator.clipboard) await navigator.clipboard.writeText(input.value);
+    else { input.select(); if (!document.execCommand('copy')) throw new Error('Copy failed'); }
+    showToast('已复制', 'green');
+  } catch (error) { input.focus(); input.select(); showToast('请长按复制'); }
 }
 
 function removeJoined(id) {

@@ -1,6 +1,7 @@
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import '../player-identity.js';
+import '../payments.js';
 
 const TIME_ZONE = 'America/Toronto';
 const DEFAULT_DATABASE_URL = 'https://dovecupdatabase-default-rtdb.firebaseio.com/doveCupWaitlistSystem.json';
@@ -48,7 +49,12 @@ function cleanPerson(person) {
     name: globalThis.DovePlayerIdentity.canonicalName(person.name),
     levelGroup: person.levelGroup || '20_25',
     confirmed: Boolean(person.confirmed),
-    paid: Boolean(person.paid),
+    paid: globalThis.DovePayments.status(person) === 'received',
+    paymentStatus: globalThis.DovePayments.status(person),
+    paymentPlan: person.paymentPlan || 'single',
+    paymentAmount: Number(person.paymentAmount) || null,
+    paymentSubmittedAt: Number(person.paymentSubmittedAt) || null,
+    paymentVerifiedAt: Number(person.paymentVerifiedAt) || null,
     registeredAt: Number(person.ts) || null
   };
 }
