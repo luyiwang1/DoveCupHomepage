@@ -5,8 +5,8 @@ import test from 'node:test';
 const signup = await readFile(new URL('../signup.html', import.meta.url), 'utf8');
 const homepage = await readFile(new URL('../index.html', import.meta.url), 'utf8');
 
-test('shares one 32-player capacity across every signup division', () => {
-  assert.match(signup, /const DEFAULT_CAPACITY = 32;/);
+test('shares each venue capacity across every signup division', () => {
+  assert.match(signup, /const DEFAULT_CAPACITY = ACTIVE_VENUE\.capacity;/);
   assert.match(signup, /function openSignupSlots\(\)/);
   assert.match(signup, /if \(list === 'joined' && !canJoinSignup\(\)\)/);
   assert.match(signup, /function waitlistIndexForOpenSlot\(\) \{\s*return canJoinSignup\(\) && state\.waitlist\.length \? 0 : -1;/);
@@ -22,7 +22,16 @@ test('shows section counts without an eight-player denominator', () => {
   assert.match(homepage, /四组共享 32 个报名名额/);
 });
 
-test('keeps 32 as the hard maximum for admin capacity changes', () => {
+test('uses the active venue capacity as the hard admin maximum', () => {
   assert.match(signup, /id="capInput" placeholder="32" min="1" max="32"/);
   assert.match(signup, /val > DEFAULT_CAPACITY/);
+  assert.match(signup, /capInput\.max = DEFAULT_CAPACITY/);
+});
+
+test('shows prominent MRTC and NYTA East session entrances', () => {
+  assert.match(signup, /id="venueMrtc"/);
+  assert.match(signup, /周六 5–7 PM · 最多 32 人/);
+  assert.match(signup, /id="venueNyta"/);
+  assert.match(signup, /周六 9–11 PM · 最多 12 人/);
+  assert.match(signup, /ACTIVE_VENUE\.databasePath/);
 });

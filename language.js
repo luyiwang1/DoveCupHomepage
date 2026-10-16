@@ -10,6 +10,7 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('你已经在本场次报名或候补名单中', '你已经在本场次报名或候补名单中', 'You are already registered or waitlisted for this session.');
 
   // Shared navigation, labels, and mixed-language sports terms.
   add('Golden Dove Cup / 金鸽杯', '金鸽杯', 'Golden Dove Cup');
@@ -85,6 +86,27 @@
   add('场常驻活动', '场常驻活动', 'Recurring Event(s)');
   add('场特殊活动', '场特殊活动', 'Special Event(s)');
   add('金鸽巡回赛', '金鸽巡回赛', 'Golden Dove Tour');
+  add('选择本周场次', '选择本周场次', 'Choose This Week\'s Session');
+  add('周六 5–7 PM · 最多 32 人', '周六 17:00–19:00 · 最多 32 人', 'Saturday · 5–7 PM · Up to 32 Players');
+  add('周六 9–11 PM · 最多 12 人', '周六 21:00–23:00 · 最多 12 人', 'Saturday · 9–11 PM · Up to 12 Players');
+  add('周六 5–7 PM · 32 人', '周六 17:00–19:00 · 32 人', 'Saturday · 5–7 PM · 32 Players');
+  add('周六 9–11 PM · 12 人', '周六 21:00–23:00 · 12 人', 'Saturday · 9–11 PM · 12 Players');
+  add('金鸽巡回赛 · MRTC', '金鸽巡回赛 · MRTC', 'Golden Dove Tour · MRTC');
+  add('金鸽巡回赛 · NYTA East', '金鸽巡回赛 · NYTA East', 'Golden Dove Tour · NYTA East');
+  add('周六傍晚的常规分级巡回赛，四个分级共享 32 个报名名额。', '周六傍晚的常规分级巡回赛，四个分级共享 32 个报名名额。', 'The Saturday early session offers 32 shared spots across four divisions.');
+  add('周六晚间的小场次巡回赛，NYTA East Bubble 独立开放 12 个报名名额。', '周六晚间的小场次巡回赛，NYTA East Bubble 独立开放 12 个报名名额。', 'The Saturday late session at NYTA East Bubble has 12 dedicated spots.');
+  add('周六 · 5–7 PM', '周六 · 17:00–19:00', 'Saturday · 5–7 PM');
+  add('周六 · 9–11 PM', '周六 · 21:00–23:00', 'Saturday · 9–11 PM');
+  add('最多 32 人 · 4 个分级', '最多 32 人 · 4 个分级', 'Up to 32 Players · 4 Divisions');
+  add('最多 12 人 · 分级报名', '最多 12 人 · 分级报名', 'Up to 12 Players · Division Signup');
+  add('报名 MRTC', '报名 MRTC', 'Register for MRTC');
+  add('报名 NYTA East', '报名 NYTA East', 'Register for NYTA East');
+  add('进入 5–7 PM 场次', '进入 17:00–19:00 场次', 'Open the 5–7 PM Session');
+  add('进入 9–11 PM 场次', '进入 21:00–23:00 场次', 'Open the 9–11 PM Session');
+  add('MRTC 场地', 'MRTC 场地', 'MRTC Courts');
+  add('NYTA 场地', 'NYTA 场地', 'NYTA Courts');
+  add('查看本场场地安排', '查看本场场地安排', 'View This Session\'s Courts');
+  add('查看两地累计到场次数', '查看两地累计到场次数', 'View Combined Attendance');
   add('常驻活动 · 金鸽巡回赛', '常驻活动 · 金鸽巡回赛', 'Recurring Event · Golden Dove Tour');
   add('金鸽巡回赛 · 报名接龙', '金鸽巡回赛 · 报名接龙', 'Golden Dove Tour · Registration');
   add('金鸽巡回赛 · 三轮升降级赛程', '金鸽巡回赛 · 三轮升降级赛程', 'Golden Dove Tour · Court Rotations');
@@ -621,6 +643,11 @@
   add('周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。', '周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。', 'The Saturday archive records the official roster automatically. Use this area only for admin corrections.');
   add('到场次数', '到场次数', 'Attendances');
   add('本周报名名单', '本周报名名单', 'This Week\'s Registration');
+  add('本周两个场次报名', '本周两个场次报名', 'This Week\'s Two Sessions');
+  add('MRTC 与 NYTA East 分别报名；每周六晚 11 点归档后，两个场次都会计入累计到场。', 'MRTC 与 NYTA East 分别报名；每周六晚 11 点归档后，两个场次都会计入累计到场。', 'MRTC and NYTA East have separate registrations. Both sessions are added to attendance after the Saturday 11:00 PM archive.');
+  add('本场次还没有人报名。', '本场次还没有人报名。', 'No one has registered for this session yet.');
+  add('进入报名', '进入报名', 'Open Registration');
+  add('人次', '人次', 'Entries');
   add('报名后会实时显示在这里；每周六晚 11 点归档后，才会增加本周到场次数。', '报名后会实时显示在这里；每周六晚 11 点归档后，才会增加本周到场次数。', 'Registrations appear here live. This week\'s attendance is added only after the Saturday 11:00 PM archive.');
   add('有历史到场记录', '有历史到场记录', 'Previous Attendance');
   add('首次报名，待到场', '首次报名，待到场', 'First Registration · Pending');

@@ -1,5 +1,6 @@
 import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
+import '../player-identity.js';
 
 const TIME_ZONE = 'America/Toronto';
 const DEFAULT_DATABASE_URL = 'https://dovecupdatabase-default-rtdb.firebaseio.com/doveCupWaitlistSystem.json';
@@ -30,7 +31,7 @@ export function latestEligibleResetId(now = new Date()) {
 }
 
 export function normalizeName(name) {
-  return String(name || '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-CA');
+  return globalThis.DovePlayerIdentity.key(name);
 }
 
 function playerKey(name) {
@@ -38,13 +39,13 @@ function playerKey(name) {
 }
 
 export function scoreKeyForName(name) {
-  return String(name || '').trim().toLocaleLowerCase('en-CA').replace(/[.#$/[\]]/g, '_');
+  return globalThis.DovePlayerIdentity.scoreKey(name);
 }
 
 function cleanPerson(person) {
   return {
     id: person.id ?? null,
-    name: String(person.name || '').trim(),
+    name: globalThis.DovePlayerIdentity.canonicalName(person.name),
     levelGroup: person.levelGroup || '20_25',
     confirmed: Boolean(person.confirmed),
     paid: Boolean(person.paid),
@@ -58,7 +59,7 @@ function updatePlayerStat(stats, person, kind, resetId, archivedAt) {
 
   const key = playerKey(person.name);
   const previous = stats[key] || {};
-  const name = String(person.name || '').trim();
+  const name = globalThis.DovePlayerIdentity.canonicalName(person.name);
   const aliases = Array.isArray(previous.aliases) ? previous.aliases.slice(0, 4) : [];
   if (previous.name && previous.name !== name && !aliases.includes(previous.name)) aliases.unshift(previous.name);
   const registeredAt = Number(person.ts) || archivedAt;
@@ -90,7 +91,7 @@ function updatePlayerStat(stats, person, kind, resetId, archivedAt) {
   return key;
 }
 
-function recordAttendance(system, people, resetId, recordedAt) {
+function recordAttendance(system, people, attendanceKey, recordedAt, metadata = {}) {
   const scores = system.scores && typeof system.scores === 'object' ? system.scores : {};
   const players = scores.players && typeof scores.players === 'object' ? scores.players : {};
   const events = Array.isArray(scores.events) ? scores.events : [];
@@ -98,14 +99,14 @@ function recordAttendance(system, people, resetId, recordedAt) {
     ? scores.attendanceWeeks
     : {};
 
-  if (attendanceWeeks[resetId]) {
-    return { changed: false, count: Number(attendanceWeeks[resetId].count) || 0 };
+  if (attendanceWeeks[attendanceKey]) {
+    return { changed: false, count: Number(attendanceWeeks[attendanceKey].count) || 0 };
   }
 
   const names = [];
   const seen = new Set();
   (Array.isArray(people) ? people : []).forEach(person => {
-    const name = String(person?.name || '').trim();
+    const name = globalThis.DovePlayerIdentity.canonicalName(person?.name);
     const key = scoreKeyForName(name);
     if (!key || seen.has(key)) return;
     seen.add(key);
@@ -124,19 +125,22 @@ function recordAttendance(system, people, resetId, recordedAt) {
     delete existing.wins;
     delete existing.points;
     existing.lastPlayedAt = recordedAt;
-    existing.lastAttendanceWeek = resetId;
+    existing.lastAttendanceWeek = metadata.resetId || attendanceKey;
     existing.updatedAt = recordedAt;
     players[key] = existing;
   });
 
-  attendanceWeeks[resetId] = {
-    resetId,
+  attendanceWeeks[attendanceKey] = {
+    resetId: metadata.resetId || attendanceKey,
+    attendanceKey,
+    venueKey: metadata.venueKey || 'mrtc',
+    venue: metadata.venue || 'MRTC',
     count: names.length,
     names,
     recordedAt,
     source: 'weekly-signup-archive'
   };
-  events.unshift({ type: 'weeklyAttendance', resetId, names, count: names.length, ts: recordedAt });
+  events.unshift({ type: 'weeklyAttendance', resetId: metadata.resetId || attendanceKey, venueKey: metadata.venueKey || 'mrtc', venue: metadata.venue || 'MRTC', names, count: names.length, ts: recordedAt });
   system.scores = {
     ...scores,
     players,
@@ -194,6 +198,44 @@ export function buildAttendanceOnlyMigration(input, now = new Date()) {
   };
 }
 
+const VENUE_RESET_CONFIGS = [
+  { key: 'mrtc', name: 'MRTC', capacity: 32, schedule: '周六 5–7 PM' },
+  { key: 'nyta-east', name: 'NYTA East Bubble', capacity: 12, schedule: '周六 9–11 PM' }
+];
+
+function venueMain(system, venueKey) {
+  if (venueKey === 'mrtc') return system.main && typeof system.main === 'object' ? system.main : {};
+  return system.venues?.[venueKey]?.main && typeof system.venues[venueKey].main === 'object'
+    ? system.venues[venueKey].main
+    : {};
+}
+
+function venueIsEnabled(system, venueKey) {
+  return venueKey === 'mrtc' || Boolean(system.venues?.[venueKey]?.main);
+}
+
+function saveClearedVenue(system, config, main, state, archivedAt) {
+  const nextMain = {
+    ...main,
+    state: {
+      ...state,
+      title: state.title || `${config.name} · 报名接龙`,
+      capacity: state.capacity ?? config.capacity,
+      joined: [],
+      waitlist: []
+    },
+    updatedAt: archivedAt
+  };
+  if (config.key === 'mrtc') {
+    system.main = nextMain;
+    delete system.courtsPage;
+    return;
+  }
+  system.venues = system.venues && typeof system.venues === 'object' ? system.venues : {};
+  system.venues[config.key] = { ...(system.venues[config.key] || {}), main: nextMain };
+  delete system.venues[config.key].courtsPage;
+}
+
 export function buildReset(input, resetId, now = new Date()) {
   if (!/^\d{4}-\d{2}-\d{2}$/.test(resetId)) throw new Error(`Invalid reset id: ${resetId}`);
 
@@ -206,71 +248,85 @@ export function buildReset(input, resetId, now = new Date()) {
       summary: { resetId, reason: 'event-cancelled', attendanceRecorded: 0 }
     };
   }
-  if (history[resetId] || system.weeklyReset?.lastResetId === resetId) {
-    const attendance = history[resetId]
-      ? recordAttendance(system, history[resetId].joined, resetId, now.getTime())
-      : { changed: false, count: 0 };
+
+  const archivedAt = now.getTime();
+  const stats = system.signupStats && typeof system.signupStats === 'object' ? system.signupStats : {};
+  const totals = { joined: 0, waitlist: 0, unique: 0, attendance: 0, venues: 0 };
+  let changed = false;
+  let archivedAny = false;
+
+  VENUE_RESET_CONFIGS.filter(config => venueIsEnabled(system, config.key)).forEach(config => {
+    const archiveKey = config.key === 'mrtc' ? resetId : `${resetId}__${config.key}`;
+    const attendanceKey = archiveKey;
+    const existing = history[archiveKey];
+    const metadata = { resetId, venueKey: config.key, venue: config.name };
+
+    if (existing || (config.key === 'mrtc' && system.weeklyReset?.lastResetId === resetId)) {
+      const attendance = existing
+        ? recordAttendance(system, existing.joined, attendanceKey, archivedAt, metadata)
+        : { changed: false, count: 0 };
+      changed = changed || attendance.changed;
+      totals.attendance += attendance.count;
+      return;
+    }
+
+    const main = venueMain(system, config.key);
+    const state = main.state && typeof main.state === 'object' ? main.state : {};
+    const joined = Array.isArray(state.joined) ? state.joined.filter(person => normalizeName(person?.name)) : [];
+    const waitlist = Array.isArray(state.waitlist) ? state.waitlist.filter(person => normalizeName(person?.name)) : [];
+    const joinedKeys = new Set();
+    const waitlistKeys = new Set();
+
+    joined.forEach(person => {
+      const key = playerKey(person.name);
+      if (joinedKeys.has(key)) return;
+      joinedKeys.add(key);
+      updatePlayerStat(stats, person, 'joined', resetId, archivedAt);
+    });
+    waitlist.forEach(person => {
+      const key = playerKey(person.name);
+      if (joinedKeys.has(key) || waitlistKeys.has(key)) return;
+      waitlistKeys.add(key);
+      updatePlayerStat(stats, person, 'waitlist', resetId, archivedAt);
+    });
+
+    history[archiveKey] = {
+      archiveKey,
+      resetId,
+      venueKey: config.key,
+      venue: config.name,
+      schedule: config.schedule,
+      scheduledFor: `${resetId}T23:00:00[${TIME_ZONE}]`,
+      archivedAt,
+      title: state.title || `${config.name} · 报名接龙`,
+      capacity: state.capacity ?? config.capacity,
+      joinedCount: joined.length,
+      waitlistCount: waitlist.length,
+      joined: joined.map(cleanPerson),
+      waitlist: waitlist.map(cleanPerson)
+    };
+    const attendance = recordAttendance(system, joined, attendanceKey, archivedAt, metadata);
+    saveClearedVenue(system, config, main, state, archivedAt);
+
+    totals.joined += joined.length;
+    totals.waitlist += waitlist.length;
+    totals.unique += joinedKeys.size;
+    totals.attendance += attendance.count;
+    totals.venues += 1;
+    changed = true;
+    archivedAny = true;
+  });
+
+  if (!changed) {
     return {
-      changed: attendance.changed,
+      changed: false,
       data: system,
-      summary: {
-        resetId,
-        reason: attendance.changed ? 'attendance-backfilled' : 'already-archived',
-        attendanceRecorded: attendance.count
-      }
+      summary: { resetId, reason: 'already-archived', attendanceRecorded: totals.attendance }
     };
   }
 
-  const main = system.main && typeof system.main === 'object' ? system.main : {};
-  const state = main.state && typeof main.state === 'object' ? main.state : {};
-  const joined = Array.isArray(state.joined) ? state.joined.filter(person => normalizeName(person?.name)) : [];
-  const waitlist = Array.isArray(state.waitlist) ? state.waitlist.filter(person => normalizeName(person?.name)) : [];
-  const archivedAt = now.getTime();
-  const stats = system.signupStats && typeof system.signupStats === 'object' ? system.signupStats : {};
-
-  const joinedKeys = new Set();
-  joined.forEach(person => {
-    const key = playerKey(person.name);
-    if (joinedKeys.has(key)) return;
-    joinedKeys.add(key);
-    updatePlayerStat(stats, person, 'joined', resetId, archivedAt);
-  });
-
-  const waitlistKeys = new Set();
-  waitlist.forEach(person => {
-    const key = playerKey(person.name);
-    if (joinedKeys.has(key) || waitlistKeys.has(key)) return;
-    waitlistKeys.add(key);
-    updatePlayerStat(stats, person, 'waitlist', resetId, archivedAt);
-  });
-
-  history[resetId] = {
-    resetId,
-    scheduledFor: `${resetId}T23:00:00[${TIME_ZONE}]`,
-    archivedAt,
-    title: state.title || '金鸽杯报名接龙',
-    capacity: state.capacity ?? null,
-    joinedCount: joined.length,
-    waitlistCount: waitlist.length,
-    joined: joined.map(cleanPerson),
-    waitlist: waitlist.map(cleanPerson)
-  };
-  const attendance = recordAttendance(system, joined, resetId, archivedAt);
-
-  system.main = {
-    ...main,
-    state: {
-      ...state,
-      title: state.title || '金鸽杯报名接龙',
-      capacity: state.capacity ?? null,
-      joined: [],
-      waitlist: []
-    },
-    updatedAt: archivedAt
-  };
   system.signupHistory = history;
   system.signupStats = stats;
-  delete system.courtsPage;
   system.weeklyReset = {
     ...(system.weeklyReset || {}),
     lastResetId: resetId,
@@ -284,10 +340,12 @@ export function buildReset(input, resetId, now = new Date()) {
     data: system,
     summary: {
       resetId,
-      joinedArchived: joined.length,
-      waitlistArchived: waitlist.length,
-      uniqueSignupsCounted: joinedKeys.size,
-      attendanceRecorded: attendance.count,
+      reason: archivedAny ? 'archived' : 'attendance-backfilled',
+      venuesArchived: totals.venues,
+      joinedArchived: totals.joined,
+      waitlistArchived: totals.waitlist,
+      uniqueSignupsCounted: totals.unique,
+      attendanceRecorded: totals.attendance,
       trackedPlayers: Object.keys(stats).length
     }
   };

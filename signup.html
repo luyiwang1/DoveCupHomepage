@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=31"></script>
+<script src="language.js?v=34"></script>
+<script src="venue-config.js?v=1"></script>
+<script src="player-identity.js?v=1"></script>
 <script src="site-nav.js?v=2" defer></script>
 <title>金鸽巡回赛 · 报名接龙</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -69,6 +71,10 @@ body {
   text-overflow: ellipsis;
   margin-right: 8px;
 }
+@media (max-width: 640px) {
+  .header-top { flex-wrap: wrap; justify-content: flex-start; gap: 6px; }
+  .event-title { flex-basis: 100%; white-space: normal; margin: 0 0 4px; }
+}
 .edit-title-btn {
   background: none;
   border: none;
@@ -130,6 +136,14 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 .stat-chip .dot.orange { background: var(--orange); }
 .stat-chip .dot.gray { background: var(--gray-300); }
 .stat-chip strong { font-weight: 700; color: var(--ink); }
+.venue-picker-wrap { padding: 12px; background: #efe8d8; border-bottom: 1px solid #dfd2b9; }
+.venue-picker-label { margin-bottom: 8px; color: var(--gray-700); font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+.venue-picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.venue-card { display: grid; gap: 3px; min-width: 0; padding: 12px; border: 1px solid #d5c5aa; border-radius: 8px; background: #fffdf8; color: var(--ink); text-decoration: none; }
+.venue-card strong { font-size: 14px; line-height: 1.25; }
+.venue-card span { color: var(--gray-700); font-size: 11px; line-height: 1.4; }
+.venue-card.active { border-color: #006b3f; background: #0b3c2a; color: #fff; box-shadow: 0 5px 16px rgba(0,75,43,.18); }
+.venue-card.active span { color: rgba(255,255,255,.76); }
 
 /* ── Tabs ── */
 .tabs {
@@ -759,6 +773,18 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   </div>
 </div>
 
+<section class="venue-picker-wrap" aria-label="选择本周场次">
+  <div class="venue-picker-label">选择本周场次</div>
+  <div class="venue-picker">
+    <a class="venue-card" id="venueMrtc" href="signup.html?venue=mrtc">
+      <strong>MRTC</strong><span>周六 5–7 PM · 最多 32 人</span>
+    </a>
+    <a class="venue-card" id="venueNyta" href="signup.html?venue=nyta-east">
+      <strong>NYTA East Bubble</strong><span>周六 9–11 PM · 最多 12 人</span>
+    </a>
+  </div>
+</section>
+
 <!-- Tabs -->
 <div class="tabs">
   <button class="tab-btn active" onclick="switchTab('joined')" id="tab-joined">
@@ -879,9 +905,11 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 <script>
 const COLORS = ['#07C160','#10AEFF','#FF8C00','#FA5151','#9B59B6','#E67E22','#2ECC71','#E74C3C','#3498DB','#1ABC9C'];
 const ADMIN_PASSWORD = '8888';
-const SITE_VERSION = '32';
+const SITE_VERSION = '35';
 const WAITLIST_CAPACITY = 24;
-const DEFAULT_CAPACITY = 32;
+const VENUE_KEY = window.DoveVenues.keyFromQuery(location.search);
+const ACTIVE_VENUE = window.DoveVenues.get(VENUE_KEY);
+const DEFAULT_CAPACITY = ACTIVE_VENUE.capacity;
 const LEVEL_GROUPS = [
   { key: 'u20', label: '新手场 · 2.0-' },
   { key: '20_25', label: '2.0-2.5' },
@@ -892,8 +920,8 @@ const LEGACY_LEVEL_MAP = {
   under3: '20_25',
   over3: '30_plus'
 };
-const DATA_STORAGE = 'signup_v3';
-const DB_PATH = 'doveCupWaitlistSystem/main';
+const DATA_STORAGE = `signup_v3_${VENUE_KEY}`;
+const DB_PATH = ACTIVE_VENUE.databasePath;
 const SIGNUP_STATS_DB_PATH = 'doveCupWaitlistSystem/signupStats';
 const SIGNUP_HISTORY_DB_PATH = 'doveCupWaitlistSystem/signupHistory';
 const FIREBASE_CONFIG = {
@@ -936,10 +964,15 @@ let currentUserName = localStorage.getItem(USER_NAME_STORAGE) || '';
 let isAdminMode = sessionStorage.getItem(ADMIN_STORAGE) === '1';
 
 function goPage(page) {
-  location.href = page;
+  const venuePages = new Set(['signup.html', 'courts.html']);
+  location.href = venuePages.has(page)
+    ? window.DoveVenues.href(page, VENUE_KEY, location.search)
+    : page;
 }
 if (new URLSearchParams(location.search).has('v')) {
-  history.replaceState(null, '', location.pathname);
+  const cleanParams = new URLSearchParams(location.search);
+  cleanParams.delete('v');
+  history.replaceState(null, '', `${location.pathname}${cleanParams.size ? `?${cleanParams}` : ''}${location.hash}`);
 }
 function newId() { return idSeq++; }
 function hasFirebaseConfig() {
@@ -958,18 +991,18 @@ function remotePayload() {
   };
 }
 function defaultState() {
-  return { title: '金鸽巡回赛 · 报名接龙', capacity: DEFAULT_CAPACITY, joined: [], waitlist: [] };
+  return { title: `${ACTIVE_VENUE.name} · 报名接龙`, capacity: DEFAULT_CAPACITY, joined: [], waitlist: [] };
 }
 function normalizeState(input) {
   const next = Object.assign(defaultState(), input || {});
-  if (next.title === '金鸽杯报名接龙' || next.title === '🎉 活动接龙') next.title = '金鸽巡回赛 · 报名接龙';
+  if (next.title === '金鸽杯报名接龙' || next.title === '🎉 活动接龙' || (VENUE_KEY === 'nyta-east' && next.title === '金鸽巡回赛 · 报名接龙')) next.title = `${ACTIVE_VENUE.name} · 报名接龙`;
   next.capacity = Math.min(DEFAULT_CAPACITY, Number(next.capacity) > 0 ? Number(next.capacity) : DEFAULT_CAPACITY);
-  next.joined = Array.isArray(next.joined) ? next.joined : [];
-  next.waitlist = Array.isArray(next.waitlist) ? next.waitlist : [];
+  next.joined = Array.isArray(next.joined) ? next.joined.map(p => ({ ...p, name: DovePlayerIdentity.canonicalName(p.name) })) : [];
+  next.waitlist = Array.isArray(next.waitlist) ? next.waitlist.map(p => ({ ...p, name: DovePlayerIdentity.canonicalName(p.name) })) : [];
   return enforceTotalCapacityForState(next);
 }
 function normalizePersonName(name) {
-  return String(name || '').normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('en-CA');
+  return DovePlayerIdentity.key(name);
 }
 function levelKeyOf(p) {
   const raw = p && p.levelGroup;
@@ -1159,6 +1192,7 @@ function stopAdminDataSync() {
 
 // ── Render ──
 function render() {
+  renderVenuePicker();
   renderAuth();
   renderJoined();
   renderWaitlist();
@@ -1167,6 +1201,17 @@ function render() {
   renderAdminHistory();
   replaceLegacyLevelText();
   save();
+}
+
+function renderVenuePicker() {
+  const mrtc = document.getElementById('venueMrtc');
+  const nyta = document.getElementById('venueNyta');
+  mrtc.href = window.DoveVenues.href('signup.html', 'mrtc', location.search);
+  nyta.href = window.DoveVenues.href('signup.html', 'nyta-east', location.search);
+  mrtc.classList.toggle('active', VENUE_KEY === 'mrtc');
+  nyta.classList.toggle('active', VENUE_KEY === 'nyta-east');
+  mrtc.setAttribute('aria-current', VENUE_KEY === 'mrtc' ? 'page' : 'false');
+  nyta.setAttribute('aria-current', VENUE_KEY === 'nyta-east' ? 'page' : 'false');
 }
 
 function renderAuth() {
@@ -1193,7 +1238,10 @@ function renderStats() {
   document.getElementById('barTotal').textContent = cap ?? '∞';
   const pct = cap ? Math.min(100, state.joined.length / cap * 100) : 0;
   document.getElementById('barFill').style.width = pct + '%';
-  if (cap) document.getElementById('capInput').value = cap;
+  const capInput = document.getElementById('capInput');
+  capInput.max = DEFAULT_CAPACITY;
+  capInput.placeholder = String(DEFAULT_CAPACITY);
+  if (cap) capInput.value = cap;
 }
 
 function renderJoined() {
@@ -1339,7 +1387,7 @@ function renderAdminHistory() {
     const joinedNames = (Array.isArray(archive.joined) ? archive.joined : []).map(person => escapeHtml(person.name)).join('、') || '无';
     const waitlistNames = (Array.isArray(archive.waitlist) ? archive.waitlist : []).map(person => escapeHtml(person.name)).join('、') || '无';
     return `<details class="archive-week">
-      <summary>${escapeHtml(archive.resetId)} · 报名 ${Number(archive.joinedCount) || 0} 人 · Waitlist ${Number(archive.waitlistCount) || 0} 人</summary>
+      <summary>${escapeHtml(archive.resetId)} · ${escapeHtml(archive.venue || 'MRTC')} · 报名 ${Number(archive.joinedCount) || 0} 人 · Waitlist ${Number(archive.waitlistCount) || 0} 人</summary>
       <div class="archive-week-body"><strong>报名：</strong>${joinedNames}<br><strong>Waitlist：</strong>${waitlistNames}</div>
     </details>`;
   }).join('') : '<div class="admin-data-empty">第一次周六归档后，历史名单会显示在这里。</div>';
@@ -1348,10 +1396,10 @@ function renderAdminHistory() {
   el.innerHTML = `
     <div class="admin-history-summary">
       <div class="admin-history-metric"><strong>${playerRows.length}</strong><span>累计记录人数</span></div>
-      <div class="admin-history-metric"><strong>${archives.length}</strong><span>已归档周次</span></div>
+      <div class="admin-history-metric"><strong>${archives.length}</strong><span>已归档场次</span></div>
     </div>
     ${rowsHtml}
-    <div class="archive-heading">每周历史名单</div>
+    <div class="archive-heading">场次历史名单</div>
     ${archiveHtml}`;
 }
 
@@ -1477,10 +1525,14 @@ function personCard(p, rank, list) {
 }
 
 function addPerson(list) {
-  const name = document.getElementById('addName').value.trim();
+  const name = DovePlayerIdentity.canonicalName(document.getElementById('addName').value);
   const selectedLevel = document.getElementById('addLevel').value;
   const levelGroup = LEVEL_GROUPS.some(group => group.key === selectedLevel) ? selectedLevel : '20_25';
   if (!name) { showToast('请输入姓名'); return; }
+  if ([...state.joined, ...state.waitlist].some(p => normalizePersonName(p.name) === normalizePersonName(name))) {
+    showToast('你已经在本场次报名或候补名单中');
+    return;
+  }
 
   if (list === 'joined' && !canJoinSignup()) {
     if (state.waitlist.length >= WAITLIST_CAPACITY) {
@@ -1593,7 +1645,7 @@ function autoPromote() {
 function setCapacity() {
   if (!requireAdmin()) return;
   const val = parseInt(document.getElementById('capInput').value);
-  if (isNaN(val) || val < 1 || val > DEFAULT_CAPACITY) { showToast('请输入 1-32 的总名额'); return; }
+  if (isNaN(val) || val < 1 || val > DEFAULT_CAPACITY) { showToast(`请输入 1-${DEFAULT_CAPACITY} 的总名额`); return; }
   state.capacity = val;
   let moved = 0;
   if (state.joined.length > val) {

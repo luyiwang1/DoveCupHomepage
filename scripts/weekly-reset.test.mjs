@@ -49,7 +49,7 @@ test('archives both lists, counts joined players once, and clears the signup for
   assert.equal(result.data.courtsPage, undefined);
   assert.equal(result.summary.uniqueSignupsCounted, 2);
   assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'irene').signupCount, 1);
-  assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'alvin').waitlistCount, 1);
+  assert.equal(Object.values(result.data.signupStats).find(player => player.normalizedName === 'alvin lyu').waitlistCount, 1);
   assert.equal(result.data.scores.players.irene.appearances, 4);
   assert.equal('points' in result.data.scores.players.irene, false);
   assert.equal('wins' in result.data.scores.players.irene, false);
@@ -65,6 +65,50 @@ test('does not archive or count the same week twice', () => {
   const second = buildReset(first.data, '2026-08-01');
   assert.equal(second.changed, false);
   assert.equal(Object.values(second.data.signupStats)[0].signupCount, 1);
+});
+
+test('archives MRTC and NYTA East as separate sessions at the same cutoff', () => {
+  const input = {
+    main: {
+      state: {
+        title: 'MRTC · 报名接龙',
+        capacity: 32,
+        joined: [{ name: 'Alex', levelGroup: '25_30' }],
+        waitlist: []
+      }
+    },
+    courtsPage: { courtCount: 5 },
+    venues: {
+      'nyta-east': {
+        main: {
+          state: {
+            title: 'NYTA East Bubble · 报名接龙',
+            capacity: 12,
+            joined: [{ name: 'Alex', levelGroup: '25_30' }, { name: 'Irene', levelGroup: '20_25' }],
+            waitlist: [{ name: 'May', levelGroup: '20_25' }]
+          }
+        },
+        courtsPage: { courtCount: 3 }
+      }
+    }
+  };
+
+  const result = buildReset(input, '2026-12-05', new Date('2026-12-06T04:00:00Z'));
+
+  assert.equal(result.summary.venuesArchived, 2);
+  assert.equal(result.summary.joinedArchived, 3);
+  assert.equal(result.summary.attendanceRecorded, 3);
+  assert.equal(result.data.signupHistory['2026-12-05'].venueKey, 'mrtc');
+  assert.equal(result.data.signupHistory['2026-12-05__nyta-east'].venueKey, 'nyta-east');
+  assert.equal(result.data.signupHistory['2026-12-05__nyta-east'].capacity, 12);
+  assert.deepEqual(result.data.main.state.joined, []);
+  assert.deepEqual(result.data.venues['nyta-east'].main.state.joined, []);
+  assert.equal(result.data.courtsPage, undefined);
+  assert.equal(result.data.venues['nyta-east'].courtsPage, undefined);
+  assert.equal(result.data.scores.players.alex.appearances, 2);
+  assert.equal(result.data.scores.players.irene.appearances, 1);
+  assert.equal(result.data.scores.attendanceWeeks['2026-12-05'].venue, 'MRTC');
+  assert.equal(result.data.scores.attendanceWeeks['2026-12-05__nyta-east'].venue, 'NYTA East Bubble');
 });
 
 test('skips a cancelled week even after later resets and does not backfill its archive', () => {

@@ -5,7 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=29"></script>
+<script src="language.js?v=34"></script>
+<script src="venue-config.js?v=1"></script>
+<script src="player-identity.js?v=1"></script>
 <script src="site-nav.js?v=2" defer></script>
 <title>金鸽巡回赛 · 到场记录</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -16,6 +18,7 @@
 .panel-heading{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:12px}.panel-heading .panel-title{margin:0}.count-badge{display:inline-flex;align-items:center;justify-content:center;min-width:34px;height:28px;padding:0 10px;border-radius:999px;color:var(--green-dark);background:var(--green-light);font-size:13px;font-weight:900}.signup-note{margin:-2px 0 12px;color:var(--gray-500);font-size:12px;line-height:1.6}.current-signup-list{border-top:1px solid var(--gray-200)}.current-signup-row{display:grid;grid-template-columns:42px minmax(120px,1fr) minmax(110px,.6fr) minmax(140px,.8fr);align-items:center;gap:12px;min-height:52px;padding:10px 4px;border-bottom:1px solid var(--gray-200)}.current-signup-index{color:var(--gray-500);font-size:12px;font-weight:900;text-align:center}.current-signup-name{font-weight:900}.current-signup-level{color:var(--gray-700);font-size:13px}.signup-state{justify-self:start;display:inline-flex;padding:5px 9px;border-radius:999px;font-size:12px;font-weight:800}.signup-state.previous{color:var(--green-dark);background:var(--green-light)}.signup-state.first{color:#8a5a12;background:var(--orange-light)}
 @media(max-width:720px){body{padding:12px}.hero{border-radius:20px;padding:18px}.stats{grid-template-columns:repeat(2,minmax(0,1fr))}.btn{width:100%}.field{width:100%}.field input,.field select{width:100%;min-width:0}.small-btn{width:100%}}
 @media(max-width:560px){.current-signup-row{grid-template-columns:30px minmax(0,1fr) auto;gap:8px}.current-signup-level{grid-column:2}.signup-state{grid-column:3;grid-row:1/3;max-width:116px;text-align:center}.current-signup-index{grid-row:1/3}}
+.venue-signup-block+.venue-signup-block{margin-top:18px}.venue-signup-head{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:8px;padding:10px 12px;border-radius:8px;background:#f2eadb}.venue-signup-head strong{font-size:14px}.venue-signup-head a{color:var(--green-dark);font-size:12px;font-weight:900;text-decoration:none}
 </style>
 </head>
 <body>
@@ -40,7 +43,7 @@
     <div class="stat-card"><div class="num" id="playerCount">0</div><div class="label">到场人员</div></div>
     <div class="stat-card"><div class="num" id="totalAppearances">0</div><div class="label">累计到场</div></div>
     <div class="stat-card"><div class="num" id="topAttendance">0</div><div class="label">最多到场</div></div>
-    <div class="stat-card"><div class="num" id="recordedWeeks">0</div><div class="label">已记录周数</div></div>
+    <div class="stat-card"><div class="num" id="recordedWeeks">0</div><div class="label">已记录场次</div></div>
   </section>
   <section class="panel admin-control">
     <div class="panel-title">管理员补录到场</div>
@@ -54,8 +57,8 @@
     <p class="note" style="margin-top:12px">周六归档会自动记录正式名单；这里仅用于管理员修正到场次数。</p>
   </section>
   <section class="panel">
-    <div class="panel-heading"><div class="panel-title">本周报名名单</div><div class="count-badge" id="currentSignupCount">0 人</div></div>
-    <p class="signup-note">报名后会实时显示在这里；每周六晚 11 点归档后，才会增加本周到场次数。</p>
+    <div class="panel-heading"><div class="panel-title">本周两个场次报名</div><div class="count-badge" id="currentSignupCount">0 人次</div></div>
+    <p class="signup-note">MRTC 与 NYTA East 分别报名；每周六晚 11 点归档后，两个场次都会计入累计到场。</p>
     <div id="currentSignupList" class="current-signup-list"></div>
   </section>
   <section class="panel">
@@ -77,26 +80,27 @@
 <script>
 const ADMIN_PASSWORD='8888';
 const ADMIN_STORAGE='scores_is_admin';
-const SITE_VERSION='30';
-const SIGNUP_DB_PATH='doveCupWaitlistSystem/main';
+const SITE_VERSION='33';
+const SIGNUP_DB_PATHS={mrtc:window.DoveVenues.get('mrtc').databasePath,'nyta-east':window.DoveVenues.get('nyta-east').databasePath};
 const SCORE_DB_PATH='doveCupWaitlistSystem/scores';
 const FIREBASE_CONFIG={apiKey:'AIzaSyBPTwRAkfHjCA_RCQu5t2udzllF3Rz_CCo',authDomain:'dovecupdatabase.firebaseapp.com',databaseURL:'https://dovecupdatabase-default-rtdb.firebaseio.com/',projectId:'dovecupdatabase',storageBucket:'dovecupdatabase.firebasestorage.app',messagingSenderId:'814970094950',appId:'1:814970094950:web:c061c00eaceed40125b4a7'};
-let scoreRef=null,signupRef=null,scoreData={players:{},events:[]},signupState={joined:[]},isAdminMode=sessionStorage.getItem(ADMIN_STORAGE)==='1';
+let scoreRef=null,signupRefs=[],scoreData={players:{},events:[]},signupStates={mrtc:{joined:[]},'nyta-east':{joined:[]}},isAdminMode=sessionStorage.getItem(ADMIN_STORAGE)==='1';
 function goPage(page){location.href=page}
 if(new URLSearchParams(location.search).has('v')){history.replaceState(null,'',location.pathname)}
-function keyForName(name){return name.trim().toLowerCase().replace(/[.#$/[\]]/g,'_')}
+function keyForName(name){return DovePlayerIdentity.scoreKey(name)}
 function normalizeScoreData(data){const next=data||{};next.players=next.players&&typeof next.players==='object'?next.players:{};next.events=Array.isArray(next.events)?next.events:[];next.attendanceWeeks=next.attendanceWeeks&&typeof next.attendanceWeeks==='object'?next.attendanceWeeks:{};next.attendanceEvents=next.attendanceEvents&&typeof next.attendanceEvents==='object'?next.attendanceEvents:{};Object.values(next.players).forEach(p=>{if(!p)return;delete p.points;delete p.wins;delete p.manualWins;delete p.courtWins});next.mode='attendance-only';return next}
-function signupPlayers(){return Array.isArray(signupState.joined)?signupState.joined.filter(p=>p&&p.name):[]}
+function signupPlayers(venueKey){const state=signupStates[venueKey]||{joined:[]};return Array.isArray(state.joined)?state.joined.filter(p=>p&&p.name):[]}
 function playerList(){return Object.entries(scoreData.players).flatMap(([key,p])=>p&&p.name&&Number(p.appearances)>0?[Object.assign({},p,{key,hasScoreRecord:true})]:[]).sort((a,b)=>(b.appearances||0)-(a.appearances||0)||String(a.name).localeCompare(String(b.name),'zh-Hans-CN'))}
 function signupLevelLabel(person){const labels={u20:'新手场 · 2.0-','20_25':'2.0-2.5','25_30':'2.5-3.0','30_plus':'3.0+'};return labels[person&&person.levelGroup]||'未分级'}
-function renderCurrentSignup(){const people=signupPlayers();document.getElementById('currentSignupCount').textContent=`${people.length} 人`;document.getElementById('currentSignupList').innerHTML=people.length?people.map((person,index)=>{const previous=scoreData.players[keyForName(person.name)],hasAttendance=Number(previous&&previous.appearances)>0;return`<div class="current-signup-row"><span class="current-signup-index">${index+1}</span><span class="current-signup-name">${escapeHtml(person.name)}</span><span class="current-signup-level">${escapeHtml(signupLevelLabel(person))}</span><span class="signup-state ${hasAttendance?'previous':'first'}">${hasAttendance?'有历史到场记录':'首次报名，待到场'}</span></div>`}).join(''):'<div class="empty">本周还没有人报名。</div>'}
+function renderSignupRows(people){return people.length?people.map((person,index)=>{const previous=scoreData.players[keyForName(person.name)],hasAttendance=Number(previous&&previous.appearances)>0;return`<div class="current-signup-row"><span class="current-signup-index">${index+1}</span><span class="current-signup-name">${escapeHtml(person.name)}</span><span class="current-signup-level">${escapeHtml(signupLevelLabel(person))}</span><span class="signup-state ${hasAttendance?'previous':'first'}">${hasAttendance?'有历史到场记录':'首次报名，待到场'}</span></div>`}).join(''):'<div class="empty">本场次还没有人报名。</div>'}
+function renderCurrentSignup(){const venueKeys=['mrtc','nyta-east'],total=venueKeys.reduce((sum,key)=>sum+signupPlayers(key).length,0);document.getElementById('currentSignupCount').textContent=`${total} 人次`;document.getElementById('currentSignupList').innerHTML=venueKeys.map(key=>{const venue=window.DoveVenues.get(key),people=signupPlayers(key);return`<section class="venue-signup-block"><div class="venue-signup-head"><strong>${escapeHtml(venue.name)} · ${escapeHtml(venue.schedule)}</strong><a href="signup.html?venue=${key}">进入报名</a></div>${renderSignupRows(people)}</section>`}).join('')}
 function renderAdmin(){document.body.classList.toggle('is-admin',isAdminMode);document.getElementById('adminBtn').textContent=isAdminMode?'Admin 已登录':'Admin'}
 function toggleAdmin(){if(isAdminMode){isAdminMode=false;sessionStorage.removeItem(ADMIN_STORAGE);renderAdmin();render();return}const pass=prompt('请输入管理员密码');if(pass===ADMIN_PASSWORD){isAdminMode=true;sessionStorage.setItem(ADMIN_STORAGE,'1');renderAdmin();render()}else if(pass!==null){alert('密码错误')}}
 function requireAdmin(){if(isAdminMode)return true;alert('只有管理员可以更新到场记录');return false}
 function saveScores(){if(scoreRef)scoreRef.set(Object.assign({},scoreData,{updatedAt:Date.now()})).catch(()=>alert('保存失败，请检查网络'))}
-function ensurePlayer(name){const clean=name.trim();if(!clean)return null;const key=keyForName(clean);if(!scoreData.players[key])scoreData.players[key]={key,name:clean,appearances:0,lastPlayedAt:null,updatedAt:Date.now()};return scoreData.players[key]}
+function ensurePlayer(name){const clean=DovePlayerIdentity.canonicalName(name);if(!clean)return null;const key=keyForName(clean);if(!scoreData.players[key])scoreData.players[key]={key,name:clean,appearances:0,lastPlayedAt:null,updatedAt:Date.now()};return scoreData.players[key]}
 function addEvent(type,names){scoreData.events.unshift({type,names,ts:Date.now()});scoreData.events=scoreData.events.slice(0,20)}
-function importCurrentJoined(){if(!requireAdmin())return;const joined=Array.isArray(signupState.joined)?signupState.joined:[];if(!joined.length){alert('当前报名名单为空');return}joined.forEach(p=>{const player=ensurePlayer(p.name);if(!player)return;player.appearances=(player.appearances||0)+1;player.lastPlayedAt=Date.now();player.updatedAt=Date.now()});addEvent('participation',joined.map(p=>p.name));saveScores();render()}
+function importCurrentJoined(){if(!requireAdmin())return;const joined=['mrtc','nyta-east'].flatMap(key=>signupPlayers(key).map(person=>({...person,venueKey:key})));if(!joined.length){alert('当前报名名单为空');return}joined.forEach(p=>{const player=ensurePlayer(p.name);if(!player)return;player.appearances=(player.appearances||0)+1;player.lastPlayedAt=Date.now();player.updatedAt=Date.now()});addEvent('participation',joined.map(p=>p.name));saveScores();render()}
 function addManualParticipation(){if(!requireAdmin())return;const name=document.getElementById('playerNameInput').value.trim();const player=ensurePlayer(name);if(!player){alert('请输入姓名');return}player.appearances=(player.appearances||0)+1;player.lastPlayedAt=Date.now();player.updatedAt=Date.now();addEvent('manualParticipation',[player.name]);saveScores();render()}
 function resetPlayer(){if(!requireAdmin())return;const name=document.getElementById('playerNameInput').value.trim();if(!name){alert('请输入要删除的姓名');return}deletePlayerByKey(keyForName(name))}
 function deletePlayerFromButton(btn){deletePlayerByKey(btn.dataset.key)}
@@ -105,9 +109,9 @@ function resetAllScores(){if(!requireAdmin())return;if(!confirm('确定清空全
 function formatDate(ts){return ts?new Date(ts).toLocaleDateString('zh-CN',{timeZone:'America/Toronto'}):'—'}
 function renderSpecialAttendance(){const events=Object.values(scoreData.attendanceEvents||{}).filter(item=>item&&item.eventId).sort((a,b)=>(Number(b.recordedAt)||0)-(Number(a.recordedAt)||0));document.getElementById('specialAttendanceList').innerHTML=events.length?events.map(item=>`<div class="special-event-row"><div><strong>${escapeHtml(item.title||item.eventId)}</strong><span class="special-event-meta">${escapeHtml([item.date,item.venue].filter(Boolean).join(' · '))}</span><span class="special-event-names" data-dove-no-translate>${escapeHtml((item.names||[]).join('、'))}</span></div><span class="special-event-count">${Number(item.count)||0} 人</span></div>`).join(''):'<div class="empty">活动归档后，参赛名单会保留在这里。</div>'}
 function render(){const list=playerList();document.getElementById('playerCount').textContent=list.length;document.getElementById('totalAppearances').textContent=list.reduce((s,p)=>s+(p.appearances||0),0);document.getElementById('topAttendance').textContent=list[0]?.appearances||0;document.getElementById('recordedWeeks').textContent=Object.keys(scoreData.attendanceWeeks||{}).length;document.getElementById('emptyState').style.display=list.length?'none':'block';document.getElementById('scoreRows').innerHTML=list.map((p,i)=>`<tr><td class="rank">${i+1}</td><td class="name">${escapeHtml(p.name)}</td><td class="points">${p.appearances||0} 次</td><td>${formatDate(p.lastPlayedAt)}</td><td>已记录</td><td class="admin-cell"><button class="row-delete" data-key="${escapeHtml(p.key)}" onclick="deletePlayerFromButton(this)">删除</button></td></tr>`).join('');document.getElementById('eventLog').innerHTML=scoreData.events.length?scoreData.events.slice(0,8).map(e=>`<div class="log-row"><span>${eventText(e)}</span><span>${new Date(e.ts).toLocaleString('zh-CN')}</span></div>`).join(''):'<div class="empty">暂无更新记录</div>';renderCurrentSignup();renderSpecialAttendance()}
-function eventText(e){if(e.type==='attendanceOnly')return '已切换为只记录到场次数';if(e.type==='weeklyAttendance')return `${e.resetId||'本周'} 自动记录到场：${e.count??(e.names||[]).length} 人`;if(e.type==='specialEventAttendance')return `特别活动 · ${e.title||e.eventId}：${e.count??(e.names||[]).length} 人到场`;if(e.type==='participation')return `记录到场：${(e.names||[]).length} 人`;if(e.type==='manualParticipation')return `${(e.names||[])[0]} 记录到场一次`;if(e.type==='deletePlayer'||e.type==='resetPlayer')return `${(e.names||[])[0]} 到场记录已删除`;if(e.type==='resetAll')return '全部到场记录已清空';return '到场记录已更新'}
+function eventText(e){if(e.type==='attendanceOnly')return '已切换为只记录到场次数';if(e.type==='weeklyAttendance')return `${e.resetId||'本周'} · ${e.venue||'MRTC'} 自动记录到场：${e.count??(e.names||[]).length} 人`;if(e.type==='specialEventAttendance')return `特别活动 · ${e.title||e.eventId}：${e.count??(e.names||[]).length} 人到场`;if(e.type==='participation')return `记录到场：${(e.names||[]).length} 人`;if(e.type==='manualParticipation')return `${(e.names||[])[0]} 记录到场一次`;if(e.type==='deletePlayer'||e.type==='resetPlayer')return `${(e.names||[])[0]} 到场记录已删除`;if(e.type==='resetAll')return '全部到场记录已清空';return '到场记录已更新'}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
-function start(){renderAdmin();if(!window.firebase||!firebase.database){document.getElementById('syncStatus').textContent='Firebase 加载失败';render();return}if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);scoreRef=firebase.database().ref(SCORE_DB_PATH);signupRef=firebase.database().ref(SIGNUP_DB_PATH);scoreRef.on('value',snap=>{scoreData=normalizeScoreData(snap.val());document.getElementById('syncStatus').textContent='到场记录实时同步中';render()});signupRef.on('value',snap=>{const data=snap.val();signupState=data&&data.state?data.state:{joined:[]};render()})}
+function start(){renderAdmin();if(!window.firebase||!firebase.database){document.getElementById('syncStatus').textContent='Firebase 加载失败';render();return}if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CONFIG);scoreRef=firebase.database().ref(SCORE_DB_PATH);scoreRef.on('value',snap=>{scoreData=normalizeScoreData(snap.val());document.getElementById('syncStatus').textContent='两地到场记录实时同步中';render()});Object.entries(SIGNUP_DB_PATHS).forEach(([key,path])=>{const ref=firebase.database().ref(path);signupRefs.push(ref);ref.on('value',snap=>{const data=snap.val();signupStates[key]=data&&data.state?data.state:{joined:[]};render()})})}
 start();
 </script>
 </body>

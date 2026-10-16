@@ -9,7 +9,37 @@ vm.runInNewContext(source, context);
 
 const event = context.window.DOVE_EVENTS[0];
 const singlesEvent = context.window.DOVE_EVENTS.find(item => item.id === '2026-singles-championship');
+const recurringEvents = context.window.DOVE_RECURRING_EVENTS;
 const status = context.window.DoveEventStatus;
+
+test('keeps MRTC and NYTA East as separate weekly signup entrances', () => {
+  assert.equal(recurringEvents.length, 2);
+  assert.deepEqual(
+    JSON.parse(JSON.stringify(recurringEvents.map(item => ({
+      id: item.id,
+      schedule: item.schedule,
+      format: item.format,
+      signup: item.tools[0].href,
+      courts: item.tools[1].href
+    })))),
+    [
+      {
+        id: 'golden-dove-tour-mrtc',
+        schedule: '周六 · 5–7 PM',
+        format: '最多 32 人 · 4 个分级',
+        signup: 'signup.html?venue=mrtc',
+        courts: 'courts.html?venue=mrtc'
+      },
+      {
+        id: 'golden-dove-tour-nyta-east',
+        schedule: '周六 · 9–11 PM',
+        format: '最多 12 人 · 分级报名',
+        signup: 'signup.html?venue=nyta-east',
+        courts: 'courts.html?venue=nyta-east'
+      }
+    ]
+  );
+});
 
 test('stores the archived team-event result shown in the past-event card', () => {
   assert.equal(event.attendeeCount, 16);

@@ -1,17 +1,32 @@
 window.DOVE_RECURRING_EVENTS = [
   {
-    id: 'golden-dove-tour',
+    id: 'golden-dove-tour-mrtc',
     status: '常驻活动',
     eyebrow: 'Resident Event · Weekly Tour',
-    title: '金鸽巡回赛',
-    summary: '每周开放的分级升降场巡回赛。四个分级各自进行三轮对局，报名、场地安排和长期到场记录都集中在这里。',
-    schedule: '每周六 · 长期开放',
-    venue: 'Toronto',
-    format: '4 个分级 · 三轮升降级',
+    title: '金鸽巡回赛 · MRTC',
+    summary: '周六傍晚的常规分级巡回赛，四个分级共享 32 个报名名额。',
+    schedule: '周六 · 5–7 PM',
+    venue: 'MRTC · Toronto',
+    format: '最多 32 人 · 4 个分级',
     tools: [
-      { label: '报名接龙', hint: '加入本周名单和候补名单', href: 'signup.html' },
-      { label: '场地分组', hint: '查看三轮场地与比分', href: 'courts.html' },
+      { label: '报名 MRTC', hint: '进入 5–7 PM 场次', href: 'signup.html?venue=mrtc' },
+      { label: 'MRTC 场地', hint: '查看本场场地安排', href: 'courts.html?venue=mrtc' },
       { label: '到场记录', hint: '查看累计到场次数', href: 'scores.html' }
+    ]
+  },
+  {
+    id: 'golden-dove-tour-nyta-east',
+    status: '常驻活动',
+    eyebrow: 'Resident Event · Late Session',
+    title: '金鸽巡回赛 · NYTA East',
+    summary: '周六晚间的小场次巡回赛，NYTA East Bubble 独立开放 12 个报名名额。',
+    schedule: '周六 · 9–11 PM',
+    venue: 'NYTA East Bubble',
+    format: '最多 12 人 · 分级报名',
+    tools: [
+      { label: '报名 NYTA East', hint: '进入 9–11 PM 场次', href: 'signup.html?venue=nyta-east' },
+      { label: 'NYTA 场地', hint: '查看本场场地安排', href: 'courts.html?venue=nyta-east' },
+      { label: '到场记录', hint: '查看两地累计到场次数', href: 'scores.html' }
     ]
   }
 ];
