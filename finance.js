@@ -14,7 +14,10 @@
 
   function makeDemo() {
     let rows = [];
-    const add = input => { rows = ledger.append(rows, { id: `demo-${rows.length}`, date: '2026-10-17', venueKey: 'mrtc', ts: 1000 + rows.length, ...input }); };
+    const add = input => {
+      const date = input.date || '2026-10-17';
+      rows = ledger.append(rows, { id: `demo-${rows.length}`, date, venueKey: 'mrtc', ts: Date.parse(`${date}T21:00:00Z`) + rows.length, ...input });
+    };
     add({ name: 'Demo Player A', type: 'payment', plan: 'package10', amount: 350 });
     for (const date of ['2026-10-17', '2026-10-24', '2026-10-31']) add({ name: 'Demo Player A', type: 'usage', date });
     add({ name: 'Demo Player A', type: 'payment', plan: 'single', amount: 40, date: '2026-11-07' });
@@ -50,6 +53,7 @@
     $('demoNotice').hidden = !demo;
     if (!allowed) return;
     try { currentRows = demo ? demoRows : store.read(); } catch (error) { message(error.message); return; }
+    if (!selected) selected = currentRows.filter(row => row.type === 'payment').sort((a, b) => b.ts - a.ts)[0]?.name || '';
     const members = ledger.members(currentRows);
     $('totalMoney').textContent = money(members.reduce((sum, member) => sum + member.received, 0));
     $('totalVisits').textContent = members.reduce((sum, member) => sum + member.remaining, 0);
@@ -63,8 +67,11 @@
     $('memberDetail').hidden = !selected;
     if (selected) {
       const member = ledger.summary(currentRows, selected);
+      const receipt = member.rows.filter(row => row.type === 'payment').sort((a, b) => b.ts - a.ts)[0];
+      const receiptTime = receipt ? new Intl.DateTimeFormat(language() === 'en' ? 'en-CA' : 'zh-CN', { timeZone: 'America/Toronto', dateStyle: 'medium', timeStyle: 'short' }).format(receipt.ts) : '';
+      const receiptSummary = receipt ? `<div class="receipt-summary"><div><span>${text('最近一笔收款', 'Latest Receipt')}</span><strong>${escape(money(receipt.amountCents / 100))} · ${ledger.active(currentRows, receipt) ? text('已收款', 'Received') : text('已退款', 'Refunded')}</strong></div><div><span>${text('活动日期与场地', 'Event Date & Venue')}</span><strong>${escape(receipt.date)} · ${escape(venue(receipt.venueKey))}</strong></div><div><span>${text('核实时间 · 多伦多', 'Recorded At · Toronto')}</span><strong>${escape(receiptTime)}</strong></div></div>` : '';
       $('memberDetail').setAttribute('data-dove-no-translate', '');
-      $('memberDetail').innerHTML = `<h2>${escape(member.name)} · ${text('逐笔明细', 'Transaction History')}</h2><div class="table-wrap"><table><thead><tr><th>${text('日期', 'Date')}</th><th>${text('场地', 'Venue')}</th><th>${text('项目', 'Item')}</th><th>${text('实收金额', 'Amount Received')}</th><th>${text('套餐变动', 'Visit Change')}</th><th>${text('操作', 'Action')}</th></tr></thead><tbody>${detailRows(member.rows, true)}</tbody></table></div>`;
+      $('memberDetail').innerHTML = `<h2>${escape(member.name)} · ${text('逐笔明细', 'Transaction History')}</h2>${receiptSummary}<div class="table-wrap"><table><thead><tr><th>${text('活动日期', 'Event Date')}</th><th>${text('场地', 'Venue')}</th><th>${text('项目', 'Item')}</th><th>${text('实收金额', 'Amount Received')}</th><th>${text('套餐变动', 'Visit Change')}</th><th>${text('操作', 'Action')}</th></tr></thead><tbody>${detailRows(member.rows, true)}</tbody></table></div>`;
     }
     const sessionRows = currentRows.filter(row => row.date === $('filterDate').value && ($('filterVenue').value === 'all' || row.venueKey === $('filterVenue').value));
     $('sessionRows').setAttribute('data-dove-no-translate', '');
