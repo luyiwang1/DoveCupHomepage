@@ -5,11 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=37"></script>
+<script src="language.js?v=38"></script>
 <script src="payments.js?v=1"></script>
 <script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=1"></script>
 <script src="player-identity.js?v=1"></script>
+<script src="finance-ledger.js?v=1"></script>
+<script src="finance-store.js?v=1"></script>
 <script src="site-nav.js?v=2" defer></script>
 <title>金鸽巡回赛 · 报名接龙</title>
 <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
@@ -764,6 +766,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
     <button class="admin-btn" onclick="goPage('scores.html')">到场</button>
     <button class="admin-btn" onclick="goPage('events.html')">活动中心</button>
     <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">Admin</button>
+    <button class="admin-btn admin-only" type="button" onclick="goPage('finance.html')">收款与套餐</button>
   </div>
   <div class="stats-row">
     <div class="stat-chip">
@@ -913,6 +916,13 @@ body.is-admin .summary-card.admin-only { display: block !important; }
       <strong id="paymentStatusText"></strong>
     </div>
     <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('paymentModal')">关闭</button><button type="button" class="modal-btn confirm" id="paymentSubmit" onclick="submitTransfer()">我已转账</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="attendanceModal" onclick="closeModal(event,'attendanceModal')" role="dialog" aria-modal="true" aria-labelledby="attendanceTitle">
+  <div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="attendanceTitle">到场登记</div>
+    <div class="payment-details"><strong id="attendanceName" data-dove-no-translate></strong><div><label for="attendanceDate">活动日期</label><input id="attendanceDate" type="date"></div><div><label for="attendanceMethod">本次方式</label><select id="attendanceMethod"><option value="attendance">单次到场 · 不扣套餐</option><option value="usage">套餐到场 · 扣1次</option></select></div><span id="attendanceBalance"></span><p class="payment-notice">本机预览记录，仅保存在当前浏览器。与线上到场统计分开。</p></div>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('attendanceModal')">取消</button><button type="button" class="modal-btn confirm" onclick="saveAttendance()">确认到场</button></div>
   </div>
 </div>
 
@@ -1430,10 +1440,15 @@ async function verifyArchivedPayment(button) {
   const index = Number(button.dataset.personIndex);
   if (!Object.hasOwn(adminSignupHistory, key) || !Number.isInteger(index) || index < 0) return;
   try {
-    await adminHistoryRef.child(key).child('joined').child(String(index)).transaction(person => {
+    const result = await adminHistoryRef.child(key).child('joined').child(String(index)).transaction(person => {
       if (!person || DovePayments.status(person) !== 'pending') return;
       return DovePayments.verify(person, true);
     });
+    if (result.committed) {
+      const archive = adminSignupHistory[key];
+      try { await DoveFinanceStore.recordPayment(result.snapshot.val(), { date: archive.resetId, venueKey: archive.venueKey || 'mrtc' }); }
+      catch (error) { showToast('收款已确认，但本机账本保存失败'); return; }
+    }
     showToast('已确认收款', 'green');
   } catch (error) { showToast('云端保存失败，请检查网络'); }
 }
@@ -1538,6 +1553,7 @@ function personCard(p, rank, list) {
       <span class="badge badge-confirm ${p.confirmed ? '' : 'off'}${lockClass}" ${canEdit ? `onclick="toggleConfirm(${p.id})"` : ''}>${p.confirmed ? '已确认' : '待确认'}</span>
       <button type="button" class="badge badge-paid ${DovePayments.status(p)} ${DovePayments.status(p)==='unpaid'?'off':''}" ${canEdit && (DovePayments.status(p)==='unpaid' || isAdminMode) ? `onclick="togglePaid(${p.id})"` : 'disabled'}>${DovePayments.label(p)}</button>
       ${canEdit ? `<span class="badge badge-cancel" onclick="removeJoined(${p.id})">退出</span>` : ''}
+      ${isAdminMode ? `<button type="button" class="badge" onclick="openAttendance(${p.id})">到场登记</button>` : ''}
     </div>
   ` : `
     <div class="badges">
@@ -1643,17 +1659,55 @@ function openPayment(id = null) {
   document.getElementById('paymentSubmit').textContent = person && DovePayments.status(person) === 'pending' ? '确认收款' : '我已转账';
   document.getElementById('paymentModal').classList.add('open');
 }
-function submitTransfer() {
+async function submitTransfer() {
   const person = state.joined.find(p => p.id === paymentTargetId);
   if (!person || !requireOwner(person)) return;
   const verifying = DovePayments.status(person) === 'pending';
   if (verifying && (!isAdminMode || !confirm('确认已核实这笔转账到账？'))) return;
   const next = verifying ? DovePayments.verify(person, isAdminMode) : DovePayments.submit(person, document.getElementById('paymentPlan').value, true);
   if (next === person) return;
+  if (verifying) {
+    try { await DoveFinanceStore.recordPayment(next, { date: next.paymentEventDate || currentSessionDate(), venueKey: VENUE_KEY }); }
+    catch (error) { showToast('本机账本保存失败，请导出备份并检查浏览器存储'); return; }
+  } else next.paymentEventDate = currentSessionDate();
   Object.assign(person, next);
   closeModalById('paymentModal');
   showToast(verifying ? '已确认收款' : '已提交，等待管理员核实');
   render();
+}
+
+function currentSessionDate() {
+  const local = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
+  const date = new Date(`${local}T12:00:00Z`);
+  date.setUTCDate(date.getUTCDate() + (6 - date.getUTCDay() + 7) % 7);
+  return date.toISOString().slice(0, 10);
+}
+let attendanceTargetId = null;
+function openAttendance(id) {
+  if (!requireAdmin()) return;
+  const person = state.joined.find(p => p.id === id);
+  if (!person) return;
+  try {
+    const balance = DoveFinance.summary(DoveFinanceStore.read(), person.name).remaining;
+    attendanceTargetId = id;
+    document.getElementById('attendanceName').textContent = `${person.name} · ${ACTIVE_VENUE.name}`;
+    document.getElementById('attendanceDate').value = currentSessionDate();
+    document.getElementById('attendanceMethod').value = balance > 0 ? 'usage' : 'attendance';
+    const english = window.DoveLanguage?.getLanguage() === 'en';
+    document.getElementById('attendanceBalance').textContent = english ? `Package visits remaining: ${balance}` : `套餐剩余：${balance} 次`;
+    document.getElementById('attendanceModal').classList.add('open');
+  } catch (error) { showToast(error.message); }
+}
+async function saveAttendance() {
+  if (!requireAdmin()) return;
+  const person = state.joined.find(p => p.id === attendanceTargetId);
+  if (!person) return;
+  try {
+    await DoveFinanceStore.add({ id: crypto.randomUUID(), name: person.name, date: document.getElementById('attendanceDate').value,
+      venueKey: VENUE_KEY, type: document.getElementById('attendanceMethod').value });
+    closeModalById('attendanceModal');
+    showToast('到场已记录到本机账本', 'green');
+  } catch (error) { showToast(error.message); }
 }
 async function copyPaymentField(id) {
   const input = document.getElementById(id);

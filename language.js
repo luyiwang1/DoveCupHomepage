@@ -10,6 +10,35 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('选择备份文件', '选择备份文件', 'Choose Backup File');
+  [
+    ['收款与套餐', 'Payments & Packages'], ['收款与套餐 · 金鸽杯', 'Payments & Packages · Golden Dove Cup'],
+    ['返回报名页', 'Back to Registration'], ['查看示例', 'View Demo'], ['导出备份', 'Export Backup'],
+    ['同步已核实收款', 'Sync Verified Receipts'], ['请先在报名页登录管理员，或查看示例。', 'Sign in as an admin on the registration page, or view the demo.'],
+    ['进入报名页', 'Open Registration'], ['本机账本预览：明细仅保存在当前浏览器，不跨设备同步。请定期导出备份。', 'Local ledger preview: records stay in this browser and do not sync across devices. Export backups regularly.'],
+    ['示例数据，不会写入本机账本。', 'Demo data is kept separate from the local ledger.'], ['累计实收', 'Net Receipts'],
+    ['套餐剩余总次数', 'Total Package Visits Remaining'], ['有账目会员', 'Members with Records'], ['会员账目', 'Member Accounts'],
+    ['每场对账', 'Session Reconciliation'], ['查找姓名', 'Find a Member'], ['套餐已购', 'Package Visits Purchased'],
+    ['套餐已用', 'Package Visits Used'], ['剩余', 'Remaining'], ['确认到场', 'Confirm Attendance'], ['还没有收款记录。', 'No receipts recorded yet.'],
+    ['日期', 'Date'], ['全部场地', 'All Venues'], ['项目', 'Item'], ['实收金额', 'Amount Received'], ['套餐变动', 'Visit Change'],
+    ['本场次没有账目。', 'No records for this session.'], ['记录收款或到场', 'Record a Payment or Attendance'],
+    ['单次收款', 'Single-Visit Payment'], ['购买10次套餐', '10-Visit Package Purchase'], ['确认单次到场', 'Confirm Single-Visit Attendance'],
+    ['确认套餐到场 · 扣1次', 'Confirm Package Attendance · Use 1 Visit'], ['实际收到 CAD', 'Amount Received (CAD)'],
+    ['备注', 'Note'], ['保存记录', 'Save Record'], ['恢复备份', 'Restore Backup'],
+    ['到场登记', 'Attendance Check-In'], ['活动日期', 'Event Date'], ['本次方式', 'Attendance Type'],
+    ['单次到场 · 不扣套餐', 'Single-Visit Attendance · No Package Deduction'], ['套餐到场 · 扣1次', 'Package Attendance · Use 1 Visit'],
+    ['本机预览记录，仅保存在当前浏览器。与线上到场统计分开。', 'Local preview records stay in this browser, separate from online attendance totals.'],
+    ['到场已记录到本机账本', 'Attendance saved to the local ledger'], ['本机账本保存失败，请导出备份并检查浏览器存储', 'Local ledger save failed. Export a backup and check browser storage.'],
+    ['收款已确认，但本机账本保存失败', 'Payment confirmed, but the local ledger could not be saved'],
+    ['姓名和记录编号不能为空', 'Name and record ID are required'], ['请选择活动日期', 'Select a valid event date'],
+    ['请选择场地', 'Select a venue'], ['请选择付款项目', 'Select a payment option'], ['请输入实际收款金额', 'Enter the amount actually received'],
+    ['套餐余额不足', 'Insufficient package visits'], ['本场次已经记录到场', 'Attendance is already recorded for this session'],
+    ['原记录不存在或已撤销', 'The original record is missing or already reversed'], ['只能撤销到场记录', 'Only attendance records can be reversed'],
+    ['只能退款收款记录', 'Only payment records can be refunded'], ['套餐已使用，请先核对扣次记录', 'Package visits have been used. Reconcile attendance before a full refund.'],
+    ['记录类型无效', 'Invalid record type'], ['账本格式无效', 'Invalid ledger format'], ['账本包含重复或无效记录', 'The ledger contains duplicate or invalid records'],
+    ['本机账本格式无效，请从备份恢复', 'The local ledger is invalid. Restore a valid backup.'], ['请先登录管理员', 'Sign in as an admin first'],
+    ['备份文件过大', 'The backup file is too large'], ['收款读取失败', 'Could not load receipts']
+  ].forEach(([zh, en]) => add(zh, zh, en));
   add('复制', '复制', 'Copy');
   add('单次 CAD $40 · 10次套餐 CAD $350', '单次 CAD $40 · 10次套餐 CAD $350', 'Single Visit CAD $40 · 10-Visit Package CAD $350');
   add('Interac e-Transfer · 转账后由管理员核对到账', 'Interac e-Transfer · 转账后由管理员核对到账', 'Interac e-Transfer · Receipt verified by the organizer');

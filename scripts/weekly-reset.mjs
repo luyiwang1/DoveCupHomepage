@@ -55,6 +55,7 @@ function cleanPerson(person) {
     paymentAmount: Number(person.paymentAmount) || null,
     paymentSubmittedAt: Number(person.paymentSubmittedAt) || null,
     paymentVerifiedAt: Number(person.paymentVerifiedAt) || null,
+    paymentEventDate: person.paymentEventDate || null,
     registeredAt: Number(person.ts) || null
   };
 }
