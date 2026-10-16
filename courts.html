@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=34"></script>
+<script src="language.js?v=36"></script>
+<script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=1"></script>
 <script src="site-nav.js?v=2" defer></script>
 <title>金鸽巡回赛 · 第一轮场地安排</title>
@@ -102,15 +103,14 @@ function scoreFor(round,court){return roundScores[scoreKey(round,court)]||{}}
 function hasScore(score){return Number.isFinite(Number(score.a))&&Number.isFinite(Number(score.b))}
 function pickCaptain(teamA,teamB,round,court){const all=teamA.concat(teamB);return all.length?all[(round+court)%all.length].key:null}
 function makeMatchFromPlayers(list,idx,round=0){const clean=list.filter(Boolean);const teamA=[];const teamB=[];clean.forEach((p,i)=>{if(clean.length>=4){(i===0||i===3?teamA:teamB).push(p)}else{(i%2===0?teamA:teamB).push(p)}});return{court:idx,teamA,teamB,captainKey:pickCaptain(teamA,teamB,round,idx)}}
-const LEVEL_VERSION='4-level-v2-configurable-groups';
-const LEVEL_GROUPS=[{key:'30_plus',label:'3.0+'},{key:'25_30',label:'2.5-3.0'},{key:'20_25',label:'2.0-2.5'},{key:'u20',label:'新手场 · 2.0-'}];
-const LEGACY_LEVEL_MAP={over3:'30_plus',under3:'20_25'};
-function normalizeLevel(level){const normalized=LEGACY_LEVEL_MAP[level]||level;return LEVEL_GROUPS.some(g=>g.key===normalized)?normalized:'20_25'}
+const LEVEL_VERSION='4-level-v3-under25-to35plus';
+const LEVEL_GROUPS=[...window.DoveTourLevels.groups].reverse();
+function normalizeLevel(level){return window.DoveTourLevels.normalize(level)}
 function courtLevel(level){const key=normalizeLevel(level);return normalizeLevel(courtLevelMap[key]||key)}
 function levelLabel(level){const key=courtLevel(level);return courtLabelMap[key]||(LEVEL_GROUPS.find(g=>g.key===key)||LEVEL_GROUPS[2]).label}
 function levelOrder(level){const key=courtLevel(level);const idx=LEVEL_GROUPS.findIndex(g=>g.key===key);return idx===-1?LEVEL_GROUPS.length:idx}
 function isMergedCourtLevel(level){return Object.entries(courtLevelMap).some(([from,to])=>from!==to&&courtLevel(to)===courtLevel(level))}
-function courtGroupingNote(){return isMergedCourtLevel('25_30')?'2.0-2.5 与 2.5-3.0 本周合组':'按本周分级安排'}
+function courtGroupingNote(){return '按本周分级安排'}
 function rebuildDivisionRanges(groups,allocations){divisionRanges=[];let start=0;groups.forEach(g=>{const count=allocations[g.level]||0;if(!count)return;divisionRanges.push({level:g.level,label:levelLabel(g.level),start,end:start+count-1,players:g.players.length});start+=count});courtCount=Math.max(1,start)}
 function allocateDivisionCourts(groups,total){const allocations={};if(!groups.length)return allocations;groups.forEach(g=>allocations[g.level]=1);let left=Math.max(groups.length,total)-groups.length;const sorted=[...groups].sort((a,b)=>b.players.length-a.players.length);while(left>0){sorted[(left-1)%sorted.length].level&&(allocations[sorted[(left-1)%sorted.length].level]++);left--}return allocations}
 function splitInitialCourts(list){const groups=Object.values(list.reduce((acc,p)=>{const level=courtLevel(p.levelGroup);p.levelGroup=level;(acc[level]=acc[level]||{level,players:[]}).players.push(p);return acc},{})).sort((a,b)=>levelOrder(a.level)-levelOrder(b.level));const configured=Object.fromEntries(groups.map(g=>[g.level,Math.max(0,Number(courtAllocations[g.level])||0)]));const configuredTotal=Object.values(configured).reduce((sum,count)=>sum+count,0);const allocations=configuredTotal===Number(courtCount)&&groups.every(g=>configured[g.level]>0)?configured:allocateDivisionCourts(groups,Number(courtCount)||groups.length||1);rebuildDivisionRanges(groups,allocations);const result=[];groups.forEach(g=>{const count=allocations[g.level]||1;const courts=Array.from({length:count},()=>[]);g.players.forEach((p,i)=>courts[i%count].push(p));result.push(...courts)});return result}

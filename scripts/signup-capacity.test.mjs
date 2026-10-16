@@ -19,7 +19,7 @@ test('shows section counts without an eight-player denominator', () => {
   assert.match(signup, /\$\{group\.people\.length\} 人<\/span>/);
   assert.doesNotMatch(signup, /group\.people\.length\} \/ \$\{/);
   assert.match(signup, /四个分级共享 \$\{state\.capacity \|\| DEFAULT_CAPACITY\} 个名额/);
-  assert.match(homepage, /四组共享 32 个报名名额/);
+  assert.match(homepage, /四组共享本场次名额/);
 });
 
 test('uses the active venue capacity as the hard admin maximum', () => {

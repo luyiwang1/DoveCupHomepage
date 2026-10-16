@@ -10,6 +10,9 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('新手场 · 2.5-', '新手场 · 2.5-', 'Beginner · Under 2.5');
+  add('新手场（2.5-） · 2.5-3.0 · 3.0-3.5 · 3.5+', '新手场（2.5-） · 2.5-3.0 · 3.0-3.5 · 3.5+', 'Beginner (under 2.5) · 2.5-3.0 · 3.0-3.5 · 3.5+');
+  add('不需要。活动设有新手场（2.5-）、2.5-3.0、3.0-3.5、3.5+ 四个分级，四组共享本场次名额，核心是有质量地打球和认识新朋友。', '不需要。活动设有新手场（2.5-）、2.5-3.0、3.0-3.5、3.5+ 四个分级，四组共享本场次名额，核心是有质量地打球和认识新朋友。', 'No. Choose from beginner (under 2.5), 2.5-3.0, 3.0-3.5, and 3.5+. All four divisions share the session capacity. The goal is quality tennis and meeting good people.');
   add('MRTC 与 NYTA East 的活动影集，记录每一次相聚。', 'MRTC 与 NYTA East 的活动影集，记录每一次相聚。', 'Event albums from MRTC and NYTA East, preserving every gathering.');
   add('你已经在本场次报名或候补名单中', '你已经在本场次报名或候补名单中', 'You are already registered or waitlisted for this session.');
 

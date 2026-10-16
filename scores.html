@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0" />
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=34"></script>
+<script src="language.js?v=36"></script>
+<script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=1"></script>
 <script src="player-identity.js?v=1"></script>
 <script src="site-nav.js?v=2" defer></script>
@@ -91,7 +92,7 @@ function keyForName(name){return DovePlayerIdentity.scoreKey(name)}
 function normalizeScoreData(data){const next=data||{};next.players=next.players&&typeof next.players==='object'?next.players:{};next.events=Array.isArray(next.events)?next.events:[];next.attendanceWeeks=next.attendanceWeeks&&typeof next.attendanceWeeks==='object'?next.attendanceWeeks:{};next.attendanceEvents=next.attendanceEvents&&typeof next.attendanceEvents==='object'?next.attendanceEvents:{};Object.values(next.players).forEach(p=>{if(!p)return;delete p.points;delete p.wins;delete p.manualWins;delete p.courtWins});next.mode='attendance-only';return next}
 function signupPlayers(venueKey){const state=signupStates[venueKey]||{joined:[]};return Array.isArray(state.joined)?state.joined.filter(p=>p&&p.name):[]}
 function playerList(){return Object.entries(scoreData.players).flatMap(([key,p])=>p&&p.name&&Number(p.appearances)>0?[Object.assign({},p,{key,hasScoreRecord:true})]:[]).sort((a,b)=>(b.appearances||0)-(a.appearances||0)||String(a.name).localeCompare(String(b.name),'zh-Hans-CN'))}
-function signupLevelLabel(person){const labels={u20:'新手场 · 2.0-','20_25':'2.0-2.5','25_30':'2.5-3.0','30_plus':'3.0+'};return labels[person&&person.levelGroup]||'未分级'}
+function signupLevelLabel(person){return window.DoveTourLevels.label(person&&person.levelGroup)}
 function renderSignupRows(people){return people.length?people.map((person,index)=>{const previous=scoreData.players[keyForName(person.name)],hasAttendance=Number(previous&&previous.appearances)>0;return`<div class="current-signup-row"><span class="current-signup-index">${index+1}</span><span class="current-signup-name">${escapeHtml(person.name)}</span><span class="current-signup-level">${escapeHtml(signupLevelLabel(person))}</span><span class="signup-state ${hasAttendance?'previous':'first'}">${hasAttendance?'有历史到场记录':'首次报名，待到场'}</span></div>`}).join(''):'<div class="empty">本场次还没有人报名。</div>'}
 function renderCurrentSignup(){const venueKeys=['mrtc','nyta-east'],total=venueKeys.reduce((sum,key)=>sum+signupPlayers(key).length,0);document.getElementById('currentSignupCount').textContent=`${total} 人次`;document.getElementById('currentSignupList').innerHTML=venueKeys.map(key=>{const venue=window.DoveVenues.get(key),people=signupPlayers(key);return`<section class="venue-signup-block"><div class="venue-signup-head"><strong>${escapeHtml(venue.name)} · ${escapeHtml(venue.schedule)}</strong><a href="signup.html?venue=${key}">进入报名</a></div>${renderSignupRows(people)}</section>`}).join('')}
 function renderAdmin(){document.body.classList.toggle('is-admin',isAdminMode);document.getElementById('adminBtn').textContent=isAdminMode?'Admin 已登录':'Admin'}

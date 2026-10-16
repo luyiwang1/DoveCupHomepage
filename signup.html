@@ -5,7 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=34"></script>
+<script src="language.js?v=36"></script>
+<script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=1"></script>
 <script src="player-identity.js?v=1"></script>
 <script src="site-nav.js?v=2" defer></script>
@@ -874,10 +875,10 @@ body.is-admin .summary-card.admin-only { display: block !important; }
     <div class="modal-title">➕ 添加人员</div>
     <input class="modal-input" id="addName" placeholder="姓名 / 微信名" autocomplete="off">
     <select class="modal-input" id="addLevel">
-      <option value="u20">新手场 · 2.0-</option>
-      <option value="20_25">2.0-2.5</option>
+      <option value="u20">新手场 · 2.5-</option>
       <option value="25_30">2.5-3.0</option>
-      <option value="30_plus">3.0+</option>
+      <option value="30_plus">3.0-3.5</option>
+      <option value="35_plus">3.5+</option>
     </select>
     <div class="modal-btns">
       <button class="modal-btn cancel" onclick="closeModalById('addModal')">取消</button>
@@ -910,16 +911,8 @@ const WAITLIST_CAPACITY = 24;
 const VENUE_KEY = window.DoveVenues.keyFromQuery(location.search);
 const ACTIVE_VENUE = window.DoveVenues.get(VENUE_KEY);
 const DEFAULT_CAPACITY = ACTIVE_VENUE.capacity;
-const LEVEL_GROUPS = [
-  { key: 'u20', label: '新手场 · 2.0-' },
-  { key: '20_25', label: '2.0-2.5' },
-  { key: '25_30', label: '2.5-3.0' },
-  { key: '30_plus', label: '3.0+' }
-];
-const LEGACY_LEVEL_MAP = {
-  under3: '20_25',
-  over3: '30_plus'
-};
+const LEVEL_GROUPS = window.DoveTourLevels.groups;
+const LEGACY_LEVEL_MAP = window.DoveTourLevels.legacy;
 const DATA_STORAGE = `signup_v3_${VENUE_KEY}`;
 const DB_PATH = ACTIVE_VENUE.databasePath;
 const SIGNUP_STATS_DB_PATH = 'doveCupWaitlistSystem/signupStats';
@@ -1007,7 +1000,7 @@ function normalizePersonName(name) {
 function levelKeyOf(p) {
   const raw = p && p.levelGroup;
   if (LEVEL_GROUPS.some(group => group.key === raw)) return raw;
-  return LEGACY_LEVEL_MAP[raw] || '20_25';
+  return window.DoveTourLevels.normalize(raw);
 }
 function levelLabelOf(p) {
   const key = levelKeyOf(p);
@@ -1527,7 +1520,7 @@ function personCard(p, rank, list) {
 function addPerson(list) {
   const name = DovePlayerIdentity.canonicalName(document.getElementById('addName').value);
   const selectedLevel = document.getElementById('addLevel').value;
-  const levelGroup = LEVEL_GROUPS.some(group => group.key === selectedLevel) ? selectedLevel : '20_25';
+  const levelGroup = window.DoveTourLevels.normalize(selectedLevel);
   if (!name) { showToast('请输入姓名'); return; }
   if ([...state.joined, ...state.waitlist].some(p => normalizePersonName(p.name) === normalizePersonName(name))) {
     showToast('你已经在本场次报名或候补名单中');
@@ -1560,7 +1553,7 @@ function addPerson(list) {
 
   closeModalById('addModal');
   document.getElementById('addName').value = '';
-  document.getElementById('addLevel').value = '20_25';
+  document.getElementById('addLevel').value = 'u20';
   render();
   switchTab(list === 'joined' ? 'joined' : 'waitlist');
 }
