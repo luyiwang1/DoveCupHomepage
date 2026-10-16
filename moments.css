@@ -5,6 +5,17 @@
 .moments-head h2{max-width:850px;margin:10px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,5.5vw,72px);font-weight:500;line-height:1}
 .moments-head-simple{display:block}
 .moments-head-simple h2{margin:0;font-size:clamp(28px,3vw,42px);line-height:1.05}
+.moment-venue-tabs,.moment-venue-jumps{display:flex;flex-wrap:wrap;gap:20px;margin-top:22px}
+.moment-venue-tabs button,.moment-venue-jumps a{padding:8px 0;border:0;border-bottom:2px solid transparent;background:transparent;color:inherit;font:inherit;font-size:14px;cursor:pointer}
+.moment-venue-tabs button[aria-pressed="true"]{border-color:#d5ab55;color:#e3bc65}
+.moment-venue-tabs button:focus-visible,.moment-venue-jumps a:focus-visible{outline:2px solid #c99a3c;outline-offset:4px}
+.moment-venue-jumps a{border-color:rgba(20,51,35,.3)}
+.moment-venue-section{padding-top:42px;scroll-margin-top:110px}
+.moment-venue-section+.moment-venue-section{margin-top:48px;border-top:1px solid rgba(20,51,35,.2)}
+.moment-venue-heading{display:flex;align-items:baseline;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.moment-venue-heading h2{margin:0;font-size:28px;font-weight:400}
+.moment-venue-heading span{font:12px "Segoe UI",sans-serif;color:#706b5e}
+.moment-venue-empty{margin-top:26px;padding:34px 0;border-top:1px solid currentColor;border-bottom:1px solid currentColor;font-size:15px;line-height:1.6;opacity:.7}
 .moments-note{max-width:380px;margin:0;color:rgba(248,239,215,.66);font-size:13px;line-height:1.7}
 .moment-marquee{margin-top:26px;overflow:hidden;border-top:1px solid rgba(248,239,215,.2);border-bottom:1px solid rgba(248,239,215,.2)}
 .moment-marquee-track{display:flex;width:max-content;padding:14px 0;animation:moment-marquee 190s linear infinite;animation-delay:var(--moment-marquee-delay,0s);will-change:transform}

@@ -10,6 +10,7 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('MRTC 与 NYTA East 的活动影集，记录每一次相聚。', 'MRTC 与 NYTA East 的活动影集，记录每一次相聚。', 'Event albums from MRTC and NYTA East, preserving every gathering.');
   add('你已经在本场次报名或候补名单中', '你已经在本场次报名或候补名单中', 'You are already registered or waitlisted for this session.');
 
   // Shared navigation, labels, and mixed-language sports terms.

@@ -95,6 +95,7 @@
 
     return {
       eventNumber,
+      venueKey: 'mrtc',
       paddedNumber,
       type: special ? 'special' : 'tour',
       typeLabel,
@@ -119,13 +120,16 @@
     };
   });
 
-  root.DOVE_MOMENTS = moments;
+  // Add NYTA records here with venueKey: 'nyta-east' and a unique eventNumber.
+  const nytaMoments = [];
+  const allMoments = [...moments, ...nytaMoments];
+  root.DOVE_MOMENTS = allMoments;
   root.DOVE_MOMENTS_GALLERY = {
     id: 'golden-dove-moments',
     gallery: {
       title: '金鸽杯活动档案',
       titleEn: 'Golden Dove Event Archive',
-      photos: moments
+      photos: allMoments
         .filter(moment => moment.photo)
         .sort((a, b) => a.eventNumber - b.eventNumber)
         .map(moment => ({ ...moment.photo, eventNumber: moment.eventNumber }))
