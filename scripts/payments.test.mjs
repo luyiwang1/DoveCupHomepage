@@ -4,6 +4,17 @@ import '../payments.js';
 import { buildReset } from './weekly-reset.mjs';
 const pay = globalThis.DovePayments;
 
+test('existing package requests are not receipts and survive archival', () => {
+  const request = pay.submit({ id: 7, name: 'Han M' }, 'use_package', true, 100);
+  assert.equal(pay.label(request), '套餐待核实');
+  assert.equal(request.paymentAmount, 0);
+  assert.equal(request.paid, false);
+  assert.equal(pay.verify(request, true), request);
+  const archive = buildReset({ main: { state: { joined: [request] } } }, '2026-10-17').data.signupHistory['2026-10-17'].joined[0];
+  assert.equal(archive.paymentStatus, 'package_pending');
+  assert.equal(archive.paymentPlan, 'use_package');
+});
+
 test('owner submits pending payment and only an admin can confirm it', () => {
   const person = { id: 1, name: 'Han M', paid: false };
   assert.equal(pay.submit(person, 'single', false), person);

@@ -10,6 +10,10 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('使用已有套餐', '使用已有套餐', 'Use Existing Package');
+  add('套餐待核实', '套餐待核实', 'Package Pending Verification');
+  add('提交套餐核实', '提交套餐核实', 'Submit Package Request');
+  add('套餐余额由管理员核实。本次无需转账，确认实际到场后才扣1次；报名不扣次。', '套餐余额由管理员核实。本次无需转账，确认实际到场后才扣1次；报名不扣次。', 'An admin will verify your package balance. No transfer is needed. One visit is deducted only after confirmed attendance, not registration.');
   add('清零收款与套餐', '清零收款与套餐', 'Reset Payments & Packages');
   add('导出清零前备份', '导出清零前备份', 'Export Pre-Reset Backup');
   add('确认归零', '确认归零', 'Confirm Reset');

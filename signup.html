@@ -5,8 +5,8 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=39"></script>
-<script src="payments.js?v=1"></script>
+<script src="language.js?v=41"></script>
+<script src="payments.js?v=2"></script>
 <script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=1"></script>
 <script src="player-identity.js?v=1"></script>
@@ -386,6 +386,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   border-color: var(--gray-300);
 }
 .badge-paid.pending{background:var(--orange-light);color:#985600;border-color:#efc476}
+.badge-paid.package_pending{background:var(--orange-light);color:#985600;border-color:#efc476}
 .badge-paid.received{background:var(--green-light);color:var(--green-dark);border-color:#a8d7be}
 .payment-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#fffaf0;border-bottom:1px solid #e1d4b8;font-size:13px;line-height:1.6}
 .payment-strip strong{display:block;color:#143323;font-size:14px}
@@ -909,7 +910,8 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   <div class="modal-sheet">
     <div class="modal-handle"></div><div class="modal-title" id="paymentTitle">付款信息</div>
     <div class="payment-details">
-      <div><label for="paymentPlan">付款项目</label><select id="paymentPlan"><option value="single">单次 · CAD $40 / 人</option><option value="package10">10次套餐 · CAD $350 / 人</option></select></div>
+      <div><label for="paymentPlan">付款项目</label><select id="paymentPlan" onchange="updatePaymentChoice()"><option value="single">单次 · CAD $40 / 人</option><option value="package10">10次套餐 · CAD $350 / 人</option><option value="use_package">使用已有套餐</option></select></div>
+      <p id="packagePaymentNotice" class="payment-notice" hidden>套餐余额由管理员核实。本次无需转账，确认实际到场后才扣1次；报名不扣次。</p>
       <div><label for="paymentEmail">EMT 收款邮箱</label><div class="payment-copy-row"><input id="paymentEmail" value="wangluyi1997@gmail.com" readonly aria-label="EMT 收款邮箱"><button type="button" onclick="copyPaymentField('paymentEmail')">复制</button></div></div>
       <div><label for="paymentMemo">转账备注</label><div class="payment-copy-row"><input id="paymentMemo" readonly><button type="button" onclick="copyPaymentField('paymentMemo')">复制</button></div></div>
       <p class="payment-notice">到账确认以管理员核对为准。套餐购买与剩余次数由管理员手动记录。</p>
@@ -1650,7 +1652,7 @@ function togglePaid(id) {
   if (!p || !requireOwner(p)) return;
   if (DovePayments.status(p) === 'unpaid') { openPayment(id); return; }
   if (!isAdminMode) return;
-  if (DovePayments.status(p) === 'pending') {
+  if (['pending', 'package_pending'].includes(DovePayments.status(p))) {
     openPayment(id);
     return;
   } else {
@@ -1678,6 +1680,16 @@ function openPayment(id = null) {
   document.getElementById('paymentSubmit').hidden = !canSubmit;
   document.getElementById('paymentSubmit').textContent = person && DovePayments.status(person) === 'pending' ? '确认收款' : '我已转账';
   document.getElementById('paymentModal').classList.add('open');
+  updatePaymentChoice();
+}
+function updatePaymentChoice() {
+  const person = state.joined.find(p => p.id === paymentTargetId);
+  const usingPackage = document.getElementById('paymentPlan').value === 'use_package';
+  document.getElementById('packagePaymentNotice').hidden = !usingPackage;
+  for (const id of ['paymentEmail', 'paymentMemo']) document.getElementById(id).closest('.payment-details > div').hidden = usingPackage;
+  const pendingPackage = person && DovePayments.status(person) === 'package_pending';
+  document.getElementById('paymentSubmit').hidden = !person || !canEditPerson(person) || pendingPackage || !['unpaid', 'pending'].includes(DovePayments.status(person)) || (DovePayments.status(person) === 'pending' && !isAdminMode);
+  document.getElementById('paymentSubmit').textContent = usingPackage ? '提交套餐核实' : person && DovePayments.status(person) === 'pending' ? '确认收款' : '我已转账';
 }
 async function submitTransfer() {
   const person = state.joined.find(p => p.id === paymentTargetId);
@@ -1692,7 +1704,7 @@ async function submitTransfer() {
   } else next.paymentEventDate = currentSessionDate();
   Object.assign(person, next);
   closeModalById('paymentModal');
-  showToast(verifying ? '已确认收款' : '已提交，等待管理员核实');
+  showToast(verifying ? '已确认收款' : next.paymentStatus === 'package_pending' ? '套餐待核实' : '已提交，等待管理员核实');
   render();
 }
 
