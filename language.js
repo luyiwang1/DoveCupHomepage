@@ -10,6 +10,8 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('退出报名', '退出报名', 'Cancel Registration');
+  add('联系管理员', '联系管理员', 'Contact Organizer');
   add('使用已有套餐', '使用已有套餐', 'Use Existing Package');
   add('套餐待核实', '套餐待核实', 'Package Pending Verification');
   add('提交套餐核实', '提交套餐核实', 'Submit Package Request');

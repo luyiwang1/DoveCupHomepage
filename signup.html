@@ -5,11 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=41"></script>
+<script src="language.js?v=42"></script>
 <script src="payments.js?v=2"></script>
 <script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=2"></script>
 <script src="player-identity.js?v=1"></script>
+<script src="signup-ownership.js?v=1"></script>
 <script src="finance-ledger.js?v=2"></script>
 <script src="finance-store.js?v=2"></script>
 <script src="site-nav.js?v=2" defer></script>
@@ -907,6 +908,13 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 </div>
 
 <!-- Edit title modal -->
+<div class="modal-overlay" id="exitHelpModal" onclick="closeModal(event,'exitHelpModal')" role="dialog" aria-modal="true" aria-labelledby="exitHelpTitle">
+  <div class="modal-sheet">
+    <div class="modal-title" id="exitHelpTitle">退出报名</div>
+    <p id="exitHelpText" class="payment-notice" data-dove-no-translate></p>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('exitHelpModal')">关闭</button><a id="exitHelpEmail" class="modal-btn confirm" href="mailto:wangluyi1997@gmail.com">联系管理员</a></div>
+  </div>
+</div>
 <div class="modal-overlay" id="paymentModal" onclick="closeModal(event,'paymentModal')" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
   <div class="modal-sheet">
     <div class="modal-handle"></div><div class="modal-title" id="paymentTitle">付款信息</div>
@@ -1102,15 +1110,13 @@ function escapeHtml(v) {
   }[ch]));
 }
 function ownsPerson(p) {
-  return Boolean(p && (
-    p.ownerKey === currentUserKey ||
-    (!p.ownerKey && currentUserName && p.name === currentUserName)
-  ));
+  return DoveSignupOwnership.owns(p, currentUserKey, localStorage, currentUserName);
 }
 function canEditPerson(p) {
   return isAdminMode || ownsPerson(p);
 }
 function rememberUser(name) {
+  DoveSignupOwnership.remember(localStorage, name, currentUserName);
   if (!currentUserName) {
     currentUserName = name;
     localStorage.setItem(USER_NAME_STORAGE, name);
@@ -1247,6 +1253,9 @@ function render() {
 }
 
 function renderVenuePicker() {
+  for (const person of [...state.joined, ...state.waitlist]) {
+    if (person.ownerKey === currentUserKey) DoveSignupOwnership.remember(localStorage, person.name, currentUserName);
+  }
   const english = window.DoveLanguage?.getLanguage() === 'en';
   const paused = currentSessionDate() === DoveVenues.resumeFrom;
   document.getElementById('nextSessionNotice').textContent = english
@@ -1580,13 +1589,13 @@ function personCard(p, rank, list) {
     <div class="badges">
       <span class="badge badge-confirm ${p.confirmed ? '' : 'off'}${lockClass}" ${canEdit ? `onclick="toggleConfirm(${p.id})"` : ''}>${p.confirmed ? '已确认' : '待确认'}</span>
       <button type="button" class="badge badge-paid ${DovePayments.status(p)} ${DovePayments.status(p)==='unpaid'?'off':''}" ${canEdit && (DovePayments.status(p)==='unpaid' || isAdminMode) ? `onclick="togglePaid(${p.id})"` : 'disabled'}>${DovePayments.label(p)}</button>
-      ${canEdit ? `<span class="badge badge-cancel" onclick="removeJoined(${p.id})">退出</span>` : ''}
+      <button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'joined')">退出</button>
       ${isAdminMode ? `<button type="button" class="badge" onclick="openAttendance(${p.id})">到场登记</button>` : ''}
     </div>
   ` : `
     <div class="badges">
       ${isAdminMode ? `<span class="badge badge-wait-promote" onclick="promoteOne(${p.id})">补位</span>` : ''}
-      ${canEdit ? `<span class="badge badge-cancel" onclick="removeFromWaitlist(${p.id})">退出</span>` : ''}
+      <button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'waitlist')">退出</button>
     </div>
   `;
 
@@ -1750,6 +1759,21 @@ async function copyPaymentField(id) {
   } catch (error) { input.focus(); input.select(); showToast('请长按复制'); }
 }
 
+function requestExit(id, list) {
+  const person = state[list]?.find(p => p.id === id);
+  if (!person) return;
+  if (!canEditPerson(person)) {
+    const english = window.DoveLanguage?.getLanguage() === 'en';
+    document.getElementById('exitHelpText').textContent = english
+      ? 'This browser cannot verify that this is your registration. Open the original registration browser, or contact the organizer at wangluyi1997@gmail.com with your name and venue to cancel. Do not register again.'
+      : '当前浏览器无法确认这条报名属于你。请使用报名时的原浏览器，或联系管理员 wangluyi1997@gmail.com，提供姓名和场地办理退出，请勿重复报名。';
+    document.getElementById('exitHelpEmail').href = `mailto:wangluyi1997@gmail.com?subject=${encodeURIComponent('Cancel registration / 退出报名')}&body=${encodeURIComponent(`${person.name} · ${ACTIVE_VENUE.name} · ${currentSessionDate()}`)}`;
+    document.getElementById('exitHelpModal').classList.add('open');
+    return;
+  }
+  if (!confirm(window.DoveLanguage?.getLanguage() === 'en' ? `Cancel registration for ${person.name}?` : `确认退出 ${person.name} 的报名？`)) return;
+  if (list === 'joined') removeJoined(id); else removeFromWaitlist(id);
+}
 function removeJoined(id) {
   const idx = state.joined.findIndex(x=>x.id===id);
   if (idx === -1 || !requireOwner(state.joined[idx])) return;

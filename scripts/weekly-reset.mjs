@@ -47,6 +47,7 @@ function cleanPerson(person) {
   return {
     id: person.id ?? null,
     name: globalThis.DovePlayerIdentity.canonicalName(person.name),
+    ownerKey: person.ownerKey || null,
     levelGroup: person.levelGroup || '20_25',
     confirmed: Boolean(person.confirmed),
     paid: globalThis.DovePayments.status(person) === 'received',
