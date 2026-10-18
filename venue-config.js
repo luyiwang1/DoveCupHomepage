@@ -39,5 +39,12 @@
     return `${page}${query ? `?${query}` : ''}`;
   }
 
-  root.DoveVenues = { venues, get, href, keyFromQuery };
+  const resumeFrom = '2026-11-07';
+  function nextSessionDate(now = new Date()) {
+    const local = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit' }).format(now);
+    const date = new Date(`${local}T12:00:00Z`);
+    date.setUTCDate(date.getUTCDate() + (6 - date.getUTCDay() + 7) % 7);
+    return [date.toISOString().slice(0, 10), resumeFrom].sort().at(-1);
+  }
+  root.DoveVenues = { venues, get, href, keyFromQuery, resumeFrom, nextSessionDate };
 })(typeof window !== 'undefined' ? window : globalThis);

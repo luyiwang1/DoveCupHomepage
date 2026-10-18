@@ -8,7 +8,7 @@
 <script src="language.js?v=41"></script>
 <script src="payments.js?v=2"></script>
 <script src="tour-levels.js?v=1"></script>
-<script src="venue-config.js?v=1"></script>
+<script src="venue-config.js?v=2"></script>
 <script src="player-identity.js?v=1"></script>
 <script src="finance-ledger.js?v=2"></script>
 <script src="finance-store.js?v=2"></script>
@@ -790,6 +790,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 </div>
 
 <section class="venue-picker-wrap" aria-label="选择本周场次">
+  <p id="nextSessionNotice" class="payment-notice" data-dove-no-translate></p>
   <div class="venue-picker-label">选择本周场次</div>
   <div class="venue-picker">
     <a class="venue-card" id="venueMrtc" href="signup.html?venue=mrtc">
@@ -1246,6 +1247,11 @@ function render() {
 }
 
 function renderVenuePicker() {
+  const english = window.DoveLanguage?.getLanguage() === 'en';
+  const paused = currentSessionDate() === DoveVenues.resumeFrom;
+  document.getElementById('nextSessionNotice').textContent = english
+    ? `Next session: ${currentSessionDate()}${paused ? ' · No events on October 17, 24 or 31.' : ''}`
+    : `下一场：${currentSessionDate()}${paused ? ' · 10月17日、24日、31日暂停活动。' : ''}`;
   const mrtc = document.getElementById('venueMrtc');
   const nyta = document.getElementById('venueNyta');
   mrtc.href = window.DoveVenues.href('signup.html', 'mrtc', location.search);
@@ -1668,11 +1674,8 @@ function openPayment(id = null) {
   paymentTargetId = id;
   document.getElementById('paymentEmail').value = DovePayments.email;
   const person = state.joined.find(p => p.id === id);
-  const localDate = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const date = new Date(`${localDate}T12:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + (6 - date.getUTCDay() + 7) % 7);
   const namePlaceholder = window.DoveLanguage?.getLanguage() === 'en' ? 'Registration Name' : '报名姓名';
-  document.getElementById('paymentMemo').value = `${person?.name || currentUserName || namePlaceholder} · ${date.toISOString().slice(0,10)} · ${ACTIVE_VENUE.name}`;
+  document.getElementById('paymentMemo').value = `${person?.name || currentUserName || namePlaceholder} · ${currentSessionDate()} · ${ACTIVE_VENUE.name}`;
   document.getElementById('paymentPlan').value = person?.paymentPlan || 'single';
   document.getElementById('paymentPlan').disabled = Boolean(person && DovePayments.status(person) !== 'unpaid');
   document.getElementById('paymentStatusText').textContent = person ? DovePayments.label(person) : '';
@@ -1709,10 +1712,7 @@ async function submitTransfer() {
 }
 
 function currentSessionDate() {
-  const local = new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
-  const date = new Date(`${local}T12:00:00Z`);
-  date.setUTCDate(date.getUTCDate() + (6 - date.getUTCDay() + 7) % 7);
-  return date.toISOString().slice(0, 10);
+  return DoveVenues.nextSessionDate();
 }
 let attendanceTargetId = null;
 function openAttendance(id) {
