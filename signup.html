@@ -5,12 +5,12 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=43"></script>
+<script src="language.js?v=46"></script>
 <script src="payments.js?v=3"></script>
 <script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=2"></script>
 <script src="player-identity.js?v=1"></script>
-<script src="signup-ownership.js?v=1"></script>
+<script src="signup-ownership.js?v=2"></script>
 <script src="phone-tail.js?v=1"></script>
 <script src="finance-ledger.js?v=2"></script>
 <script src="finance-store.js?v=2"></script>
@@ -1594,13 +1594,13 @@ function personCard(p, rank, list) {
     <div class="badges">
       <span class="badge badge-confirm ${p.confirmed ? '' : 'off'}${lockClass}" ${canEdit ? `onclick="toggleConfirm(${p.id})"` : ''}>${p.confirmed ? '已确认' : '待确认'}</span>
       <button type="button" class="badge badge-paid ${DovePayments.status(p)} ${DovePayments.status(p)==='unpaid'?'off':''}" ${canEdit && (DovePayments.status(p)==='unpaid' || isAdminMode) ? `onclick="togglePaid(${p.id})"` : 'disabled'}>${DovePayments.label(p)}</button>
-      <button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'joined')">退出</button>
+      ${canEdit ? `<button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'joined')">${isAdminMode ? '管理员移除' : '退出'}</button>` : ''}
       ${isAdminMode ? `<button type="button" class="badge" onclick="openAttendance(${p.id})">到场登记</button>` : ''}
     </div>
   ` : `
     <div class="badges">
       ${isAdminMode ? `<span class="badge badge-wait-promote" onclick="promoteOne(${p.id})">补位</span>` : ''}
-      <button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'waitlist')">退出</button>
+      ${canEdit ? `<button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'waitlist')">${isAdminMode ? '管理员移除' : '退出'}</button>` : ''}
     </div>
   `;
 

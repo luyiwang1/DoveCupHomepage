@@ -10,6 +10,7 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('管理员移除', '管理员移除', 'Remove as Admin');
   add('选择 MRTC', '选择 MRTC', 'Select MRTC');
   add('选择 NYTA', '选择 NYTA', 'Select NYTA');
   add('周六', '周六', 'Saturday');

@@ -11,9 +11,8 @@
     storage.setItem(key, JSON.stringify([...saved]));
   }
   function owns(person, browserKey, storage, legacyName) {
-    if (!person) return false;
-    if (person.ownerKey) return person.ownerKey === browserKey;
-    return names(storage, legacyName).has(root.DovePlayerIdentity.key(person.name));
+    return Boolean(person && typeof browserKey === 'string' && browserKey
+      && typeof person.ownerKey === 'string' && person.ownerKey === browserKey);
   }
   root.DoveSignupOwnership = { owns, remember };
 })(typeof window !== 'undefined' ? window : globalThis);
