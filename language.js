@@ -10,6 +10,16 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('周六', '周六', 'Saturday');
+  add('MRTC 场次报名', 'MRTC 场次报名', 'Join MRTC');
+  add('NYTA 场次报名', 'NYTA 场次报名', 'Join NYTA');
+  add('选择场地报名', '选择场地报名', 'Choose Your Session');
+  add('金鸽巡回赛 · 选择场次', '金鸽巡回赛 · 选择场次', 'Golden Dove Tour · Choose Your Session');
+  add('多伦多当地时间', '多伦多当地时间', 'Toronto Local Time');
+  add('最多32人', '最多32人', 'Up to 32 Players');
+  add('最多12人', '最多12人', 'Up to 12 Players');
+  add('报名 MRTC', '报名 MRTC', 'Join MRTC');
+  add('报名 NYTA East', '报名 NYTA East', 'Join NYTA East');
   add('手机尾号4位', '手机尾号4位', 'Last 4 Digits of Phone');
   add('请输入手机尾号4位数字', '请输入手机尾号4位数字', 'Enter the last 4 digits of your phone number');
   add('仅填写最后4位，会显示在报名名单中。请勿填写完整手机号；尾号不用于身份验证。', '仅填写最后4位，会显示在报名名单中。请勿填写完整手机号；尾号不用于身份验证。', 'Enter only the last 4 digits. They will appear on the registration list. Do not enter your full number. These digits do not verify your identity.');
