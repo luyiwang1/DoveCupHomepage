@@ -10,6 +10,9 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('手机尾号4位', '手机尾号4位', 'Last 4 Digits of Phone');
+  add('请输入手机尾号4位数字', '请输入手机尾号4位数字', 'Enter the last 4 digits of your phone number');
+  add('仅填写最后4位，会显示在报名名单中。请勿填写完整手机号；尾号不用于身份验证。', '仅填写最后4位，会显示在报名名单中。请勿填写完整手机号；尾号不用于身份验证。', 'Enter only the last 4 digits. They will appear on the registration list. Do not enter your full number. These digits do not verify your identity.');
   add('退出报名', '退出报名', 'Cancel Registration');
   add('联系管理员', '联系管理员', 'Contact Organizer');
   add('使用已有套餐', '使用已有套餐', 'Use Existing Package');

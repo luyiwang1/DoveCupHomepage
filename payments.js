@@ -1,5 +1,5 @@
 (function (root) {
-  const email = 'wangluyi1997@gmail.com';
+  const email = 'GoldenDoveTour@outlook.com';
   const plans = { single: { amount: 40 }, package10: { amount: 350 } };
   function status(person) {
     return ['unpaid', 'pending', 'received', 'package_pending'].includes(person.paymentStatus)

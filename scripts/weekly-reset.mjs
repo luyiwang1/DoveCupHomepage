@@ -2,6 +2,7 @@ import { createHash } from 'node:crypto';
 import { fileURLToPath } from 'node:url';
 import '../player-identity.js';
 import '../payments.js';
+import '../phone-tail.js';
 
 const TIME_ZONE = 'America/Toronto';
 const DEFAULT_DATABASE_URL = 'https://dovecupdatabase-default-rtdb.firebaseio.com/doveCupWaitlistSystem.json';
@@ -48,6 +49,7 @@ function cleanPerson(person) {
     id: person.id ?? null,
     name: globalThis.DovePlayerIdentity.canonicalName(person.name),
     ownerKey: person.ownerKey || null,
+    phoneLast4: globalThis.DovePhoneTail.normalize(person.phoneLast4),
     levelGroup: person.levelGroup || '20_25',
     confirmed: Boolean(person.confirmed),
     paid: globalThis.DovePayments.status(person) === 'received',

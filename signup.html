@@ -5,12 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=42"></script>
-<script src="payments.js?v=2"></script>
+<script src="language.js?v=43"></script>
+<script src="payments.js?v=3"></script>
 <script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=2"></script>
 <script src="player-identity.js?v=1"></script>
 <script src="signup-ownership.js?v=1"></script>
+<script src="phone-tail.js?v=1"></script>
 <script src="finance-ledger.js?v=2"></script>
 <script src="finance-store.js?v=2"></script>
 <script src="site-nav.js?v=2" defer></script>
@@ -893,6 +894,9 @@ body.is-admin .summary-card.admin-only { display: block !important; }
     <div class="modal-handle"></div>
     <div class="modal-title">➕ 添加人员</div>
     <input class="modal-input" id="addName" placeholder="姓名 / 微信名" autocomplete="off">
+    <label for="addPhoneTail">手机尾号4位</label>
+    <input class="modal-input" id="addPhoneTail" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" placeholder="手机尾号4位" required aria-describedby="phoneTailNotice">
+    <p id="phoneTailNotice" class="payment-notice">仅填写最后4位，会显示在报名名单中。请勿填写完整手机号；尾号不用于身份验证。</p>
     <select class="modal-input" id="addLevel">
       <option value="u20">新手场 · 2.5-</option>
       <option value="25_30">2.5-3.0</option>
@@ -912,7 +916,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   <div class="modal-sheet">
     <div class="modal-title" id="exitHelpTitle">退出报名</div>
     <p id="exitHelpText" class="payment-notice" data-dove-no-translate></p>
-    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('exitHelpModal')">关闭</button><a id="exitHelpEmail" class="modal-btn confirm" href="mailto:wangluyi1997@gmail.com">联系管理员</a></div>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('exitHelpModal')">关闭</button><a id="exitHelpEmail" class="modal-btn confirm" href="mailto:GoldenDoveTour@outlook.com">联系管理员</a></div>
   </div>
 </div>
 <div class="modal-overlay" id="paymentModal" onclick="closeModal(event,'paymentModal')" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
@@ -921,7 +925,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
     <div class="payment-details">
       <div><label for="paymentPlan">付款项目</label><select id="paymentPlan" onchange="updatePaymentChoice()"><option value="single">单次 · CAD $40 / 人</option><option value="package10">10次套餐 · CAD $350 / 人</option><option value="use_package">使用已有套餐</option></select></div>
       <p id="packagePaymentNotice" class="payment-notice" hidden>套餐余额由管理员核实。本次无需转账，确认实际到场后才扣1次；报名不扣次。</p>
-      <div><label for="paymentEmail">EMT 收款邮箱</label><div class="payment-copy-row"><input id="paymentEmail" value="wangluyi1997@gmail.com" readonly aria-label="EMT 收款邮箱"><button type="button" onclick="copyPaymentField('paymentEmail')">复制</button></div></div>
+      <div><label for="paymentEmail">EMT 收款邮箱</label><div class="payment-copy-row"><input id="paymentEmail" value="GoldenDoveTour@outlook.com" readonly aria-label="EMT 收款邮箱"><button type="button" onclick="copyPaymentField('paymentEmail')">复制</button></div></div>
       <div><label for="paymentMemo">转账备注</label><div class="payment-copy-row"><input id="paymentMemo" readonly><button type="button" onclick="copyPaymentField('paymentMemo')">复制</button></div></div>
       <p class="payment-notice">到账确认以管理员核对为准。套餐购买与剩余次数由管理员手动记录。</p>
       <strong id="paymentStatusText"></strong>
@@ -1080,6 +1084,7 @@ function enforceTotalCapacityForState(nextState) {
         name: p.name,
         levelGroup: p.levelGroup,
         ownerKey: p.ownerKey,
+        phoneLast4: DovePhoneTail.normalize(p.phoneLast4),
         ts: p.ts || Date.now()
       });
       return false;
@@ -1607,6 +1612,7 @@ function personCard(p, rank, list) {
       <div class="person-name">${safeName}</div>
       ${ownerNote}
       <div class="person-meta">${isJoined ? levelLabelOf(p) : `${levelLabelOf(p)} · 排队中`}</div>
+      ${DovePhoneTail.normalize(p.phoneLast4) ? `<div class="person-meta" data-dove-no-translate>${window.DoveLanguage?.getLanguage() === 'en' ? 'Phone ending' : '手机尾号'} · ${p.phoneLast4}</div>` : ''}
     </div>
     ${badges}
   </div>`;
@@ -1614,9 +1620,11 @@ function personCard(p, rank, list) {
 
 function addPerson(list) {
   const name = DovePlayerIdentity.canonicalName(document.getElementById('addName').value);
+  const phoneLast4 = DovePhoneTail.normalize(document.getElementById('addPhoneTail').value);
   const selectedLevel = document.getElementById('addLevel').value;
   const levelGroup = window.DoveTourLevels.normalize(selectedLevel);
   if (!name) { showToast('请输入姓名'); return; }
+  if (!phoneLast4) { showToast('请输入手机尾号4位数字'); document.getElementById('addPhoneTail').focus(); return; }
   if ([...state.joined, ...state.waitlist].some(p => normalizePersonName(p.name) === normalizePersonName(name))) {
     showToast('你已经在本场次报名或候补名单中');
     return;
@@ -1637,17 +1645,18 @@ function addPerson(list) {
   }
 
   rememberUser(name);
-  const person = { id: newId(), name, levelGroup, ownerKey: currentUserKey, confirmed: false, paid: false, ts: Date.now() };
+  const person = { id: newId(), name, phoneLast4, levelGroup, ownerKey: currentUserKey, confirmed: false, paid: false, ts: Date.now() };
   if (list === 'joined') {
     state.joined.push(person);
     showToast(`${name} 已报名`, 'green');
   } else {
-    state.waitlist.push({ id: person.id, name, levelGroup, ownerKey: currentUserKey, ts: person.ts });
+    state.waitlist.push({ id: person.id, name, phoneLast4, levelGroup, ownerKey: currentUserKey, ts: person.ts });
     showToast(`${name} 已加入 Waitlist`);
   }
 
   closeModalById('addModal');
   document.getElementById('addName').value = '';
+  document.getElementById('addPhoneTail').value = '';
   document.getElementById('addLevel').value = 'u20';
   render();
   switchTab(list === 'joined' ? 'joined' : 'waitlist');
@@ -1765,9 +1774,9 @@ function requestExit(id, list) {
   if (!canEditPerson(person)) {
     const english = window.DoveLanguage?.getLanguage() === 'en';
     document.getElementById('exitHelpText').textContent = english
-      ? 'This browser cannot verify that this is your registration. Open the original registration browser, or contact the organizer at wangluyi1997@gmail.com with your name and venue to cancel. Do not register again.'
-      : '当前浏览器无法确认这条报名属于你。请使用报名时的原浏览器，或联系管理员 wangluyi1997@gmail.com，提供姓名和场地办理退出，请勿重复报名。';
-    document.getElementById('exitHelpEmail').href = `mailto:wangluyi1997@gmail.com?subject=${encodeURIComponent('Cancel registration / 退出报名')}&body=${encodeURIComponent(`${person.name} · ${ACTIVE_VENUE.name} · ${currentSessionDate()}`)}`;
+      ? `This browser cannot verify that this is your registration. Open the original registration browser, or contact the organizer at ${DovePayments.email} with your name and venue to cancel. Do not register again.`
+      : `当前浏览器无法确认这条报名属于你。请使用报名时的原浏览器，或联系管理员 ${DovePayments.email}，提供姓名和场地办理退出，请勿重复报名。`;
+    document.getElementById('exitHelpEmail').href = `mailto:${DovePayments.email}?subject=${encodeURIComponent('Cancel registration / 退出报名')}&body=${encodeURIComponent(`${person.name} · ${ACTIVE_VENUE.name} · ${currentSessionDate()}`)}`;
     document.getElementById('exitHelpModal').classList.add('open');
     return;
   }
@@ -1803,7 +1812,7 @@ function promoteOne(id) {
     return;
   }
   state.waitlist.splice(idx, 1);
-  state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+  state.joined.push({ id: w.id, name: w.name, phoneLast4: DovePhoneTail.normalize(w.phoneLast4), levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
   showToast(`${w.name} 已补位成功`, 'green');
   render();
   switchTab('joined');
@@ -1817,7 +1826,7 @@ function promoteAll() {
   let idx = waitlistIndexForOpenSlot();
   while (idx !== -1 && promoted < slots) {
     const w = state.waitlist.splice(idx, 1)[0];
-    state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+    state.joined.push({ id: w.id, name: w.name, phoneLast4: DovePhoneTail.normalize(w.phoneLast4), levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
     promoted += 1;
     idx = waitlistIndexForOpenSlot();
   }
@@ -1831,7 +1840,7 @@ function autoPromote() {
   const idx = waitlistIndexForOpenSlot();
   if (idx === -1) return;
   const w = state.waitlist.splice(idx, 1)[0];
-  state.joined.push({ id: w.id, name: w.name, levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+  state.joined.push({ id: w.id, name: w.name, phoneLast4: DovePhoneTail.normalize(w.phoneLast4), levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
   showToast(`${w.name} 自动补位成功`, 'green');
 }
 
@@ -1854,6 +1863,7 @@ function setCapacity() {
       name: p.name,
       levelGroup: levelKeyOf(p),
       ownerKey: p.ownerKey,
+      phoneLast4: DovePhoneTail.normalize(p.phoneLast4),
       ts: Date.now()
     })).concat(state.waitlist);
   }

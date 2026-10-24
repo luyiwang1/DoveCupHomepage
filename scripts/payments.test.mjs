@@ -33,7 +33,7 @@ test('owner submits pending payment and only an admin can confirm it', () => {
 test('packages cost 350 and legacy paid records retain their state', () => {
   assert.equal(pay.submit({ paid: false }, 'package10', true).paymentAmount, 350);
   assert.equal(pay.status({ paid: true }), 'received');
-  assert.equal(pay.email, 'wangluyi1997@gmail.com');
+  assert.equal(pay.email, 'GoldenDoveTour@outlook.com');
 });
 test('archives preserve pending payment details without marking them received', () => {
   const person = pay.submit({ id: 1, name: 'Han M' }, 'package10', true, 100);
