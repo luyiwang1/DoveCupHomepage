@@ -9,4 +9,8 @@ test('homepage exposes both venue times and independent signup links before spec
   assert.ok(html.includes('9:00–11:00 PM'));
   assert.ok(html.includes('href="#sessions"'));
   assert.ok(html.includes('DoveVenues.nextSessionDate()'));
+  assert.ok(html.includes('class="session-city">Aurora'));
+  assert.ok(html.includes('class="session-city">North York'));
+  assert.ok(html.includes('选择 MRTC'));
+  assert.ok(html.includes('选择 NYTA'));
 });

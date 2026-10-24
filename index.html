@@ -19,7 +19,7 @@
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
 <link rel="stylesheet" href="gallery.css?v=3">
-<script src="language.js?v=44"></script>
+<script src="language.js?v=45"></script>
 <script src="venue-config.js?v=2"></script>
 <script src="site-nav.js?v=2" defer></script>
 <title>金鸽杯 Golden Dove Cup</title>
@@ -118,13 +118,14 @@ section{padding:clamp(58px,8vw,108px) clamp(18px,5vw,72px)}
 .session-option{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:14px 24px;align-items:center;padding:24px 32px 24px 0;min-width:0}
 .session-option+.session-option{border-left:1px solid #ffffff24;padding-left:32px;padding-right:0}
 .session-option h3{font-family:Georgia,"Times New Roman",serif;font-size:29px;line-height:1.15;margin:0 0 12px;font-weight:400;color:#f4f0e4}
+.session-city{display:block;margin:0 0 7px;font:500 12px/1.4 Arial,"Microsoft YaHei",sans-serif;color:#d6c58e}
 .session-time{display:flex;align-items:baseline;flex-wrap:wrap;gap:8px;font:400 18px/1.4 Arial,"Microsoft YaHei",sans-serif;font-variant-numeric:tabular-nums;color:#d6ded7}
 .session-time small{font-size:11px;color:#9eafa4}
 .session-capacity{margin:7px 0 0;font:11px/1.5 Arial,"Microsoft YaHei",sans-serif;color:#9eafa4}
-.session-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:10px 0;background:transparent;color:#d6c58e;border:0;border-bottom:1px solid #b7aa7166;border-radius:0;font:500 12px/1.4 Arial,"Microsoft YaHei",sans-serif;white-space:nowrap;transition:color .2s,border-color .2s}
-.session-link:hover{color:#fff;border-color:#e2d3a3}
+.session-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 16px;background:#d6c58e;color:#132b20;border:1px solid #d6c58e;border-radius:3px;font:600 12px/1.4 Arial,"Microsoft YaHei",sans-serif;white-space:nowrap;transition:background-color .2s,border-color .2s}
+.session-link:hover{background:#e7d9ad;border-color:#e7d9ad}
 .session-link:focus-visible{outline:2px solid #9b8146;outline-offset:4px}
-@media(max-width:700px){.sessions{padding-top:12px;padding-bottom:18px}.session-options{grid-template-columns:1fr}.session-option,.session-option+.session-option{padding:18px 0;border-left:0;gap:12px}.session-option+.session-option{border-top:1px solid #ffffff24}.session-option h3{font-size:25px;margin-bottom:9px}.session-time{display:block;font-size:17px;white-space:nowrap}.session-time small{display:block;font-size:10px;margin-bottom:4px}.session-link{font-size:11px;padding:10px 0}.sessions-heading h2{font-size:14px}.sessions-heading{margin-bottom:12px}.sessions-heading p{font-size:10px}}
+@media(max-width:700px){.sessions{padding-top:12px;padding-bottom:18px}.session-options{grid-template-columns:1fr}.session-option,.session-option+.session-option{padding:14px 0;border-left:0;gap:12px}.session-option+.session-option{border-top:1px solid #ffffff24}.session-option h3{font-size:25px;margin-bottom:9px}.session-city{font-size:11px;margin-bottom:5px}.session-time{display:block;font-size:17px;white-space:nowrap}.session-time small{display:block;font-size:10px;margin-bottom:4px}.session-link{font-size:11px;padding:10px 12px}.sessions-heading h2{font-size:14px}.sessions-heading{margin-bottom:12px}.sessions-heading p{font-size:10px}}
 .kicker{color:var(--clay);font-size:12px;font-weight:900;letter-spacing:.18em;text-transform:uppercase}
 .events{padding-top:clamp(24px,3vw,38px);padding-bottom:clamp(40px,5vw,64px);color:var(--ink);background:#e8d7b4}.events-head{display:flex;align-items:flex-end;justify-content:space-between;gap:20px}.events-head h2{max-width:920px;margin:8px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(34px,3.7vw,46px);font-weight:500;line-height:1}.all-events{padding-bottom:7px;color:var(--green);font-size:10px;font-weight:900;letter-spacing:.1em;text-transform:uppercase;border-bottom:1px solid var(--green)}
 .event-feature{display:grid;grid-template-columns:180px minmax(0,1.1fr) minmax(250px,.65fr);margin-top:20px;border:1px solid var(--line);background:#fff8e7}.event-date{display:grid;align-content:space-between;min-height:260px;padding:22px;color:var(--ivory);background:#9c3f32}.event-date strong{font-family:Georgia,"Times New Roman",serif;font-size:60px;font-weight:500;line-height:.8}.event-date span{font-size:9px;font-weight:900;letter-spacing:.13em;text-transform:uppercase}.event-main{padding:clamp(22px,2.8vw,32px)}.event-main .status{display:inline-flex;padding:5px 8px;font-size:9px;font-weight:900;letter-spacing:.08em}.event-main .status-upcoming{color:#8c2f27;background:#f3d8d3}.event-main .status-live{color:#155c36;background:#d9eadf}.event-main .status-ended{color:#24577d;background:#dbe8f1}.event-main h3{margin:16px 0 9px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(32px,3.8vw,48px);font-weight:500}.event-main p{max-width:650px;margin:0;color:rgba(23,36,30,.7);font-size:14px;line-height:1.65}.event-meta{display:grid;align-content:center;gap:1px;background:var(--line);border-left:1px solid var(--line)}.event-meta div{padding:13px 17px;background:#fffaf0}.event-meta span{display:block;color:var(--clay);font-size:8px;font-weight:900;letter-spacing:.12em;text-transform:uppercase}.event-meta strong{display:block;margin-top:5px;font-family:Georgia,"Times New Roman",serif;font-size:17px;font-weight:500}.event-cta{display:inline-flex;justify-content:center;margin-top:6px;padding:11px 14px;color:var(--ivory);background:var(--green);font-size:10px;font-weight:900;letter-spacing:.08em;text-transform:uppercase}
@@ -219,12 +220,12 @@ body *{letter-spacing:0!important}
   <div class="sessions-heading"><h2 id="sessionsTitle">金鸽巡回赛 · 选择场次</h2><p><span>多伦多当地时间</span> · <span id="homeSessionDate" data-dove-no-translate></span></p></div>
   <div class="session-options">
     <article class="session-option">
-      <div><h3>MRTC</h3><strong class="session-time"><small>周六</small>5:00–7:00 PM</strong><p class="session-capacity">最多32人</p></div>
-      <a class="session-link" href="signup.html?venue=mrtc"><span>MRTC 场次报名</span>&nbsp;&#8599;</a>
+      <div><span class="session-city">Aurora</span><h3>MRTC</h3><strong class="session-time"><small>周六</small>5:00–7:00 PM</strong><p class="session-capacity">最多32人</p></div>
+      <a class="session-link" href="signup.html?venue=mrtc"><span>选择 MRTC</span>&nbsp;&#8594;</a>
     </article>
     <article class="session-option">
-      <div><h3>NYTA East Bubble</h3><strong class="session-time"><small>周六</small>9:00–11:00 PM</strong><p class="session-capacity">最多12人</p></div>
-      <a class="session-link" href="signup.html?venue=nyta-east"><span>NYTA 场次报名</span>&nbsp;&#8599;</a>
+      <div><span class="session-city">North York</span><h3>NYTA East Bubble</h3><strong class="session-time"><small>周六</small>9:00–11:00 PM</strong><p class="session-capacity">最多12人</p></div>
+      <a class="session-link" href="signup.html?venue=nyta-east"><span>选择 NYTA</span>&nbsp;&#8594;</a>
     </article>
   </div>
 </section>
