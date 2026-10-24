@@ -5,13 +5,13 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=46"></script>
+<script src="language.js?v=47"></script>
 <script src="payments.js?v=3"></script>
 <script src="tour-levels.js?v=1"></script>
 <script src="venue-config.js?v=2"></script>
 <script src="player-identity.js?v=1"></script>
 <script src="signup-ownership.js?v=2"></script>
-<script src="phone-tail.js?v=1"></script>
+<script src="phone-tail.js?v=2"></script>
 <script src="finance-ledger.js?v=2"></script>
 <script src="finance-store.js?v=3"></script>
 <script src="site-nav.js?v=2" defer></script>
@@ -912,6 +912,17 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 </div>
 
 <!-- Edit title modal -->
+<div class="modal-overlay" id="editPhoneTailModal" onclick="closeModal(event,'editPhoneTailModal')" role="dialog" aria-modal="true" aria-labelledby="editPhoneTailTitle">
+  <form class="modal-sheet" onsubmit="event.preventDefault();savePhoneTail()">
+    <div class="modal-title" id="editPhoneTailTitle">补填手机尾号</div>
+    <p id="editPhoneTailName" data-dove-no-translate></p>
+    <label for="editPhoneTailInput">手机尾号4位</label>
+    <input class="modal-input" id="editPhoneTailInput" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required aria-describedby="editPhoneTailNotice editPhoneTailError">
+    <p class="payment-notice" id="editPhoneTailNotice">仅填写最后4位，会显示在报名名单中。请勿填写完整手机号；尾号不用于身份验证。</p>
+    <p id="editPhoneTailError" role="alert" data-dove-no-translate></p>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('editPhoneTailModal')">取消</button><button type="submit" class="modal-btn confirm" id="savePhoneTailButton">保存</button></div>
+  </form>
+</div>
 <div class="modal-overlay" id="exitHelpModal" onclick="closeModal(event,'exitHelpModal')" role="dialog" aria-modal="true" aria-labelledby="exitHelpTitle">
   <div class="modal-sheet">
     <div class="modal-title" id="exitHelpTitle">退出报名</div>
@@ -1590,8 +1601,10 @@ function personCard(p, rank, list) {
   const canEdit = canEditPerson(p);
   const lockClass = canEdit ? '' : ' locked';
   const ownerNote = ownsPerson(p) ? '<div class="owner-note">这是你</div>' : '';
+  const phoneEdit = canEdit ? `<button type="button" class="badge" onclick="openPhoneTail(${p.id},'${list}')">${DovePhoneTail.normalize(p.phoneLast4) ? '修改尾号' : '补填手机尾号'}</button>` : '';
   const badges = isJoined ? `
     <div class="badges">
+      ${phoneEdit}
       <span class="badge badge-confirm ${p.confirmed ? '' : 'off'}${lockClass}" ${canEdit ? `onclick="toggleConfirm(${p.id})"` : ''}>${p.confirmed ? '已确认' : '待确认'}</span>
       <button type="button" class="badge badge-paid ${DovePayments.status(p)} ${DovePayments.status(p)==='unpaid'?'off':''}" ${canEdit && (DovePayments.status(p)==='unpaid' || isAdminMode) ? `onclick="togglePaid(${p.id})"` : 'disabled'}>${DovePayments.label(p)}</button>
       ${canEdit ? `<button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'joined')">${isAdminMode ? '管理员移除' : '退出'}</button>` : ''}
@@ -1599,6 +1612,7 @@ function personCard(p, rank, list) {
     </div>
   ` : `
     <div class="badges">
+      ${phoneEdit}
       ${isAdminMode ? `<span class="badge badge-wait-promote" onclick="promoteOne(${p.id})">补位</span>` : ''}
       ${canEdit ? `<button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'waitlist')">${isAdminMode ? '管理员移除' : '退出'}</button>` : ''}
     </div>
@@ -1612,12 +1626,57 @@ function personCard(p, rank, list) {
       <div class="person-name">${safeName}</div>
       ${ownerNote}
       <div class="person-meta">${isJoined ? levelLabelOf(p) : `${levelLabelOf(p)} · 排队中`}</div>
-      ${DovePhoneTail.normalize(p.phoneLast4) ? `<div class="person-meta" data-dove-no-translate>${window.DoveLanguage?.getLanguage() === 'en' ? 'Phone ending' : '手机尾号'} · ${p.phoneLast4}</div>` : ''}
+      <div class="person-meta" data-dove-no-translate>${DovePhoneTail.normalize(p.phoneLast4) ? `${window.DoveLanguage?.getLanguage() === 'en' ? 'Phone ending' : '手机尾号'} · ${p.phoneLast4}` : (window.DoveLanguage?.getLanguage() === 'en' ? 'Phone ending: not provided' : '手机尾号：待补填')}</div>
     </div>
     ${badges}
   </div>`;
 }
 
+let phoneTailTarget = null;
+let phoneTailSaving = false;
+function openPhoneTail(id, list) {
+  if (!['joined', 'waitlist'].includes(list)) return;
+  const person = state[list].find(p => p.id === id);
+  if (!person || !requireOwner(person)) return;
+  phoneTailTarget = { id, list };
+  document.getElementById('editPhoneTailName').textContent = `${person.name} · ${ACTIVE_VENUE.name}`;
+  document.getElementById('editPhoneTailInput').value = DovePhoneTail.normalize(person.phoneLast4) || '';
+  document.getElementById('editPhoneTailError').textContent = '';
+  document.getElementById('editPhoneTailModal').classList.add('open');
+  document.getElementById('editPhoneTailInput').focus();
+}
+async function savePhoneTail() {
+  if (!phoneTailTarget || phoneTailSaving) return;
+  const { id, list } = phoneTailTarget;
+  const person = state[list].find(p => p.id === id);
+  if (!person || !requireOwner(person)) return;
+  const english = window.DoveLanguage?.getLanguage() === 'en';
+  const tail = DovePhoneTail.normalize(document.getElementById('editPhoneTailInput').value);
+  if (!tail) { document.getElementById('editPhoneTailError').textContent = english ? 'Enter exactly 4 digits.' : '请输入手机尾号4位数字'; return; }
+  phoneTailSaving = true;
+  document.getElementById('savePhoneTailButton').disabled = true;
+  try {
+    if (remoteRef) {
+      if (!remoteReady) throw new Error(english ? 'Wait for the registration list to finish loading.' : '请等待报名名单同步完成');
+      const result = await remoteRef.transaction(data => {
+        const people = data?.state?.[list];
+        if (!Array.isArray(people)) return;
+        const index = people.findIndex(p => p?.id === id);
+        if (index < 0 || !canEditPerson(people[index])) return;
+        people[index] = DovePhoneTail.updatePerson(people[index], tail, true);
+        data.updatedAt = Date.now();
+        return data;
+      });
+      if (!result.committed) throw new Error(english ? 'Registration changed. Refresh and try again.' : '报名记录已变动，请刷新后重试');
+    } else {
+      Object.assign(person, DovePhoneTail.updatePerson(person, tail, canEditPerson(person)));
+      render();
+    }
+    closeModalById('editPhoneTailModal');
+    showToast(english ? 'Phone ending saved' : '手机尾号已保存', 'green');
+  } catch (error) { document.getElementById('editPhoneTailError').textContent = error.message; }
+  finally { phoneTailSaving = false; document.getElementById('savePhoneTailButton').disabled = false; }
+}
 function addPerson(list) {
   const name = DovePlayerIdentity.canonicalName(document.getElementById('addName').value);
   const phoneLast4 = DovePhoneTail.normalize(document.getElementById('addPhoneTail').value);

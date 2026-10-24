@@ -11,3 +11,10 @@ test('archives only valid tails for joined and waitlisted players', () => {
   assert.equal(result.data.signupHistory['2026-11-07'].joined[0].phoneLast4,'0012');
   assert.equal(result.data.signupHistory['2026-11-07'].waitlist[0].phoneLast4,null);
 });
+test('editing a phone ending preserves all signup and payment fields and requires permission', () => {
+  const person = {id:7,name:'Han M',ownerKey:'owner',ts:123,paymentStatus:'received',paymentAmount:350,paymentPlan:'package10',confirmed:true};
+  assert.deepEqual(globalThis.DovePhoneTail.updatePerson(person,'0012',true),{...person,phoneLast4:'0012'});
+  assert.equal(person.phoneLast4,undefined);
+  assert.throws(()=>globalThis.DovePhoneTail.updatePerson(person,'0012',false));
+  assert.throws(()=>globalThis.DovePhoneTail.updatePerson(person,'4165551234',true));
+});
