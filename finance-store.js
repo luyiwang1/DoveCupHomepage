@@ -54,5 +54,19 @@
     return navigator.locks ? navigator.locks.request(KEY, save) : save();
   }
   function resetBackup() { const raw = localStorage.getItem(BACKUP_KEY); return raw ? JSON.parse(raw) : null; }
-  root.DoveFinanceStore = { read, add, recordPayment, restore, resetFinance, resetBackup, key: KEY };
+  async function cleanupTestMembers() {
+    const save = () => {
+      const entries = read();
+      const removed = entries.filter(row => ['小王', 'test'].includes(String(row.name).trim().toLowerCase()));
+      if (!removed.length) return 0;
+      const ids = new Set(removed.map(row => row.id));
+      const next = root.DoveFinance.validate(entries.filter(row => !ids.has(row.id) && !ids.has(row.reverses)));
+      localStorage.setItem(`dove_finance_test_cleanup_backup_${Date.now()}`, JSON.stringify({ format: 'dove-finance-v1', exportedAt: new Date().toISOString(), entries }));
+      localStorage.setItem(KEY, JSON.stringify(next));
+      root.dispatchEvent(new Event('dove:financechange'));
+      return entries.length - next.length;
+    };
+    return navigator.locks ? navigator.locks.request(KEY, save) : save();
+  }
+  root.DoveFinanceStore = { read, add, recordPayment, restore, resetFinance, resetBackup, cleanupTestMembers, key: KEY };
 })(window);

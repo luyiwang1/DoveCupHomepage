@@ -197,5 +197,8 @@
   for (const name of ['dove:languagechange', 'dove:financechange', 'storage']) window.addEventListener(name, render);
   $('entryDate').value = today(); $('filterDate').value = today();
   render();
+  if (admin()) store.cleanupTestMembers().then(count => {
+    if (count) { selected = ''; render(); message(text('已清理小王和test的测试记录，清理前账本已在本机备份。', 'Removed test records for 小王 and test. A local backup was saved first.')); }
+  }).catch(error => message(error.message));
   if (location.hash === '#reset-finance' && admin()) $('resetFinanceDialog').showModal();
 })();

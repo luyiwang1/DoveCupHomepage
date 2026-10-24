@@ -90,4 +90,13 @@ test('local receipt imports are idempotent and never infer unknown historic amou
   assert.equal(root.DoveFinanceStore.read().length, 1);
   await root.DoveFinanceStore.recordPayment({ ...person, id: 4, paymentVerifiedAt: Date.now() + 1000 }, context);
   assert.equal(ledger.summary(root.DoveFinanceStore.read(), 'Han').remaining, 10);
+  await root.DoveFinanceStore.add(row('test-payment', { name:'test', plan:'single', amount:40 }));
+  await root.DoveFinanceStore.add(row('wang-payment', { name:'小王' }));
+  await root.DoveFinanceStore.add(row('not-test', { name:'Test Player', plan:'single', amount:40 }));
+  const hanBefore = ledger.summary(root.DoveFinanceStore.read(), 'Han').received;
+  assert.equal(await root.DoveFinanceStore.cleanupTestMembers(), 2);
+  assert.equal(await root.DoveFinanceStore.cleanupTestMembers(), 0);
+  assert.equal(ledger.summary(root.DoveFinanceStore.read(), 'Han').received, hanBefore);
+  assert.equal(ledger.summary(root.DoveFinanceStore.read(), 'Test Player').received, 40);
+  assert.ok([...values.keys()].some(key => key.startsWith('dove_finance_test_cleanup_backup_')));
 });
