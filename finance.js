@@ -10,7 +10,7 @@
   const venue = key => key === 'nyta-east' ? 'NYTA East Bubble' : 'MRTC';
   const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const admin = () => sessionStorage.getItem('signup_is_admin') === '1';
-  let demo = false, demoRows = [], selected = '', view = 'members', currentRows = [];
+  let demo = false, demoRows = [], selected = '', view = 'members', currentRows = [], syncing = false;
 
   function makeDemo() {
     let rows = [];
@@ -47,7 +47,7 @@
     $('gate').hidden = allowed;
     $('workspace').hidden = !allowed;
     $('exportButton').disabled = !admin() || demo;
-    $('importPayments').disabled = !admin() || demo;
+    $('importPayments').disabled = !admin() || demo || syncing;
     $('restoreButton').disabled = !admin() || demo;
     $('resetFinanceButton').disabled = !admin() || demo;
     $('resetBackupButton').disabled = !admin() || demo || !store.resetBackup();
@@ -155,8 +155,9 @@
   };
   $('resetBackupButton').onclick = () => { const backup = store.resetBackup(); if (backup) download(backup, `dove-finance-before-reset-${today()}.json`); };
   $('restoreButton').onclick = () => $('restoreFile').click();
-  $('importPayments').onclick = async () => {
-    if (!admin() || demo) return;
+  async function syncVerifiedReceipts() {
+    if (!admin() || demo || syncing) return;
+    syncing = true;
     $('importPayments').disabled = true;
     try {
       const base = 'https://dovecupdatabase-default-rtdb.firebaseio.com/doveCupWaitlistSystem/';
@@ -166,21 +167,29 @@
         return response.json();
       };
       const [mrtc, nyta, history] = await Promise.all([read('main'), read('venues/nyta-east/main'), read('signupHistory')]);
-      const date = new Date(`${today()}T12:00:00Z`);
-      date.setUTCDate(date.getUTCDate() + (6 - date.getUTCDay() + 7) % 7);
+      const date = window.DoveVenues.nextSessionDate();
       const sources = [
-        { venueKey: 'mrtc', date: date.toISOString().slice(0,10), people: mrtc?.state?.joined },
-        { venueKey: 'nyta-east', date: date.toISOString().slice(0,10), people: nyta?.state?.joined },
+        { venueKey: 'mrtc', date, people: mrtc?.state?.joined },
+        { venueKey: 'nyta-east', date, people: nyta?.state?.joined },
         ...Object.values(history || {}).map(archive => ({ venueKey: archive.venueKey || 'mrtc', date: archive.resetId, people: archive.joined }))
       ];
+      const before = store.read().length;
+      let excludedByReset = 0, unknown = 0;
+      const cutoff = Number(localStorage.getItem('dove_finance_start_at') || 0);
       for (const source of sources) for (const person of source.people || []) {
-        if (person.paymentStatus === 'received' && person.paymentVerifiedAt && person.paymentAmount) await store.recordPayment(person, { date: person.paymentEventDate || source.date, venueKey: source.venueKey });
+        if (['小王', 'test'].includes(String(person.name).trim().toLowerCase())) continue;
+        if (person.paymentStatus !== 'received' && !person.paid) continue;
+        if (!person.paymentVerifiedAt || !Number(person.paymentAmount)) { unknown++; continue; }
+        if (Number(person.paymentVerifiedAt) <= cutoff) { excludedByReset++; continue; }
+        await store.recordPayment(person, { date: person.paymentEventDate || source.date, venueKey: source.venueKey });
       }
-      message(text('已同步可核实的收款记录，旧金额不推算。', 'Verified receipts synced. Unknown historical amounts are not estimated.'));
+      const added = store.read().length - before;
+      message(text(`收款同步完成：新增${added}笔；清零前记录跳过${excludedByReset}笔；缺少金额或核实时间的旧记录${unknown}笔，不计入实收。`, `Receipts synced: ${added} added; ${excludedByReset} excluded by your reset; ${unknown} historical records lack an amount or verification time and are not counted.`));
       render();
     } catch (error) { message(error.message); }
-    finally { $('importPayments').disabled = false; }
-  };
+    finally { syncing = false; render(); }
+  }
+  $('importPayments').onclick = syncVerifiedReceipts;
   $('restoreFile').addEventListener('change', async event => {
     const file = event.target.files[0];
     if (!file || !admin() || demo) return;
@@ -197,8 +206,9 @@
   for (const name of ['dove:languagechange', 'dove:financechange', 'storage']) window.addEventListener(name, render);
   $('entryDate').value = today(); $('filterDate').value = today();
   render();
-  if (admin()) store.cleanupTestMembers().then(count => {
-    if (count) { selected = ''; render(); message(text('已清理小王和test的测试记录，清理前账本已在本机备份。', 'Removed test records for 小王 and test. A local backup was saved first.')); }
+  if (admin()) store.cleanupTestMembers().then(async count => {
+    if (count) { selected = ''; render(); }
+    await syncVerifiedReceipts();
   }).catch(error => message(error.message));
   if (location.hash === '#reset-finance' && admin()) $('resetFinanceDialog').showModal();
 })();
