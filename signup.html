@@ -293,9 +293,10 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   padding: 12px 14px;
   margin-bottom: 8px;
   box-shadow: var(--shadow);
-  display: flex;
-  align-items: center;
-  gap: 12px;
+  display: grid;
+  grid-template-columns: 22px 38px minmax(0,1fr);
+  align-items: start;
+  gap: 10px;
   transition: transform 0.15s, opacity 0.15s;
   position: relative;
   overflow: hidden;
@@ -332,15 +333,22 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   flex-shrink: 0;
   color: white;
 }
-.person-info { flex: 1; min-width: 0; }
+.person-info { min-width: 0; }
 .person-name {
   font-size: 15px;
   font-weight: 600;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  overflow-wrap: anywhere;
 }
 .person-meta { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+.person-card>.rank-num{padding-top:10px}
+.person-card>.avatar{margin-top:3px}
+.person-status{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px}
+.person-status .badge{min-height:32px;border-radius:4px;padding:5px 9px}
+.person-status .badge:disabled{opacity:1;cursor:default}
+.person-actions{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;padding-top:10px;border-top:1px solid var(--gray-200)}
+.person-actions .badge{display:flex;justify-content:center;align-items:center;min-height:40px;white-space:normal;overflow-wrap:anywhere;padding:7px 8px;border-radius:4px;line-height:1.4;background:#f4f6f4;color:#344c3d;border:1px solid #dce3dd}
+.person-actions .badge-cancel{background:transparent;color:#ad4848;border-color:#ead9d9}
 
 /* ── Status badges ── */
 .badges {
@@ -1599,24 +1607,18 @@ function personCard(p, rank, list) {
   const isJoined = list === 'joined';
   const safeName = escapeHtml(p.name);
   const canEdit = canEditPerson(p);
-  const lockClass = canEdit ? '' : ' locked';
   const ownerNote = ownsPerson(p) ? '<div class="owner-note">这是你</div>' : '';
   const phoneEdit = canEdit ? `<button type="button" class="badge" onclick="openPhoneTail(${p.id},'${list}')">${DovePhoneTail.normalize(p.phoneLast4) ? '修改尾号' : '补填手机尾号'}</button>` : '';
-  const badges = isJoined ? `
-    <div class="badges">
-      ${phoneEdit}
-      <span class="badge badge-confirm ${p.confirmed ? '' : 'off'}${lockClass}" ${canEdit ? `onclick="toggleConfirm(${p.id})"` : ''}>${p.confirmed ? '已确认' : '待确认'}</span>
+  const statuses = isJoined ? `
+    <div class="person-status">
+      <button type="button" class="badge badge-confirm ${p.confirmed ? '' : 'off'}" ${canEdit ? `onclick="toggleConfirm(${p.id})"` : 'disabled'}>${p.confirmed ? '已确认' : '待确认'}</button>
       <button type="button" class="badge badge-paid ${DovePayments.status(p)} ${DovePayments.status(p)==='unpaid'?'off':''}" ${canEdit && (DovePayments.status(p)==='unpaid' || isAdminMode) ? `onclick="togglePaid(${p.id})"` : 'disabled'}>${DovePayments.label(p)}</button>
-      ${canEdit ? `<button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'joined')">${isAdminMode ? '管理员移除' : '退出'}</button>` : ''}
-      ${isAdminMode ? `<button type="button" class="badge" onclick="openAttendance(${p.id})">到场登记</button>` : ''}
-    </div>
-  ` : `
-    <div class="badges">
+    </div>` : '';
+  const actions = canEdit ? `<div class="person-actions">
       ${phoneEdit}
-      ${isAdminMode ? `<span class="badge badge-wait-promote" onclick="promoteOne(${p.id})">补位</span>` : ''}
-      ${canEdit ? `<button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'waitlist')">${isAdminMode ? '管理员移除' : '退出'}</button>` : ''}
-    </div>
-  `;
+      ${isAdminMode ? isJoined ? `<button type="button" class="badge" onclick="openAttendance(${p.id})">到场登记</button>` : `<button type="button" class="badge badge-wait-promote" onclick="promoteOne(${p.id})">补位</button>` : ''}
+      <button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'${list}')">${isAdminMode ? '管理员移除' : '退出'}</button>
+    </div>` : '';
 
   return `
   <div class="person-card" id="card-${p.id}" ontouchstart="" >
@@ -1627,8 +1629,9 @@ function personCard(p, rank, list) {
       ${ownerNote}
       <div class="person-meta">${isJoined ? levelLabelOf(p) : `${levelLabelOf(p)} · 排队中`}</div>
       <div class="person-meta" data-dove-no-translate>${DovePhoneTail.normalize(p.phoneLast4) ? `${window.DoveLanguage?.getLanguage() === 'en' ? 'Phone ending' : '手机尾号'} · ${p.phoneLast4}` : (window.DoveLanguage?.getLanguage() === 'en' ? 'Phone ending: not provided' : '手机尾号：待补填')}</div>
+      ${statuses}
     </div>
-    ${badges}
+    ${actions}
   </div>`;
 }
 
