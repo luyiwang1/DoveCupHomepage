@@ -125,13 +125,14 @@ section{padding:clamp(58px,8vw,108px) clamp(18px,5vw,72px)}
 .session-link{display:inline-flex;align-items:center;justify-content:center;min-height:44px;padding:11px 16px;background:#d6c58e;color:#132b20;border:1px solid #d6c58e;border-radius:3px;font:600 12px/1.4 Arial,"Microsoft YaHei",sans-serif;white-space:nowrap;transition:background-color .2s,border-color .2s}
 .session-link:hover{background:#e7d9ad;border-color:#e7d9ad}
 .session-link:focus-visible{outline:2px solid #9b8146;outline-offset:4px}
-.moments-content{display:grid;grid-template-columns:minmax(0,1fr) 230px;gap:28px;max-width:1320px;margin:0 auto;align-items:start}
+.moments-content{display:grid;grid-template-columns:minmax(0,1fr) 244px;gap:28px;max-width:1320px;margin:0 auto;align-items:start}
 .moments-content>#featuredGallery{min-width:0;width:100%}
 .moments .welcome-gift{display:grid;grid-template-columns:minmax(0,1fr);align-items:start;gap:15px;padding:0 0 0 24px;margin:0;border-left:1px solid #ffffff24;scroll-margin-top:100px}
 .gift-preview{position:relative;display:block;width:100%;aspect-ratio:9/16;padding:0;border:1px solid #ffffff28;border-radius:4px;overflow:hidden;background:#142e23;cursor:pointer;grid-row:2}
 .gift-preview img{display:block;width:100%;height:100%;object-fit:cover}
 .gift-play{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);display:grid;place-items:center;width:54px;height:54px;padding-left:3px;border:1px solid #fff9;border-radius:50%;background:#0b2118b8;color:#fff;font-size:21px}
 .gift-copy{min-width:0;grid-row:1}.gift-copy h3{margin:0;font-size:27px;font-weight:400;line-height:1.25}
+@media(min-width:851px){.gift-copy{min-height:126px}.gift-preview{height:clamp(237.5px,30vw,387.5px);width:auto;max-width:100%;justify-self:center}.gift-watch{justify-self:stretch;text-align:center}}
 .gift-watch{padding:8px 0;border:0;border-bottom:1px solid #b7aa7180;background:transparent;color:#d6c58e;cursor:pointer;font-size:13px;min-height:44px}
 .gift-preview:focus-visible,.gift-watch:focus-visible{outline:2px solid #d6c58e;outline-offset:4px}
 .gift-dialog{max-width:calc(100vw - 24px);max-height:calc(100dvh - 24px);width:390px;padding:0;margin:auto;overflow:auto;border:1px solid #ffffff38;border-radius:6px;background:#10261d;color:#fff}
@@ -358,6 +359,21 @@ body *{letter-spacing:0!important}
   target.innerHTML=`<article class="event-feature"><div class="event-date"><span>${clean(event.dateLabel)}</span><strong>${day}</strong><span>${month} · 2026</span></div><div class="event-main"><span class="status ${statusClass}">${clean(status)}</span><h3>${clean(event.title)}</h3><p>${clean(event.summary)}</p></div><div class="event-meta"><div><span>Venue</span><strong>${clean(event.venue)}</strong></div><div><span>Format</span><strong>${clean(event.format)}</strong></div><div><a class="event-cta" href="${clean(event.href)}">进入活动页面</a></div></div></article>`;
 }());
 window.DoveMoments.mountCarousel('featuredGallery');
+(function alignMomentsMedia(){
+  const gallery=document.getElementById('featuredGallery'),gift=document.getElementById('welcome-gift');
+  function align(){
+    const copy=gift.querySelector('.gift-copy'),preview=gift.querySelector('.gift-preview');
+    const photo=gallery.querySelector('.moment-slide');
+    if(window.innerWidth<=850||!photo){copy.style.minHeight='';preview.style.height='';return;}
+    const top=gift.getBoundingClientRect().top,box=photo.getBoundingClientRect();
+    copy.style.minHeight=`${Math.max(0,box.top-top-15)}px`;
+    preview.style.height=`${box.height}px`;
+  }
+  if(typeof ResizeObserver==='function'){const observer=new ResizeObserver(align);observer.observe(gallery);}
+  window.addEventListener('resize',align);
+  window.addEventListener('dove:languagechange',()=>requestAnimationFrame(align));
+  requestAnimationFrame(align);
+}());
 function renderHomeSessionDate(){
   const english=window.DoveLanguage?.getLanguage()==='en';
   document.getElementById('homeSessionDate').textContent=`${english?'Next session':'下一场'}: ${DoveVenues.nextSessionDate()}`;
