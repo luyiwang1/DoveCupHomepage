@@ -10,6 +10,13 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('新人礼包', '新人礼包', 'Newcomer Welcome Gift');
+  add('金鸽杯球员礼盒，打开看看。', '金鸽杯球员礼盒，打开看看。', 'A closer look inside the Golden Dove Cup player gift box.');
+  add('观看礼盒开箱', '观看礼盒开箱', 'Watch the Unboxing');
+  add('新人礼包 · 礼盒开箱', '新人礼包 · 礼盒开箱', 'Welcome Gift · Unboxing');
+  add('播放新人礼包开箱视频', '播放新人礼包开箱视频', 'Play the welcome gift unboxing video');
+  add('金鸽杯球员礼盒', '金鸽杯球员礼盒', 'Golden Dove Cup player gift box');
+  add('关闭视频', '关闭视频', 'Close video');
   add('补填手机尾号', '补填手机尾号', 'Add Phone Ending');
   add('修改尾号', '修改尾号', 'Edit Phone Ending');
   add('管理员移除', '管理员移除', 'Remove as Admin');
