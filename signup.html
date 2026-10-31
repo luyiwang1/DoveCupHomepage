@@ -5,10 +5,11 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=47"></script>
+<script src="language.js?v=49"></script>
 <script src="payments.js?v=3"></script>
 <script src="tour-levels.js?v=1"></script>
-<script src="venue-config.js?v=2"></script>
+<script src="venue-config.js?v=3"></script>
+<script src="signup-capacity.js?v=1"></script>
 <script src="player-identity.js?v=1"></script>
 <script src="signup-ownership.js?v=2"></script>
 <script src="phone-tail.js?v=2"></script>
@@ -801,6 +802,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
 
 <section class="venue-picker-wrap" aria-label="选择本周场次">
   <p id="nextSessionNotice" class="payment-notice" data-dove-no-translate></p>
+  <p id="venueLimitNotice" class="payment-notice" hidden>每个等级最多4人，总名额12人；等级满员后进入候补。</p>
   <div class="venue-picker-label">选择本周场次</div>
   <div class="venue-picker">
     <a class="venue-card" id="venueMrtc" href="signup.html?venue=mrtc">
@@ -1094,35 +1096,16 @@ function groupedByLevel(list) {
   }));
 }
 function enforceTotalCapacityForState(nextState) {
-  const overflow = [];
-  nextState.joined = nextState.joined.filter((p, index) => {
-    p.levelGroup = levelKeyOf(p);
-    if (index >= nextState.capacity) {
-      overflow.push({
-        id: p.id,
-        name: p.name,
-        levelGroup: p.levelGroup,
-        ownerKey: p.ownerKey,
-        phoneLast4: DovePhoneTail.normalize(p.phoneLast4),
-        ts: p.ts || Date.now()
-      });
-      return false;
-    }
-    return true;
-  });
-  nextState.waitlist = overflow.concat(nextState.waitlist.map(p => Object.assign({}, p, {
-    levelGroup: levelKeyOf(p)
-  })));
-  return nextState;
+  return DoveSignupCapacity.rebalance(nextState, ACTIVE_VENUE);
 }
 function openSignupSlots() {
   return Math.max(0, (state.capacity || DEFAULT_CAPACITY) - state.joined.length);
 }
-function canJoinSignup() {
-  return openSignupSlots() > 0;
+function canJoinSignup(levelGroup) {
+  return DoveSignupCapacity.canJoin(state, ACTIVE_VENUE, levelGroup);
 }
 function waitlistIndexForOpenSlot() {
-  return canJoinSignup() && state.waitlist.length ? 0 : -1;
+  return state.waitlist.findIndex(p => canJoinSignup(levelKeyOf(p)));
 }
 function escapeHtml(v) {
   return String(v).replace(/[&<>"']/g, ch => ({
@@ -1277,6 +1260,7 @@ function render() {
 }
 
 function renderVenuePicker() {
+  document.getElementById('venueLimitNotice').hidden = !ACTIVE_VENUE.levelCapacity;
   for (const person of [...state.joined, ...state.waitlist]) {
     if (person.ownerKey === currentUserKey) DoveSignupOwnership.remember(localStorage, person.name, currentUserName);
   }
@@ -1338,7 +1322,7 @@ function renderJoined() {
       : `<div class="waitlist-empty"><p>暂无报名</p></div>`;
     return `
       <section class="level-section">
-        <div class="level-section-title">${group.label}<span>${group.people.length} 人</span></div>
+        <div class="level-section-title">${group.label}<span>${group.people.length}${ACTIVE_VENUE.levelCapacity ? ` / ${ACTIVE_VENUE.levelCapacity}` : ''} 人</span></div>
         ${cards}
       </section>`;
   }).join('');
@@ -1349,13 +1333,13 @@ function renderWaitlist() {
   const slots = openSignupSlots();
 
   if (!state.waitlist.length) {
-    el.innerHTML = `<div class="waitlist-empty"><div class="icon">⏳</div><p>Waitlist 暂时为空<br>四个分级共享 ${state.capacity || DEFAULT_CAPACITY} 个名额，满员后新报名会进入候补</p></div>`;
+    el.innerHTML = `<div class="waitlist-empty"><div class="icon">⏳</div><p>Waitlist 暂时为空<br>${ACTIVE_VENUE.levelCapacity ? '每个等级最多4人，总名额12人；等级满员后进入候补。' : `四个分级共享 ${state.capacity || DEFAULT_CAPACITY} 个名额，满员后新报名会进入候补`}</p></div>`;
     return;
   }
 
   let html = `<div class="section-label">等待补位 · ${state.waitlist.length} / ${WAITLIST_CAPACITY} 人</div>`;
 
-  if (isAdminMode && slots > 0) {
+  if (isAdminMode && slots > 0 && waitlistIndexForOpenSlot() !== -1) {
     html += `<button class="promote-all-btn" onclick="promoteAll()">🎉 有 ${slots} 个空位！一键补位前 ${Math.min(slots, state.waitlist.length)} 人</button>`;
   }
 
@@ -1692,12 +1676,12 @@ function addPerson(list) {
     return;
   }
 
-  if (list === 'joined' && !canJoinSignup()) {
+  if (list === 'joined' && !canJoinSignup(levelGroup)) {
     if (state.waitlist.length >= WAITLIST_CAPACITY) {
       showToast(`名额已满，Waitlist 也已满（最多 ${WAITLIST_CAPACITY} 人）`);
       return;
     }
-    showToast(`总名额已满，已加入 Waitlist`);
+    showToast(ACTIVE_VENUE.levelCapacity ? '该等级或总名额已满，已加入候补' : '总名额已满，已加入 Waitlist');
     list = 'waitlist';
   }
 
@@ -1869,12 +1853,12 @@ function promoteOne(id) {
   const idx = state.waitlist.findIndex(x=>x.id===id);
   if (idx === -1) return;
   const w = state.waitlist[idx];
-  if (!canJoinSignup()) {
-    showToast(`总名额已满，无法补位`);
+  if (!canJoinSignup(levelKeyOf(w))) {
+    showToast(ACTIVE_VENUE.levelCapacity ? '该等级或总名额已满，无法补位' : '总名额已满，无法补位');
     return;
   }
   state.waitlist.splice(idx, 1);
-  state.joined.push({ id: w.id, name: w.name, phoneLast4: DovePhoneTail.normalize(w.phoneLast4), levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+  state.joined.push({ ...w, levelGroup: levelKeyOf(w) });
   showToast(`${w.name} 已补位成功`, 'green');
   render();
   switchTab('joined');
@@ -1888,7 +1872,7 @@ function promoteAll() {
   let idx = waitlistIndexForOpenSlot();
   while (idx !== -1 && promoted < slots) {
     const w = state.waitlist.splice(idx, 1)[0];
-    state.joined.push({ id: w.id, name: w.name, phoneLast4: DovePhoneTail.normalize(w.phoneLast4), levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+    state.joined.push({ ...w, levelGroup: levelKeyOf(w) });
     promoted += 1;
     idx = waitlistIndexForOpenSlot();
   }
@@ -1902,7 +1886,7 @@ function autoPromote() {
   const idx = waitlistIndexForOpenSlot();
   if (idx === -1) return;
   const w = state.waitlist.splice(idx, 1)[0];
-  state.joined.push({ id: w.id, name: w.name, phoneLast4: DovePhoneTail.normalize(w.phoneLast4), levelGroup: levelKeyOf(w), ownerKey: w.ownerKey, confirmed: false, paid: false, ts: Date.now() });
+  state.joined.push({ ...w, levelGroup: levelKeyOf(w) });
   showToast(`${w.name} 自动补位成功`, 'green');
 }
 

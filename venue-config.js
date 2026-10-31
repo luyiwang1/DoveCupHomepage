@@ -17,6 +17,7 @@
       schedule: '周六 9–11 PM',
       scheduleEn: 'Saturday · 9–11 PM',
       capacity: 12,
+      levelCapacity: 4,
       databasePath: 'doveCupWaitlistSystem/venues/nyta-east/main',
       courtsPath: 'doveCupWaitlistSystem/venues/nyta-east/courtsPage'
     }

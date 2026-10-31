@@ -10,6 +10,9 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('每个等级最多4人，总名额12人；等级满员后进入候补。', '每个等级最多4人，总名额12人；等级满员后进入候补。', 'Up to 4 players per division and 12 total. Full divisions go to the waitlist.');
+  add('该等级或总名额已满，已加入候补', '该等级或总名额已满，已加入候补', 'This division or session is full. Added to the waitlist.');
+  add('该等级或总名额已满，无法补位', '该等级或总名额已满，无法补位', 'This division or session is full. Promotion is unavailable.');
   add('新人礼包', '新人礼包', 'Newcomer Welcome Gift');
   add('金鸽杯球员礼盒，打开看看。', '金鸽杯球员礼盒，打开看看。', 'A closer look inside the Golden Dove Cup player gift box.');
   add('观看礼盒开箱', '观看礼盒开箱', 'Watch the Unboxing');
