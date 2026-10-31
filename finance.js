@@ -11,6 +11,28 @@
   const today = () => new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Toronto', year: 'numeric', month: '2-digit', day: '2-digit' }).format(new Date());
   const admin = () => sessionStorage.getItem('signup_is_admin') === '1';
   let demo = false, demoRows = [], selected = '', view = 'members', currentRows = [], syncing = false;
+  let receiptSources=null;
+  function renderReceiptAudit(){
+    $('receiptAudit').hidden=demo;
+    if(demo)return;
+    if(!receiptSources){$('receiptAuditSummary').textContent=text('正在读取报名付款状态…','Loading registration payment status…');return;}
+    const rows=window.DoveFinanceReconciliation.rows(receiptSources,currentRows,Number(localStorage.getItem('dove_finance_start_at')||0));
+    const complete=rows.filter(r=>r.status==='received'&&r.ledgerState!=='legacy');
+    const pending=rows.filter(r=>['pending','package_pending'].includes(r.status));
+    $('receiptAuditSummary').textContent=text(
+      `线上已核实 ${complete.length}笔 / ${money(complete.reduce((s,r)=>s+(r.amount||0),0))}；待核实及套餐申请 ${pending.length}人；清零前排除 ${rows.filter(r=>r.ledgerState==='reset').length}笔；历史缺少金额或核实时间 ${rows.filter(r=>r.ledgerState==='legacy').length}笔。待核实不计入累计实收。`,
+      `Online verified: ${complete.length} / ${money(complete.reduce((s,r)=>s+(r.amount||0),0))}; pending or package requests: ${pending.length}; excluded by reset: ${rows.filter(r=>r.ledgerState==='reset').length}; incomplete historical receipts: ${rows.filter(r=>r.ledgerState==='legacy').length}. Pending payments are not counted as received.`);
+    const filter=$('receiptAuditFilter').value;
+    const visible=rows.filter(r=>filter==='all'||(filter==='received'?r.status==='received':['pending','package_pending'].includes(r.status)));
+    const labels={pending:text('待核实 · 未计收入','Pending · Not Received'),package_pending:text('套餐待核实 · 未扣次','Package Pending · No Visit Deducted'),unpaid:text('未付款','Unpaid'),recorded:text('已入本机账本','Recorded in Local Ledger'),refunded:text('已入账并退款','Recorded and Refunded'),reset:text('清零前记录 · 未重新计入','Excluded by Your Reset'),missing:text('已核实 · 本机未匹配流水','Verified · No Matching Local Receipt'),legacy:text('旧付款标记 · 缺少核实资料','Legacy Paid Flag · Missing Receipt Details')};
+    $('receiptAuditRows').innerHTML=visible.map(r=>{
+      const plan=r.plan==='use_package'?text('使用已有套餐','Use Existing Package'):r.plan==='package10'?text('10次套餐','10-Visit Package'):r.plan==='single'?text('单次','Single Visit'):text('项目未记录','Plan Not Recorded');
+      const href=`signup.html?venue=${encodeURIComponent(r.venueKey)}&lang=${language()}${r.current?`&review=${encodeURIComponent(r.id)}`:''}#${r.current?`card-${r.id}`:'admin'}`;
+      return `<tr><td>${escape(r.name)}<div style="font-size:11px;font-weight:400">${escape(venue(r.venueKey))} · ${escape(r.date)}</div></td><td>${escape(plan)}${r.amount?` · ${escape(money(r.amount))}`:''}</td><td style="white-space:normal;min-width:150px">${escape(labels[r.ledgerState]||r.ledgerState)}</td><td><a href="${escape(href)}">${text('查看报名记录','View Registration')}</a></td></tr>`;
+    }).join('');
+    $('receiptAuditEmpty').hidden=visible.length>0;
+    $('receiptAuditEmpty').textContent=text('此筛选下暂无记录。','No records for this filter.');
+  }
 
   function makeDemo() {
     let rows = [];
@@ -56,6 +78,7 @@
     $('demoNotice').hidden = !demo;
     if (!allowed) return;
     try { currentRows = demo ? demoRows : store.read(); } catch (error) { message(error.message); return; }
+    renderReceiptAudit();
     if (!selected) selected = currentRows.filter(row => row.type === 'payment').sort((a, b) => b.ts - a.ts)[0]?.name || '';
     const members = ledger.members(currentRows);
     $('totalMoney').textContent = money(members.reduce((sum, member) => sum + member.received, 0));
@@ -190,10 +213,11 @@
       const [mrtc, nyta, history] = await Promise.all([read('main'), read('venues/nyta-east/main'), read('signupHistory')]);
       const date = window.DoveVenues.nextSessionDate();
       const sources = [
-        { venueKey: 'mrtc', date, people: mrtc?.state?.joined },
-        { venueKey: 'nyta-east', date, people: nyta?.state?.joined },
-        ...Object.values(history || {}).map(archive => ({ venueKey: archive.venueKey || 'mrtc', date: archive.resetId, people: archive.joined }))
+        { venueKey: 'mrtc', date, current:true, people: [...(mrtc?.state?.joined||[]),...(mrtc?.state?.waitlist||[])] },
+        { venueKey: 'nyta-east', date, current:true, people: [...(nyta?.state?.joined||[]),...(nyta?.state?.waitlist||[])] },
+        ...Object.values(history || {}).map(archive => ({ venueKey: archive.venueKey || 'mrtc', date: archive.resetId, people: [...(archive.joined||[]),...(archive.waitlist||[])] }))
       ];
+      receiptSources=sources;
       const before = store.read().length;
       let excludedByReset = 0, unknown = 0;
       const cutoff = Number(localStorage.getItem('dove_finance_start_at') || 0);
@@ -211,6 +235,8 @@
     finally { syncing = false; render(); }
   }
   $('importPayments').onclick = syncVerifiedReceipts;
+  $('receiptAuditFilter').addEventListener('change',renderReceiptAudit);
+  window.addEventListener('focus',()=>{if(admin()&&!demo)syncVerifiedReceipts();});
   $('restoreFile').addEventListener('change', async event => {
     const file = event.target.files[0];
     if (!file || !admin() || demo) return;

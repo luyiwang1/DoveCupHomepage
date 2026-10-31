@@ -10,6 +10,13 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('报名收款核对','报名收款核对','Registration Payment Review');
+  add('收款状态','收款状态','Payment Status');
+  add('待核实与套餐申请','待核实与套餐申请','Pending Payments & Package Requests');
+  add('已收款核对','已收款核对','Verified Receipt Review');
+  add('全部报名付款状态','全部报名付款状态','All Registration Payments');
+  add('姓名与场次','姓名与场次','Name & Session');
+  add('核对状态','核对状态','Review Status');
   add('使用谁的套餐', '使用谁的套餐', 'Package Owner');
   add('本人套餐', '本人套餐', 'Own Package');
   add('已确认套餐持有人同意共享', '已确认套餐持有人同意共享', 'The package owner has agreed to sharing');

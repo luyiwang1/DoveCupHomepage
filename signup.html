@@ -1041,6 +1041,7 @@ if (!currentUserKey) {
 }
 let currentUserName = localStorage.getItem(USER_NAME_STORAGE) || '';
 let isAdminMode = sessionStorage.getItem(ADMIN_STORAGE) === '1';
+let paymentReviewLocated=false;
 
 function goPage(page) {
   const venuePages = new Set(['signup.html', 'courts.html']);
@@ -1263,6 +1264,11 @@ function render() {
 }
 
 function renderVenuePicker() {
+  const review=new URLSearchParams(location.search).get('review');
+  if(review&&!paymentReviewLocated){
+    const list=['joined','waitlist'].find(key=>state[key].some(p=>String(p.id)===review));
+    if(list){paymentReviewLocated=true;switchTab(list==='joined'?'joined':'waitlist');requestAnimationFrame(()=>document.getElementById(`card-${review}`)?.scrollIntoView({block:'center'}));}
+  }
   document.getElementById('venueLimitNotice').hidden = !ACTIVE_VENUE.levelCapacity;
   for (const person of [...state.joined, ...state.waitlist]) {
     if (person.ownerKey === currentUserKey) DoveSignupOwnership.remember(localStorage, person.name, currentUserName);
