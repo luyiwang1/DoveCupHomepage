@@ -77,6 +77,15 @@
   <section id="roundsPanel" style="display:none"></section>
   <pre id="copyOutput" class="copy-output"></pre>
 </main>
+<dialog id="courtAdminDialog" aria-labelledby="courtAdminTitle" style="width:360px;max-width:calc(100vw - 32px);margin:auto;padding:24px;border:1px solid #d5c5aa;border-radius:12px;background:#fffdf8;color:#17241e;box-shadow:0 16px 60px #0004">
+  <form id="courtAdminForm">
+    <h2 id="courtAdminTitle" style="font-size:20px;margin-bottom:18px">管理员登录 / Admin Login</h2>
+    <label for="courtAdminPassword" style="font-size:13px">管理员密码 / Password</label>
+    <input id="courtAdminPassword" type="password" autocomplete="current-password" required style="display:block;width:100%;padding:12px;margin-top:8px;border:1px solid #b9c5ba;border-radius:6px;font:inherit">
+    <p id="courtAdminError" role="alert" style="min-height:22px;margin-top:8px;font-size:13px;color:#c43c3c"></p>
+    <div style="display:flex;justify-content:flex-end;gap:10px;margin-top:12px"><button class="small-btn light" type="button" id="courtAdminCancel">取消 / Cancel</button><button class="small-btn" type="submit">登录 / Sign In</button></div>
+  </form>
+</dialog>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
 <script>
@@ -93,7 +102,10 @@ function goPage(page){const venuePages=new Set(['signup.html','courts.html']);lo
 if(new URLSearchParams(location.search).has('v')){const params=new URLSearchParams(location.search);params.delete('v');history.replaceState(null,'',`${location.pathname}${params.size?`?${params}`:''}${location.hash}`)}
 function renderVenueSwitch(){const mrtc=document.getElementById('courtVenueMrtc'),nyta=document.getElementById('courtVenueNyta');mrtc.href=window.DoveVenues.href('courts.html','mrtc',location.search);nyta.href=window.DoveVenues.href('courts.html','nyta-east',location.search);mrtc.classList.toggle('active',VENUE_KEY==='mrtc');nyta.classList.toggle('active',VENUE_KEY==='nyta-east')}
 function renderAdmin(){document.body.classList.toggle('is-admin',isAdminMode);const btn=document.getElementById('adminBtn');if(btn)btn.textContent=isAdminMode?'Admin 已登录':'Admin';if(!isAdminMode)document.getElementById('manualBox').style.display='none'}
-function toggleAdmin(){if(isAdminMode){isAdminMode=false;sessionStorage.removeItem(ADMIN_STORAGE);renderAdmin();render();return}const pass=prompt('请输入管理员密码');if(pass===ADMIN_PASSWORD){isAdminMode=true;sessionStorage.setItem(ADMIN_STORAGE,'1');renderAdmin();render()}else if(pass!==null){alert('密码错误')}}
+function toggleAdmin(){if(isAdminMode){isAdminMode=false;sessionStorage.removeItem(ADMIN_STORAGE);renderAdmin();render();return}const dialog=document.getElementById('courtAdminDialog');document.getElementById('courtAdminPassword').value='';document.getElementById('courtAdminError').textContent='';if(!dialog.open)dialog.showModal();document.getElementById('courtAdminPassword').focus()}
+document.getElementById('courtAdminCancel').addEventListener('click',()=>document.getElementById('courtAdminDialog').close());
+document.getElementById('courtAdminDialog').addEventListener('close',()=>{document.getElementById('courtAdminPassword').value=''});
+document.getElementById('courtAdminForm').addEventListener('submit',event=>{event.preventDefault();const input=document.getElementById('courtAdminPassword');if(input.value!==ADMIN_PASSWORD){document.getElementById('courtAdminError').textContent='密码错误 / Incorrect password';input.select();return}isAdminMode=true;sessionStorage.setItem(ADMIN_STORAGE,'1');document.getElementById('courtAdminDialog').close();renderAdmin();render()});
 function requireAdmin(){if(isAdminMode)return true;alert('只有管理员可以修改赛程');return false}
 function escapeHtml(v){return String(v).replace(/[&<>"']/g,ch=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]))}
 function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]]}return a}
