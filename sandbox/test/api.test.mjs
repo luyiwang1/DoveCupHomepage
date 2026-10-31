@@ -1,0 +1,73 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import request from 'supertest';
+import { mkdtempSync, rmSync } from 'node:fs';
+import { tmpdir } from 'node:os';
+import { join,resolve,sep } from 'node:path';
+import { createApp } from '../server.mjs';
+async function client(app,username){const agent=request.agent(app);let boot=await agent.get('/api/bootstrap').expect(200);let csrf=boot.body.csrf;const login=await agent.post('/api/auth/login').set('X-CSRF-Token',csrf).send({username,password:'DoveTest!2026'}).expect(200);csrf=login.body.csrf;return {agent,csrf,user:login.body.user,post:(path,body={})=>agent.post(path).set('X-CSRF-Token',csrf).send(body)};}
+test('server authorization, CSRF, private views and real cross-browser package synchronization',async t=>{
+  const {app,domain}=await createApp({test:true});t.after(()=>domain.close());
+  await request(app).get('/api/admin').expect(401);await request(app).post('/api/bookings').send({}).expect(403);
+  const admin=await client(app,'admin_test'),nina=await client(app,'nina_test'),ninaPhone=await client(app,'nina_test'),vivi=await client(app,'vivi_test');
+  assert.notEqual(nina.agent.jar.getCookies?.toString?.(),'');
+  await nina.agent.get('/api/admin').expect(403);
+  await nina.agent.post('/api/admin/payments/x/verify').set('X-CSRF-Token',nina.csrf).send({confirmed:true}).expect(403);
+  await nina.agent.post('/api/bookings').set('Origin','https://attacker.invalid').set('X-CSRF-Token',nina.csrf).send({}).expect(403);
+  const personal=(await nina.agent.get('/api/me').expect(200)).body,other=(await vivi.agent.get('/api/me').expect(200)).body,pkg=personal.packages[0];
+  assert.equal(other.payments.length,0);assert.equal(other.packages[0].isOwner,false);assert.equal(other.packages[0].uses.length,0);
+  assert.ok(!JSON.stringify(personal).includes('password_hash'));assert.ok(!JSON.stringify(personal).includes('recovery_hash'));
+  await vivi.post(`/api/bookings/${personal.bookings[0].id}/cancel`).expect(403);
+  await admin.post('/api/admin/attendance',{memberId:nina.user.id,eventId:'2026-11-07-nyta-east',packageId:pkg.id,confirmed:true}).expect(201);
+  await admin.post('/api/admin/attendance',{memberId:vivi.user.id,eventId:'2026-11-07-nyta-east',packageId:pkg.id,confirmed:true}).expect(201);
+  assert.equal((await ninaPhone.agent.get('/api/me')).body.packages[0].remaining,8);
+  assert.equal((await vivi.agent.get('/api/me')).body.attended,1);
+  const a=(await admin.agent.get('/api/admin')).body;assert.equal(a.ledger.reduce((s,r)=>s+r.amount_cents,0),35000);
+  const vAttendance=a.attendance.find(r=>r.member_id===vivi.user.id);
+  await admin.post(`/api/admin/attendance/${vAttendance.id}/reverse`).expect(200);
+  assert.equal((await ninaPhone.agent.get('/api/me')).body.packages[0].remaining,9);
+  assert.equal((await vivi.agent.get('/api/me')).body.attended,0);
+  const baseline=a.ledger.length;
+  const preview=await admin.post('/api/admin/migration-preview',{entries:[{name:'Old Person',amountCents:4000,visits:0,type:'payment'}]}).expect(200);
+  assert.equal(preview.body.writes,0);assert.equal(domain.adminData(admin.user.id).ledger.length,baseline+1);
+  const html=await request(app).get('/').expect(200);assert.match(html.headers['content-security-policy'],/connect-src 'self'/);assert.ok(html.text.includes('/staging/shell.js'));
+  await request(app).get('/sandbox/.data/members.sqlite').expect(404);
+});
+test('competing requests cannot spend the last shared visit twice and duplicate verification is idempotent',async t=>{
+  const {app,domain}=await createApp({test:true});t.after(()=>domain.close());const a=await client(app,'admin_test');const snap=domain.adminData(a.user.id),pkg=snap.packages[0],nina=snap.members.find(m=>m.username==='nina_test'),vivi=snap.members.find(m=>m.username==='vivi_test');
+  domain.run('INSERT INTO ledger VALUES(?,?,?,?,?,?,?,?,?,?,?)','test-adjust','test-adjust',nina.id,pkg.id,null,null,0,-9,null,a.user.id,new Date().toISOString());
+  const responses=await Promise.all([nina,vivi].map(user=>a.post('/api/admin/attendance',{eventId:'2026-11-07-nyta-east',memberId:user.id,packageId:pkg.id,confirmed:true})));
+  assert.deepEqual(responses.map(r=>r.status).sort(),[201,409]);assert.equal(domain.balance(pkg.id),0);
+  const p=snap.payments.find(p=>p.status==='pending');
+  await Promise.all([a.post(`/api/admin/payments/${p.id}/verify`,{confirmed:true}),a.post(`/api/admin/payments/${p.id}/verify`,{confirmed:true})]);
+  assert.equal(domain.all("SELECT * FROM ledger WHERE payment_id=? AND kind='payment'",p.id).length,1);
+});
+test('session cookies and ledger survive a server restart and logout invalidates only its own session',async t=>{
+  const dir=mkdtempSync(join(tmpdir(),'dove-member-test-')),database=join(dir,'test.sqlite'),secret='test-secret-at-least-32-characters-long';
+  let first=await createApp({test:true,database,secret});const signed=await client(first.app,'nina_test');
+  const auth=await signed.agent.get('/api/bootstrap');const cookie=auth.headers['set-cookie'][0].split(';')[0];
+  assert.match(auth.headers['set-cookie'][0],/HttpOnly/);assert.match(auth.headers['set-cookie'][0],/SameSite=Lax/);
+  first.domain.close();first=null;
+  const second=await createApp({test:true,database,secret});t.after(()=>{second.domain.close();assert.ok(resolve(dir).startsWith(resolve(tmpdir())+sep+'dove-member-test-'));rmSync(dir,{recursive:true,force:true});});
+  const me=await request(second.app).get('/api/me').set('Cookie',cookie).expect(200);assert.equal(me.body.user.id,signed.user.id);assert.equal(me.body.packages[0].remaining,10);
+  const other=await client(second.app,'nina_test');
+  await request(second.app).post('/api/auth/logout').set('Cookie',cookie).set('X-CSRF-Token',auth.body.csrf).send({}).expect(200);
+  await request(second.app).get('/api/me').set('Cookie',cookie).expect(401);await other.agent.get('/api/me').expect(200);
+});
+test('password change revokes every old session even if an old session row is replayed',async t=>{
+  const {app,domain}=await createApp({test:true});t.after(()=>domain.close());const one=await client(app,'nina_test'),two=await client(app,'nina_test');
+  const oldRows=domain.all('SELECT * FROM sessions');
+  await one.post('/api/auth/password',{oldPassword:'DoveTest!2026',password:'ChangedSafe!2026'}).expect(200);
+  await two.agent.get('/api/me').expect(401);
+  for(const row of oldRows)domain.run('INSERT OR REPLACE INTO sessions VALUES(?,?,?)',row.id,row.value,row.expires);
+  await two.agent.get('/api/me').expect(401);
+  assert.equal((await domain.authenticate('nina_test','ChangedSafe!2026')).id,one.user.id);
+});
+test('archiving locks registrations but never invents attendance or package deductions',async t=>{
+  const {app,domain}=await createApp({test:true});t.after(()=>domain.close());const admin=await client(app,'admin_test'),nina=await client(app,'nina_test');
+  const before=domain.profile(nina.user.id),booking=before.bookings[0];
+  await admin.post(`/api/admin/events/${booking.event_id}/archive`).expect(200);
+  await nina.post(`/api/bookings/${booking.id}/cancel`).expect(409);
+  const after=domain.profile(nina.user.id);assert.equal(after.attended,0);assert.equal(after.packages[0].remaining,10);
+  assert.ok(domain.adminData(admin.user.id).audit.some(a=>a.action==='event.archived'));
+});

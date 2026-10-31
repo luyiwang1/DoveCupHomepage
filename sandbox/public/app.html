@@ -1,0 +1,12 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>金鸽杯 · 会员测试环境</title><link rel="stylesheet" href="/staging/app.css"><script src="/staging/app.js" defer></script></head>
+<body>
+<div class="environment" id="environment">测试环境 · 独立数据库 · 不影响正式报名</div>
+<header class="app-nav"><a class="brand" href="/"><img src="/golden-dove-mark.webp" alt="Golden Dove Cup"><span>GOLDEN DOVE CUP</span></a><nav id="navigation"></nav><div class="nav-actions"><div class="languages"><button type="button" id="zhButton">中</button><button type="button" id="enButton">EN</button></div><button type="button" id="identityButton">登录</button></div></header>
+<main id="app" aria-live="polite"><div class="loading">正在加载测试环境…</div></main>
+<div id="toast" role="status" hidden></div>
+<dialog id="authDialog"><div class="dialog-head"><h2 id="authTitle"></h2><button class="close" type="button" data-close="authDialog" aria-label="Close">×</button></div><div class="segmented" id="authTabs"></div><form id="authForm"></form><p class="form-error" id="authError" role="alert"></p></dialog>
+<dialog id="recoveryDialog"><div class="dialog-head"><h2 id="recoveryTitle"></h2></div><p id="recoveryNotice"></p><code id="recoveryCode"></code><div class="dialog-actions"><button id="copyRecovery" type="button"></button><button id="closeRecovery" type="button" class="primary"></button></div></dialog>
+<dialog id="confirmDialog"><h2 id="confirmTitle"></h2><p id="confirmBody"></p><div class="dialog-actions"><button id="cancelConfirm" type="button"></button><button id="acceptConfirm" type="button" class="primary"></button></div></dialog>
+<dialog id="levelDialog"><div class="dialog-head"><h2 id="levelTitle"></h2><button class="close" type="button" data-close="levelDialog" aria-label="Close">×</button></div><form id="levelForm"></form></dialog>
+</body></html>
