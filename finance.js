@@ -30,6 +30,7 @@
     $('message').textContent = window.DoveLanguage?.localizeText(value, language()) || value;
   }
   function title(row) {
+    if(row.type==='usage'||(row.type==='reversal'&&row.packageOwner))return `${row.type==='usage'?text('套餐到场','Package Attendance'):text('撤销到场','Attendance Reversed')} · ${row.name} · ${text('扣次套餐','Package')}: ${row.packageOwner||row.name}`;
     if (row.type === 'payment') return row.plan === 'package10' ? text('购买10次套餐', '10-Visit Package Purchase') : text('单次收款', 'Single-Visit Payment');
     return { usage: text('套餐到场', 'Package Attendance'), attendance: text('单次到场', 'Single-Visit Attendance'), reversal: text('撤销到场', 'Attendance Reversed'), refund: text('整笔退款', 'Full Refund') }[row.type] || row.type;
   }
@@ -66,6 +67,10 @@
     $('memberRows').innerHTML = filtered.map(member => `<tr><td><button class="member-button" type="button" data-member="${escape(member.name)}">${escape(member.name)}</button></td><td data-label="${text('累计实收', 'Net Receipts')}">${escape(money(member.received))}</td><td data-label="${text('套餐已购', 'Purchased')}">${member.purchased}</td><td data-label="${text('套餐已用', 'Used')}">${member.used}</td><td data-label="${text('剩余', 'Remaining')}"><strong>${member.remaining}</strong></td><td data-label="${text('确认到场', 'Attendance')}">${member.attended}</td></tr>`).join('');
     $('memberEmpty').hidden = filtered.length > 0;
     $('memberNames').innerHTML = members.map(member => `<option value="${escape(member.name)}"></option>`).join('');
+    const chosenOwner=$('entryPackageOwner').value;
+    $('entryPackageOwner').innerHTML=`<option value="">${text('本人套餐','Own Package')}</option>`+members.filter(m=>m.remaining>0).map(m=>`<option value="${escape(m.name)}">${escape(m.name)} · ${m.remaining}</option>`).join('');
+    $('entryPackageOwner').value=chosenOwner;
+    updatePackageChoice();
     $('memberDetail').hidden = !selected;
     if (selected) {
       const member = ledger.summary(currentRows, selected);
@@ -106,9 +111,15 @@
       venueKey: $('entryVenue').value, type: ['usage', 'attendance'].includes(type) ? type : 'payment',
       plan: type, amount: Number($('entryAmount').value), note: $('entryNote').value.trim() };
     try {
+      if(type==='usage'){
+        input.packageOwner=$('entryPackageOwner').value||input.name;
+        if(window.DovePlayerIdentity.key(input.packageOwner)!==window.DovePlayerIdentity.key(input.name)&&!$('entryShareConsent').checked)throw new Error(text('请先确认套餐持有人同意共享','Confirm the package owner has agreed to sharing.'));
+        if(window.DovePlayerIdentity.key(input.packageOwner)!==window.DovePlayerIdentity.key(input.name))input.note=[input.note,text('管理员已确认共享授权','Sharing authorization confirmed by admin')].filter(Boolean).join(' · ');
+      }
       await add(input);
       selected = window.DovePlayerIdentity.canonicalName(input.name);
       $('entryNote').value = '';
+      $('entryShareConsent').checked=false;
       if (input.type === 'payment') $('entryAmount').value = '';
       message(text('记录已保存', 'Record saved'));
       render();
@@ -120,7 +131,17 @@
     $('amountField').hidden = !payment;
     $('entryAmount').required = payment;
     $('entryAmount').value = $('entryType').value === 'package10' ? '350' : '40';
+    updatePackageChoice(true);
   });
+  function updatePackageChoice(reset=false){
+    const using=$('entryType').value==='usage';
+    $('entryPackageField').hidden=!using;
+    const owner=$('entryPackageOwner').value;
+    $('entryShareField').hidden=!using||!owner||window.DovePlayerIdentity.key(owner)===window.DovePlayerIdentity.key($('entryName').value);
+    if(reset)$('entryShareConsent').checked=false;
+  }
+  $('entryPackageOwner').addEventListener('change',()=>updatePackageChoice(true));
+  $('entryName').addEventListener('input',()=>updatePackageChoice(true));
   document.addEventListener('click', async event => {
     const memberButton = event.target.closest('[data-member]');
     if (memberButton) { selected = memberButton.dataset.member; $('entryName').value = selected; render(); return; }

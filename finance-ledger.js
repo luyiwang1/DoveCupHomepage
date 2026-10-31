@@ -3,14 +3,16 @@
   const personKey = name => identity.key(name);
   function active(entries, entry) { return !entries.some(row => row.reverses === entry.id); }
   function summary(entries, name) {
-    const rows = entries.filter(row => personKey(row.name) === personKey(name));
+    const own = entries.filter(row => personKey(row.name) === personKey(name));
+    const account = entries.filter(row => personKey(['usage','reversal'].includes(row.type) ? row.packageOwner || row.name : row.name) === personKey(name));
+    const rows = entries.filter(row => own.includes(row) || account.includes(row));
     return {
       name: identity.canonicalName(name),
-      received: rows.reduce((sum, row) => sum + row.amountCents, 0) / 100,
-      purchased: rows.filter(row => row.type === 'payment' || row.type === 'refund').reduce((sum, row) => sum + row.visits, 0),
-      used: -rows.filter(row => row.type === 'usage' || row.type === 'reversal').reduce((sum, row) => sum + row.visits, 0),
-      remaining: rows.reduce((sum, row) => sum + row.visits, 0),
-      attended: rows.filter(row => ['usage', 'attendance'].includes(row.type) && active(entries, row)).length,
+      received: own.reduce((sum, row) => sum + row.amountCents, 0) / 100,
+      purchased: own.filter(row => row.type === 'payment' || row.type === 'refund').reduce((sum, row) => sum + row.visits, 0),
+      used: -account.filter(row => row.type === 'usage' || row.type === 'reversal').reduce((sum, row) => sum + row.visits, 0),
+      remaining: account.reduce((sum, row) => sum + row.visits, 0),
+      attended: own.filter(row => ['usage', 'attendance'].includes(row.type) && active(entries, row)).length,
       rows
     };
   }
@@ -24,13 +26,16 @@
     if (!/^\d{4}-\d{2}-\d{2}$/.test(row.date || '') || !Number.isFinite(Date.parse(`${row.date}T12:00:00Z`)) || new Date(`${row.date}T12:00:00Z`).toISOString().slice(0, 10) !== row.date) throw new Error('请选择活动日期');
     if (!['mrtc', 'nyta-east'].includes(row.venueKey)) throw new Error('请选择场地');
     if (row.type === 'payment') {
+      delete row.packageOwner;
       if (!['single', 'package10'].includes(row.plan)) throw new Error('请选择付款项目');
       const cents = Math.round(Number(input.amount) * 100);
       if (!Number.isSafeInteger(cents) || cents <= 0 || cents > 100000000) throw new Error('请输入实际收款金额');
       row.amountCents = cents;
       row.visits = row.plan === 'package10' ? 10 : 0;
     } else if (row.type === 'usage' || row.type === 'attendance') {
-      if (row.type === 'usage' && summary(entries, row.name).remaining < 1) throw new Error('套餐余额不足');
+      if (row.type === 'usage') row.packageOwner = identity.canonicalName(input.packageOwner || row.name);
+      else delete row.packageOwner;
+      if (row.type === 'usage' && summary(entries, row.packageOwner).remaining < 1) throw new Error('套餐余额不足');
       if (entries.some(old => ['usage', 'attendance'].includes(old.type) && personKey(old.name) === personKey(row.name) && old.date === row.date && old.venueKey === row.venueKey && active(entries, old))) throw new Error('本场次已经记录到场');
       row.visits = row.type === 'usage' ? -1 : 0;
     } else if (row.type === 'reversal' || row.type === 'refund') {
@@ -42,6 +47,8 @@
       row.amountCents = original.amountCents ? -original.amountCents : 0;
       row.visits = -original.visits;
       row.venueKey = original.venueKey;
+      if (original.type === 'usage') row.packageOwner = original.packageOwner || original.name;
+      else delete row.packageOwner;
     } else throw new Error('记录类型无效');
     delete row.amount;
     return [...entries, row];

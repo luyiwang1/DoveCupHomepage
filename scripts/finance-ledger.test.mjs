@@ -5,6 +5,22 @@ import { readFile } from 'node:fs/promises';
 import '../player-identity.js';
 import '../finance-ledger.js';
 const ledger = globalThis.DoveFinance;
+test('Nina and Vivi share visits without merging attendance or double-counting money', () => {
+  let rows=ledger.append([], {id:'n-buy',name:'Nina',type:'payment',plan:'package10',amount:350,date:'2026-11-07',venueKey:'nyta-east'});
+  for(const [id,name] of [['n-use','Nina'],['v-use','Vivi']])rows=ledger.append(rows,{id,name,type:'usage',packageOwner:'Nina',date:'2026-11-07',venueKey:'nyta-east'});
+  assert.equal(ledger.summary(rows,'Nina').remaining,8);
+  assert.equal(ledger.summary(rows,'Nina').used,2);
+  assert.equal(ledger.summary(rows,'Nina').attended,1);
+  assert.equal(ledger.summary(rows,'Vivi').remaining,0);
+  assert.equal(ledger.summary(rows,'Vivi').attended,1);
+  assert.equal(ledger.members(rows).reduce((s,m)=>s+m.received,0),350);
+  assert.throws(()=>ledger.append(rows,{id:'dup',name:'Vivi',type:'attendance',date:'2026-11-07',venueKey:'nyta-east'}),/已经记录/);
+  assert.throws(()=>ledger.append(rows,{id:'refund',name:'Nina',type:'refund',reverses:'n-buy',date:'2026-11-07',venueKey:'nyta-east'}),/套餐已使用/);
+  rows=ledger.append(rows,{id:'v-undo',name:'Vivi',type:'reversal',reverses:'v-use',packageOwner:'Vivi',date:'2026-11-07',venueKey:'nyta-east'});
+  assert.equal(ledger.summary(rows,'Nina').remaining,9);
+  assert.equal(ledger.summary(rows,'Vivi').attended,0);
+  assert.equal(ledger.validate(rows).length,4);
+});
 const row = (id, extra = {}) => ({ id, name: 'Han M', date: '2026-10-17', venueKey: 'mrtc', type: 'payment', plan: 'package10', amount: 350, ...extra });
 
 test('keeps money, package usage and actual attendance as separate records', () => {

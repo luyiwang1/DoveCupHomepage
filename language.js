@@ -10,6 +10,11 @@
   const SKIP_TAGS = new Set(['SCRIPT', 'STYLE', 'NOSCRIPT', 'CODE', 'PRE', 'TEXTAREA']);
   const entries = [];
   const add = (source, zh, en) => entries.push({ source, zh, en });
+  add('使用谁的套餐', '使用谁的套餐', 'Package Owner');
+  add('本人套餐', '本人套餐', 'Own Package');
+  add('已确认套餐持有人同意共享', '已确认套餐持有人同意共享', 'The package owner has agreed to sharing');
+  add('请先确认套餐持有人同意共享', '请先确认套餐持有人同意共享', 'Confirm the package owner has agreed to sharing.');
+  add('管理员已确认共享授权', '管理员已确认共享授权', 'Sharing authorization confirmed by admin');
   add('每个等级最多4人，总名额12人；等级满员后进入候补。', '每个等级最多4人，总名额12人；等级满员后进入候补。', 'Up to 4 players per division and 12 total. Full divisions go to the waitlist.');
   add('该等级或总名额已满，已加入候补', '该等级或总名额已满，已加入候补', 'This division or session is full. Added to the waitlist.');
   add('该等级或总名额已满，无法补位', '该等级或总名额已满，无法补位', 'This division or session is full. Promotion is unavailable.');
