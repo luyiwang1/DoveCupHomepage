@@ -59,6 +59,7 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
   app.get('/api/events/:eventId/courts',(req,res)=>res.json(operations.courts(req.params.eventId)));
   app.put('/api/events/:eventId/courts',admin,(req,res)=>res.json(operations.saveCourts(req.user.id,req.params.eventId,req.body.data,req.body.revision)));
   app.get('/api/attendance',(req,res)=>res.json(operations.attendance(req.query.venue)));
+  app.get('/api/attendance-page',(_req,res)=>res.json(operations.attendancePage()));
   app.get('/api/singles',(req,res)=>res.json(operations.tournamentView(req.session.userId)));
   app.post('/api/singles',login,(req,res)=>res.json(operations.saveTournament(req.user.id,req.body)));
   app.get('/api/team',(req,res)=>res.json(operations.team(req.session.userId)));
@@ -131,7 +132,14 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
     html=html.replace('</head>','<link rel="stylesheet" href="/staging/signup-live.css"></head>');
     res.type('html').send(html);
   });
-  app.get(['/account.html','/login.html','/finance.html','/scores.html'],(_req,res)=>res.sendFile(resolve(here,'public','app.html')));
+  app.get('/scores.html',(_req,res)=>{
+    let html=readFileSync(resolve(here,'live-signup/scores.html'),'utf8').replace(/<script src="https:\/\/www\.gstatic\.com\/firebasejs\/[^\"]+"><\/script>/g,'');
+    const startup=html.lastIndexOf('start();');if(startup<0)throw new Error('Attendance startup marker missing');
+    html=html.slice(0,startup)+html.slice(startup+8);
+    html=html.replace('</head>','<link rel="stylesheet" href="/staging/scores-live.css"></head>').replace('</body>','<script src="/staging/scores-live-runtime.js"></script></body>');
+    res.type('html').send(html);
+  });
+  app.get(['/account.html','/login.html','/finance.html'],(_req,res)=>res.sendFile(resolve(here,'public','app.html')));
   app.use((req,res,next)=>{
     if(req.path.startsWith('/sandbox')||!['.js','.css','.webp','.jpg','.jpeg','.png','.svg','.mp4','.woff','.woff2'].includes(extname(req.path).toLowerCase()))return next();
     express.static(root,{dotfiles:'deny',index:false,fallthrough:true})(req,res,next);

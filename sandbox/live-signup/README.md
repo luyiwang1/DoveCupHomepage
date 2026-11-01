@@ -1,7 +1,7 @@
 # Production Signup Snapshot
 
 Copied from the production checkout at commit d4ee1a5 on 2026-11-01.
-`signup.html`, `language.js` and `venue-config.js` retain the production source
+`signup.html`, `scores.html`, `language.js` and `venue-config.js` retain the production source
 (line endings and an optional UTF-8 BOM are not significant).
 
 The sandbox server removes Firebase SDK loading and the original startup calls.
@@ -15,3 +15,8 @@ Intentional differences:
 - Confirmation of participation is not actual attendance and never deducts visits.
 
 Update these snapshots deliberately when the production signup UI changes.
+
+The attendance snapshot uses `scores-live-runtime.js` and `/api/attendance-page`.
+Public statistics, upcoming rosters, ranking, special events and update panels
+retain the live structure. Counts use confirmed member attendance, not names or
+automatic signup counts. Administrator corrections use the authenticated workspace.
