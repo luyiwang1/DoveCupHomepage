@@ -4,10 +4,10 @@ window.DOVE_RECURRING_EVENTS = [
     status: '常驻活动',
     eyebrow: 'Resident Event · Weekly Tour',
     title: '金鸽巡回赛 · MRTC',
-    summary: '周六傍晚的常规分级巡回赛，四个分级共享 32 个报名名额。',
+    summary: '周六傍晚的常规分级巡回赛，四个分级共享 24 个报名名额。',
     schedule: '周六 · 5–7 PM',
     venue: 'MRTC · Toronto',
-    format: '最多 32 人 · 4 个分级',
+    format: '最多 24 人 · 4 个分级',
     tools: [
       { label: '报名 MRTC', hint: '进入 5–7 PM 场次', href: 'signup.html?venue=mrtc' },
       { label: 'MRTC 场地', hint: '查看本场场地安排', href: 'courts.html?venue=mrtc' },

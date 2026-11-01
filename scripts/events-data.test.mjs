@@ -26,7 +26,7 @@ test('keeps MRTC and NYTA East as separate weekly signup entrances', () => {
       {
         id: 'golden-dove-tour-mrtc',
         schedule: '周六 · 5–7 PM',
-        format: '最多 32 人 · 4 个分级',
+        format: '最多 24 人 · 4 个分级',
         signup: 'signup.html?venue=mrtc',
         courts: 'courts.html?venue=mrtc'
       },

@@ -6,7 +6,7 @@
       name: 'MRTC',
       schedule: '周六 5–7 PM',
       scheduleEn: 'Saturday · 5–7 PM',
-      capacity: 32,
+      capacity: 24,
       databasePath: 'doveCupWaitlistSystem/main',
       courtsPath: 'doveCupWaitlistSystem/courtsPage'
     },

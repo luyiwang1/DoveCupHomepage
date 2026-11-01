@@ -5,10 +5,10 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <link rel="stylesheet" href="language.css?v=1">
 <link rel="stylesheet" href="site-nav.css?v=2">
-<script src="language.js?v=50"></script>
+<script src="language.js?v=52"></script>
 <script src="payments.js?v=3"></script>
 <script src="tour-levels.js?v=1"></script>
-<script src="venue-config.js?v=3"></script>
+<script src="venue-config.js?v=4"></script>
 <script src="signup-capacity.js?v=1"></script>
 <script src="player-identity.js?v=1"></script>
 <script src="signup-ownership.js?v=2"></script>
@@ -808,7 +808,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
   <div class="venue-picker-label">选择本周场次</div>
   <div class="venue-picker">
     <a class="venue-card" id="venueMrtc" href="signup.html?venue=mrtc">
-      <strong>MRTC</strong><span>周六 5–7 PM · 最多 32 人</span>
+      <strong>MRTC</strong><span>周六 5–7 PM · 最多 24 人</span>
     </a>
     <a class="venue-card" id="venueNyta" href="signup.html?venue=nyta-east">
       <strong>NYTA East Bubble</strong><span>周六 9–11 PM · 最多 12 人</span>
@@ -844,7 +844,7 @@ body.is-admin .summary-card.admin-only { display: block !important; }
       <div class="bar-track"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
       <div class="capacity-edit admin-only">
         <label>总名额上限</label>
-        <input type="number" id="capInput" placeholder="32" min="1" max="32">
+        <input type="number" id="capInput" placeholder="24" min="1" max="24">
         <button class="set-btn" onclick="setCapacity()">设置</button>
       </div>
       <div class="weekly-reset-note">报名表每周六 23:00（多伦多时间）归档并更新为空。</div>

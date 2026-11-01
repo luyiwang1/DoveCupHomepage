@@ -8,7 +8,7 @@ const rules=globalThis.DoveSignupCapacity,nyta=globalThis.DoveVenues.get('nyta-e
 const signup=await readFile(new URL('../signup.html',import.meta.url),'utf8');
 test('retains venue entrances and independent shared total capacity controls',()=>{
   for(const text of ['id="venueMrtc"','id="venueNyta"','ACTIVE_VENUE.databasePath','val > DEFAULT_CAPACITY','capInput.max = DEFAULT_CAPACITY']) assert.ok(signup.includes(text));
-  assert.ok(signup.includes('周六 5–7 PM · 最多 32 人'));
+  assert.ok(signup.includes('周六 5–7 PM · 最多 24 人'));
   assert.ok(signup.includes('周六 9–11 PM · 最多 12 人'));
 });
 test('uses division eligibility for signup, single promotion, and automatic promotion',()=>{
@@ -33,4 +33,12 @@ test('overflow moves to waitlist in roster order without losing payment or ident
   assert.equal(next.waitlist[1].id,9);
   assert.equal(next.waitlist.findIndex(p=>rules.canJoin(next,nyta,p.levelGroup)),1);
   assert.deepEqual(rules.rebalance(next,nyta),next);
+});
+test('MRTC hard-limits legacy 32-person state to 24 and retains overflow records',()=>{
+  const venue=globalThis.DoveVenues.get('mrtc');
+  const joined=Array.from({length:32},(_,id)=>({id,levelGroup:'u20',paymentAmount:40,ownerKey:`owner-${id}`}));
+  assert.equal(rules.canJoin({capacity:32,joined:joined.slice(0,23)},venue,'u20'),true);
+  assert.equal(rules.canJoin({capacity:32,joined:joined.slice(0,24)},venue,'u20'),false);
+  const next=rules.rebalance({capacity:32,joined,waitlist:[]},venue);
+  assert.equal(next.joined.length,24);assert.deepEqual(next.waitlist,joined.slice(24));
 });

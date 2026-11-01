@@ -209,7 +209,7 @@ export function buildAttendanceOnlyMigration(input, now = new Date()) {
 }
 
 const VENUE_RESET_CONFIGS = [
-  { key: 'mrtc', name: 'MRTC', capacity: 32, schedule: '周六 5–7 PM' },
+  { key: 'mrtc', name: 'MRTC', capacity: 24, schedule: '周六 5–7 PM' },
   { key: 'nyta-east', name: 'NYTA East Bubble', capacity: 12, schedule: '周六 9–11 PM' }
 ];
 
@@ -232,7 +232,7 @@ function saveClearedVenue(system, config, main, state, archivedAt) {
     state: {
       ...state,
       title: state.title || `${config.name} · 报名接龙`,
-      capacity: state.capacity ?? config.capacity,
+      capacity: Math.min(Number(state.capacity) > 0 ? Number(state.capacity) : config.capacity, config.capacity),
       joined: [],
       waitlist: []
     },

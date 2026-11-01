@@ -6,7 +6,7 @@ await import('../venue-config.js');
 const { get, href, keyFromQuery, venues } = globalThis.DoveVenues;
 
 test('defines two independent Saturday tour sessions', () => {
-  assert.equal(venues.mrtc.capacity, 32);
+  assert.equal(venues.mrtc.capacity, 24);
   assert.equal(venues.mrtc.schedule, '周六 5–7 PM');
   assert.equal(venues['nyta-east'].capacity, 12);
   assert.equal(venues['nyta-east'].schedule, '周六 9–11 PM');
