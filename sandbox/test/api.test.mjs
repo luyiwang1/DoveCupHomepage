@@ -6,6 +6,17 @@ import { tmpdir } from 'node:os';
 import { join,resolve,sep } from 'node:path';
 import { createApp } from '../server.mjs';
 async function client(app,username){const agent=request.agent(app);let boot=await agent.get('/api/bootstrap').expect(200);let csrf=boot.body.csrf;const login=await agent.post('/api/auth/login').set('X-CSRF-Token',csrf).send({username,password:'DoveTest!2026'}).expect(200);csrf=login.body.csrf;return {agent,csrf,user:login.body.user,post:(path,body={})=>agent.post(path).set('X-CSRF-Token',csrf).send(body)};}
+test('anonymous visitors can view rosters but cannot join, edit or cancel even with valid CSRF',async t=>{
+  const {app,domain}=await createApp({test:true});t.after(()=>domain.close());
+  const guest=request.agent(app),boot=await guest.get('/api/bootstrap').expect(200);
+  await guest.get('/api/events/2026-11-07-nyta-east/roster').expect(200);
+  const before=domain.db.prepare('SELECT COUNT(*) n FROM bookings').get().n;
+  await guest.post('/api/bookings').set('X-CSRF-Token',boot.body.csrf).send({eventId:'2026-11-07-nyta-east',level:'u20',paymentMode:'single'}).expect(401);
+  await guest.patch('/api/bookings/any').set('X-CSRF-Token',boot.body.csrf).send({level:'35_plus'}).expect(401);
+  await guest.post('/api/bookings/any/cancel').set('X-CSRF-Token',boot.body.csrf).send({}).expect(401);
+  assert.equal(domain.db.prepare('SELECT COUNT(*) n FROM bookings').get().n,before);
+});
+
 test('server authorization, CSRF, private views and real cross-browser package synchronization',async t=>{
   const {app,domain}=await createApp({test:true});t.after(()=>domain.close());
   await request(app).get('/api/admin').expect(401);await request(app).post('/api/bookings').send({}).expect(403);

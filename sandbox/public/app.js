@@ -1,5 +1,5 @@
 const $=id=>document.getElementById(id);
-let language=new URLSearchParams(location.search).get('lang')||localStorage.getItem('dove_sandbox_language')||'zh';
+let language=(new URLSearchParams(location.search).get('lang')||localStorage.getItem('dove_cup_language')||localStorage.getItem('dove_sandbox_language'))==='en'?'en':'zh';
 const t=(zh,en)=>language==='en'?en:zh;
 const esc=value=>String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const money=cents=>new Intl.NumberFormat(language==='en'?'en-CA':'zh-CN',{style:'currency',currency:'CAD'}).format(cents/100);
@@ -15,7 +15,7 @@ async function api(path,method='GET',body){const response=await fetch(`/api${pat
 async function refresh(){
   const boot=await api('/bootstrap');state.user=boot.user;state.csrf=boot.csrf;
   state.events=await api('/events');
-  if(!state.eventId){const venue=new URLSearchParams(location.search).get('venue')||'mrtc';state.eventId=state.events.find(e=>e.venue_id===venue&&e.status==='open')?.id||state.events[0]?.id;}
+  if(!state.eventId){const params=new URLSearchParams(location.search),venue=params.get('venue')||'mrtc';state.eventId=state.events.find(e=>e.id===params.get('event'))?.id||state.events.find(e=>e.venue_id===venue&&e.status==='open')?.id||state.events[0]?.id;}
   if(state.user){state.profile=await api('/me');state.legacy=await api('/legacy');state.admin=state.user.role==='admin'?await api('/admin'):null;}else{state.profile=null;state.admin=null;state.legacy=[];}
   if(state.eventId)state.roster=await api(`/events/${encodeURIComponent(state.eventId)}/roster`);
   render();
@@ -26,25 +26,59 @@ function currentEvent(){return state.events.find(e=>e.id===state.eventId);}
 function eventOptions(){return state.events.map(e=>`<option value="${e.id}" ${e.id===state.eventId?'selected':''}>${e.date} · ${venueName(e.venue_id)}${e.status==='archived'?` · ${t('已归档','Archived')}`:''}</option>`).join('');}
 function pageHead(title,subtitle=''){return `<div class="page-head"><div><h1>${title}</h1>${subtitle?`<p class="muted">${subtitle}</p>`:''}</div><div class="tools">${action('refresh','',t('刷新','Refresh'))}${state.user?action('logout','',t('退出登录','Sign Out')):''}</div></div>`;}
 function render(){
+  document.body.classList.toggle('signup-page',state.view==='sessions');
+  document.body.classList.toggle('guest-account',!state.user&&(state.view==='account'||location.pathname==='/login.html'));
   document.documentElement.lang=language==='en'?'en':'zh-CN';document.title=t('金鸽杯 · 会员测试环境','Golden Dove Cup · Member Sandbox');
   $('environment').textContent=t('测试环境 · 独立数据库 · 不影响正式报名','TEST ENVIRONMENT · SEPARATE DATABASE · NO LIVE CHANGES');
-  $('zhButton').classList.toggle('active',language!=='en');$('enButton').classList.toggle('active',language==='en');
+  $('memberLanguageSwitch').innerHTML=languageSlider();
   $('identityButton').textContent=state.user?state.user.displayName:t('登录 / 注册','Sign In / Register');$('identityButton').classList.toggle('account-name',!!state.user);
   $('navigation').innerHTML=`<a href="/signup.html" data-view="sessions" class="${state.view==='sessions'?'active':''}">${t('场次报名','Sessions')}</a><a href="/account.html" data-view="account" class="${state.view==='account'?'active':''}">${t('我的账户','My Account')}</a>${state.user?.role==='admin'?`<a href="/finance.html" data-view="admin" class="${state.view==='admin'?'active':''}">${t('管理中心','Admin')}</a>`:''}`;
   $('app').innerHTML=state.view==='sessions'?sessionsView():state.view==='admin'&&state.user?.role==='admin'?adminView():accountView();
+  document.querySelectorAll('.app-nav a').forEach(a=>{const url=new URL(a.href);url.searchParams.set('lang',language);a.href=url.pathname+url.search+url.hash;});
+  mountDialogLanguages();
+}
+function languageSlider(){return `<button type="button" class="dove-language-toggle" data-switch-language data-language="${language}" aria-label="${t('切换到英文','Switch to Chinese')}" role="switch" aria-checked="${language==='en'}"><span class="dove-language-thumb" aria-hidden="true"></span><span class="dove-language-label dove-language-label-zh">中</span><span class="dove-language-label dove-language-label-en">EN</span></button>`;}
+function mountDialogLanguages(){document.querySelectorAll('dialog').forEach(dialog=>{let controls=dialog.querySelector('.dialog-languages');if(!controls){controls=document.createElement('div');controls.className='dialog-languages dove-language-switch';dialog.append(controls);}controls.innerHTML=languageSlider();});}
+function changeLanguage(lang){
+  if(!['zh','en'].includes(lang)||state.busy)return;
+  const open=[...document.querySelectorAll('dialog[open]')].map(d=>d.id);
+  const fields=[...document.querySelectorAll('input[name],select[name]')].map(el=>({form:el.closest('form')?.id,name:el.name,value:el.value,checked:el.checked,type:el.type}));
+  language=lang;localStorage.setItem('dove_cup_language',lang);localStorage.setItem('dove_sandbox_language',lang);
+  const url=new URL(location.href);url.searchParams.set('lang',lang);history.replaceState({},'',url.pathname+url.search+url.hash);
+  render();if(open.includes('authDialog'))openAuth(state.authMode);
+  if(open.includes('recoveryDialog'))showRecovery($('recoveryCode').textContent);
+  if(open.includes('levelDialog')){ $('levelTitle').textContent=t('修改报名等级','Edit Division');const form=$('levelForm');form.querySelector('label').firstChild.textContent=t('等级','Division');form.querySelectorAll('option').forEach(o=>o.textContent=levelName(o.value));form.querySelector('button').textContent=t('保存','Save'); }
+  for(const field of fields){const form=field.form?$(field.form):null;if(!form)continue;form.querySelectorAll('[name]').forEach(el=>{if(el.name!==field.name)return;if(field.type==='radio'||field.type==='checkbox'){if(el.value===field.value)el.checked=field.checked;}else el.value=field.value;});}
+  if($('bookingPayment'))$('bookingPackageField').hidden=$('bookingPayment').value!=='use_package';
+  for(const id of open){const dialog=$(id);if(dialog&&!dialog.open)dialog.showModal();}
+  mountDialogLanguages();
+}
+let signupTab='joined';
+let resumeSignupAfterAuth=false;
+function continueSignup(){if(resumeSignupAfterAuth&&state.user&&state.view==='sessions'){resumeSignupAfterAuth=false;$('bookingDialog')?.showModal();}}
+function signupChain(){
+  let rank=0;
+  const row=p=>{const mine=state.profile?.bookings.find(b=>b.event_id===state.eventId&&b.status!=='cancelled');return `<li class="chain-row ${p.mine?'is-mine':''}"><span class="chain-number">${++rank}</span><span class="chain-avatar" aria-hidden="true">${esc(Array.from(p.display_name||'?')[0])}</span><span class="chain-name">${esc(p.display_name)}<span class="subtle">${levelName(p.level)}</span>${p.mine?`<small>${t('这是你','You')}</small>`:''}</span>${badge(p.status)}${p.mine&&mine?`<div class="chain-own">${bookingCard(mine)}</div>`:''}</li>`;};
+  if(signupTab==='summary'){const e=currentEvent();return `<div class="metrics"><div class="metric"><span>${t('已报名','Registered')}</span><strong>${e.joined}</strong></div><div class="metric"><span>Waitlist</span><strong>${e.waiting}</strong></div></div><button type="button" data-action="copy-chain">${t('复制接龙文本','Copy Registration List')}</button>`;}
+  if(signupTab==='waitlist')return `<ol class="wait-chain">${state.roster.filter(p=>p.status==='waitlist').map(row).join('')||`<li class="empty">${t('Waitlist 暂时为空','The waitlist is empty')}</li>`}</ol>`;
+  return `<div class="signup-chain">${['u20','25_30','30_plus','35_plus'].map(level=>{const players=state.roster.filter(p=>p.level===level&&p.status==='joined');return `<section class="chain-group"><div class="chain-heading"><h3>${levelName(level)}</h3><span>${players.length}${currentEvent()?.venue.levelCapacity?` / ${currentEvent().venue.levelCapacity}`:''} ${t('人','players')}</span></div><ol>${players.map(row).join('')||`<li class="empty">${t('暂无报名','No registrations yet')}</li>`}</ol></section>`;}).join('')}</div>`;
 }
 function sessionsView(){
   const e=currentEvent(),date=e?.date||'',sameDay=state.events.filter(x=>x.date===date);
   const mine=state.profile?.bookings.find(b=>b.event_id===e?.id&&b.status!=='cancelled');
   const eligible=(state.profile?.packages||[]).filter(p=>p.remaining>0);
-  const roster=state.roster.map(p=>[`${esc(p.display_name)}${p.mine?` <span class="member-tag">${t('这是你','You')}</span>`:''}`,esc(levelName(p.level)),badge(p.status)]);
-  return `${pageHead(t('巡回赛报名','Tour Registration'),t('多伦多当地时间','Toronto local time'))}
+  return `${pageHead(t('金鸽巡回赛 · 报名接龙','Golden Dove Tour · Registration'),t('多伦多当地时间','Toronto local time'))}
   <div class="tools" style="margin-bottom:18px"><label for="eventDate">${t('活动日期','Session Date')}</label><select id="eventDate">${[...new Set(state.events.map(x=>x.date))].map(d=>`<option ${d===date?'selected':''}>${d}</option>`).join('')}</select></div>
   <div class="venue-grid">${sameDay.map(v=>`<article class="venue-card ${v.id===e.id?'selected':''}"><span class="venue-city">${v.venue.city}</span><h2>${v.venue.name}</h2><div class="time">${v.venue.time}</div><div class="subtle">${v.date} · ${badge(v.status)}</div><div class="venue-foot"><span>${v.joined} / ${v.venue.capacity} ${t('人','players')} · ${t('候补','Waitlist')} ${v.waiting}</span>${action('choose-event',v.id,t('选择场次','Select Session'))}</div></article>`).join('')}</div>
-  ${e?`<div class="division-meter">${['u20','25_30','30_plus','35_plus'].map(level=>`<div><small>${levelName(level)}</small><strong>${e.counts.find(c=>c.level===level)?.count||0}${e.venue.levelCapacity?` / ${e.venue.levelCapacity}`:''}</strong></div>`).join('')}</div>`:''}
-  <div class="split"><section class="band"><h2>${t('报名名单','Registration List')}</h2>${table([t('球友','Player'),t('等级','Division'),t('状态','Status')],roster)}</section><section class="band"><h2>${mine?t('我的报名','My Registration'):t('加入本场','Join This Session')}</h2>
+  <div class="signup-payment-strip"><strong>${t('单次 CAD $40 · 10次套餐 CAD $350','Single CAD $40 · 10 visits CAD $350')}</strong><span>${t('测试环境 · 请勿转账真实款项','Test environment · Do not send real money')}</span></div>
+  ${!state.user?`<div class="signup-account-required"><div><strong>${t('会员账户报名','Member Registration')}</strong><span>${t('登录或创建账户后加入接龙','Sign in or create an account to register')}</span></div><button type="button" class="primary" data-action="open-signup">${t('登录 / 注册','Sign In / Register')}</button></div>`:`<div class="signup-member-identity">${t('报名账户','Registering as')} <strong>${esc(state.user.displayName)}</strong> <span>@${esc(state.user.username)}</span></div>`}
+  <div class="tabs signup-tabs">${[['joined',t('报名','Registered')+` ${e?.joined||0}`],['waitlist',`Waitlist ${e?.waiting||0}`],['summary',t('汇总','Summary')]].map(([key,label])=>action('signup-tab',key,label,'',signupTab===key?'active':'')).join('')}</div>
+  <div class="signup-capacity"><span>${t('名额占用','Places Filled')} <strong>${e?.joined||0} / ${e?.venue.capacity||0}</strong></span><progress max="${e?.venue.capacity||1}" value="${e?.joined||0}"></progress><small>${e?.venue.levelCapacity?t('每个等级最多4人，总名额12人；满员后进入候补。','4 per division, 12 total; additional players join the waitlist.'):t('四个分级共享32个名额，满员后进入候补。','32 places shared across divisions; additional players join the waitlist.')}</small></div>
+  <section class="chain-content">${signupChain()}</section>
+  <button type="button" class="signup-fab" data-action="open-signup" aria-label="${t('报名','Register')}">+</button>
+  <dialog id="bookingDialog"><div class="dialog-head"><h2>${mine?t('我的报名','My Registration'):t('添加报名','Add Registration')}</h2><button class="close" type="button" data-close="bookingDialog" aria-label="Close">&times;</button></div>
   ${!state.user?`<div class="auth-empty"><p>${t('单次 $40 · 10次套餐 $350','Single visit $40 · 10-visit package $350')}</p>${action('auth','',t('登录后报名','Sign In to Register'),'','primary')}</div>`:mine?bookingCard(mine):`<form id="bookingForm" class="stack"><fieldset style="padding:0;border:0"><legend style="margin-bottom:8px">${t('等级','Division')}</legend><div class="level-options">${['u20','25_30','30_plus','35_plus'].map((l,i)=>`<label><input type="radio" name="level" value="${l}" ${i===0?'checked':''}>${levelName(l)}</label>`).join('')}</div></fieldset><label class="field">${t('付款方式','Payment Method')}<select name="paymentMode" id="bookingPayment"><option value="single">${t('单次 · $40','Single visit · $40')}</option><option value="package10">${t('购买10次套餐 · $350','Buy 10 visits · $350')}</option><option value="use_package" ${!eligible.length?'disabled':''}>${t('使用已有 / 共享套餐','Use Own / Shared Package')}</option></select></label><label class="field" id="bookingPackageField" hidden>${t('使用哪个套餐','Select Package')}<select name="packageId">${eligible.map(p=>`<option value="${p.id}">${esc(p.ownerName)} · ${p.remaining} ${t('次剩余','visits left')}</option>`).join('')}</select></label><button type="submit" class="primary" ${e?.status!=='open'?'disabled':''}>${t('确认报名','Register')}</button></form>`}
-  <p class="subtle" style="margin-top:18px">${e?.venue.levelCapacity?t('每等级最多4人，总名额12人。','Up to 4 players per division, 12 total.'):t('四个等级共享32个名额。','32 places shared across all divisions.')}</p></section></div>`;
+  </dialog>`;
 }
 function bookingCard(b){
   const p=state.profile.payments.find(p=>p.booking_id===b.id&&p.status!=='refunded'),event=state.events.find(e=>e.id===b.event_id);
@@ -57,7 +91,7 @@ function accountView(){
   if(!state.user)return `${pageHead(t('我的账户','My Account'))}<div class="auth-empty"><h2>${t('登录会员账户','Member Sign In')}</h2>${action('auth','',t('登录 / 注册','Sign In / Register'),'','primary')}</div>`;
   const p=state.profile,owned=p.packages.filter(x=>x.isOwner),tabs=[['bookings',t('我的报名','Registrations')],['packages',t('套餐与共享','Packages & Sharing')],['payments',t('付款记录','Payments')],['attendance',t('到场记录','Attendance')],['settings',t('账户设置','Settings')]];
   let content='';
-  if(state.tab==='bookings')content=table([t('活动','Session'),t('等级','Division'),t('状态','Status'),t('操作','Actions')],p.bookings.map(b=>[`${b.date}<div class="subtle">${venueName(b.venue_id)}</div>`,levelName(b.level),badge(b.status),bookingCard(b)]));
+  if(state.tab==='bookings')content=`<div class="account-registration-link"><a class="registration-link" href="/signup.html?lang=${language}">${t('前往报名页','Go to Registration')} &rarr;</a></div>`+table([t('活动','Session'),t('等级','Division'),t('状态','Status'),t('查看','View')],p.bookings.map(b=>[`${b.date}<div class="subtle">${venueName(b.venue_id)}</div>`,levelName(b.level),badge(b.status),`<a href="/signup.html?venue=${encodeURIComponent(b.venue_id)}&event=${encodeURIComponent(b.event_id)}&lang=${language}">${t('前往报名页','Go to Registration')} &rarr;</a>`]));
   if(state.tab==='packages')content=`<div class="package-grid">${p.packages.map(x=>packageCard(x)).join('')||`<p class="empty">${t('暂无套餐','No packages yet')}</p>`}</div>`;
   if(state.tab==='payments')content=paymentsTable(p.payments,false);
   if(state.tab==='attendance')content=table([t('日期','Date'),t('场地','Venue'),t('方式','Method'),t('状态','Status')],p.attendance.map(a=>[a.date,venueName(a.venue_id),a.package_id?t('套餐到场','Package Attendance'):t('单次到场','Single Visit'),a.reversed_at?t('已撤销','Reversed'):t('已确认到场','Attendance Confirmed')]));
@@ -90,6 +124,7 @@ function openAuth(mode='login'){
   $('authTabs').innerHTML=[['login',t('登录','Sign In')],['register',t('注册','Register')],['recover',t('找回密码','Recover')]].map(([key,label])=>`<button type="button" data-auth-mode="${key}" class="${mode===key?'active':''}">${label}</button>`).join('');
   $('authForm').innerHTML=`<label class="field">${t('用户名','Username')}<input name="username" autocomplete="username" minlength="3" maxlength="32" pattern="[a-zA-Z0-9_]+" required></label>${mode==='register'?`<label class="field">${t('显示姓名','Display Name')}<input name="displayName" maxlength="40" required></label><label class="field">${t('手机尾号4位','Last 4 Phone Digits')}<input name="phoneTail" pattern="[0-9]{4}" maxlength="4" inputmode="numeric" required></label>`:''}${mode==='recover'?`<label class="field">${t('私密恢复码','Private Recovery Code')}<input name="recoveryCode" autocomplete="off" required maxlength="80"></label>`:''}<label class="field">${mode==='login'?t('密码','Password'):t('设置密码 · 至少10位','Password · At Least 10 Characters')}<input name="password" type="password" autocomplete="${mode==='login'?'current-password':'new-password'}" minlength="${mode==='login'?1:10}" maxlength="64" required></label><button class="primary" type="submit">${mode==='login'?t('登录','Sign In'):mode==='register'?t('创建账户','Create Account'):t('重置密码','Reset Password')}</button>`;
   if(!$('authDialog').open)$('authDialog').showModal();
+  mountDialogLanguages();
 }
 function showRecovery(code){$('recoveryTitle').textContent=t('保存私密恢复码','Save Your Recovery Code');$('recoveryNotice').textContent=t('仅显示这一次。忘记密码时可用它自行恢复账户，请勿分享。','Shown once. Keep it private; use it to recover your account if you forget your password.');$('recoveryCode').textContent=code;$('copyRecovery').textContent=t('复制','Copy');$('closeRecovery').textContent=t('已保存','Saved');$('recoveryDialog').showModal();}
 let confirmResolve=null;
@@ -97,15 +132,19 @@ function confirmAction(title,body){$('confirmTitle').textContent=title;$('confir
 function finishConfirm(value){const resolve=confirmResolve;confirmResolve=null;$('confirmDialog').close();resolve?.(value);}
 $('cancelConfirm').onclick=()=>finishConfirm(false);$('acceptConfirm').onclick=()=>finishConfirm(true);$('confirmDialog').addEventListener('cancel',event=>{event.preventDefault();finishConfirm(false);});
 $('copyRecovery').onclick=async()=>{try{await navigator.clipboard.writeText($('recoveryCode').textContent);toast(t('已复制','Copied'));}catch(_){toast(t('请选中恢复码保存','Select and retain the recovery code'));}};
-$('closeRecovery').onclick=()=>{$('recoveryDialog').close();$('recoveryCode').textContent='';};
-$('identityButton').onclick=()=>state.user?(state.view='account',render()):openAuth();
-for(const [button,lang] of [[$('zhButton'),'zh'],[$('enButton'),'en']])button.onclick=()=>{language=lang;localStorage.setItem('dove_sandbox_language',lang);render();};
+$('closeRecovery').onclick=()=>{$('recoveryDialog').close();$('recoveryCode').textContent='';continueSignup();};
+$('identityButton').onclick=()=>state.user?location.assign(`/account.html?lang=${language}`):openAuth();
 document.addEventListener('click',async event=>{
+  if(event.target.closest('[data-switch-language]')){changeLanguage(language==='en'?'zh':'en');return;}
+  const languageButton=event.target.closest('[data-language]');if(languageButton){changeLanguage(languageButton.dataset.language);return;}
   const close=event.target.closest('[data-close]');if(close)$(close.dataset.close).close();
   const authMode=event.target.closest('[data-auth-mode]');if(authMode){openAuth(authMode.dataset.authMode);return;}
   const view=event.target.closest('[data-view]');if(view){event.preventDefault();state.view=view.dataset.view;history.pushState({},'',view.getAttribute('href'));render();return;}
   const button=event.target.closest('[data-action]');if(!button||button.disabled)return;
   const {action:kind,id}=button.dataset;
+  if(kind==='signup-tab'){signupTab=id;render();return;}
+  if(kind==='open-signup'){if(!state.user){resumeSignupAfterAuth=true;openAuth();}else $('bookingDialog').showModal();return;}
+  if(kind==='copy-chain'){try{await navigator.clipboard.writeText(state.roster.map((p,i)=>`${i+1}. ${p.display_name} · ${levelName(p.level)} · ${labels[p.status]?.()||p.status}`).join('\n'));toast(t('已复制','Copied'));}catch(_){toast(t('无法访问剪贴板','Clipboard unavailable'));}return;}
   if(kind==='auth'){openAuth();return;}
   if(kind==='account-tab'){state.tab=id;render();return;}
   if(kind==='admin-tab'){state.adminTab=id;render();return;}
@@ -143,7 +182,7 @@ document.addEventListener('submit',async event=>{
   const input=Object.fromEntries(new FormData(form)),submit=form.querySelector('[type=submit],button:not([type])');state.busy=true;if(submit)submit.disabled=true;
   try{
     if(form.id==='authForm'){
-      const result=await api(`/auth/${state.authMode}`,'POST',input);state.user=result.user;state.csrf=result.csrf;$('authDialog').close();await refresh();if(result.recoveryCode)showRecovery(result.recoveryCode);return;
+      const result=await api(`/auth/${state.authMode}`,'POST',input);state.user=result.user;state.csrf=result.csrf;$('authDialog').close();await refresh();if(result.recoveryCode)showRecovery(result.recoveryCode);else continueSignup();return;
     }
     if(form.id==='bookingForm')await api('/bookings','POST',{...input,eventId:state.eventId});
     if(form.id==='profileForm')await api('/me','PATCH',input);
