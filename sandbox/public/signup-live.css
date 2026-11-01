@@ -1,0 +1,5 @@
+.staging-banner{position:fixed;top:0;left:0;right:0;height:28px;z-index:21000;display:flex;align-items:center;justify-content:center;background:#f3dba4;color:#513f13;font:600 11px "Segoe UI",sans-serif}
+body.sandbox-live-signup{padding-top:28px}
+.sandbox-live-signup .dove-site-nav{top:28px}
+.sandbox-live-signup .app-header{top:calc(var(--dove-site-nav-height) + 28px)!important}
+@media(max-width:480px){.staging-banner{font-size:10px}}

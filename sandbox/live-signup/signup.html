@@ -1,0 +1,2001 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<link rel="stylesheet" href="language.css?v=1">
+<link rel="stylesheet" href="site-nav.css?v=2">
+<script src="language.js?v=52"></script>
+<script src="payments.js?v=3"></script>
+<script src="tour-levels.js?v=1"></script>
+<script src="venue-config.js?v=4"></script>
+<script src="signup-capacity.js?v=1"></script>
+<script src="player-identity.js?v=1"></script>
+<script src="signup-ownership.js?v=2"></script>
+<script src="phone-tail.js?v=2"></script>
+<script src="finance-ledger.js?v=3"></script>
+<script src="finance-store.js?v=3"></script>
+<script src="site-nav.js?v=2" defer></script>
+<title>金鸽巡回赛 · 报名接龙</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+:root {
+  --green: #07C160;
+  --green-light: #E8F9EF;
+  --green-dark: #059A4A;
+  --orange: #FF8C00;
+  --orange-light: #FFF3E0;
+  --red: #FA5151;
+  --red-light: #FFF0F0;
+  --blue: #10AEFF;
+  --blue-light: #EBF8FF;
+  --gray-100: #F7F7F7;
+  --gray-200: #EFEFEF;
+  --gray-300: #DCDCDC;
+  --gray-500: #999;
+  --gray-700: #555;
+  --ink: #1A1A1A;
+  --white: #FFFFFF;
+  --radius: 12px;
+  --radius-sm: 8px;
+  --shadow: 0 2px 12px rgba(0,0,0,0.08);
+  --shadow-lg: 0 8px 32px rgba(0,0,0,0.14);
+}
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+[hidden]{display:none!important}
+.payment-details input[type="checkbox"]{width:auto;margin-right:6px}
+html, body { height: 100%; }
+body {
+  font-family: 'Noto Sans SC', -apple-system, sans-serif;
+  background: var(--gray-100);
+  color: var(--ink);
+  max-width: 480px;
+  margin: 0 auto;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+}
+
+/* ── Header ── */
+.app-header {
+  background: var(--white);
+  padding: 16px 16px 0;
+  position: sticky;
+  top: 0;
+  z-index: 200;
+  box-shadow: 0 1px 0 var(--gray-200);
+}
+.header-top {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+}
+.event-title {
+  font-size: 18px;
+  font-weight: 700;
+  flex: 1;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 8px;
+}
+@media (max-width: 640px) {
+  .header-top { flex-wrap: wrap; justify-content: flex-start; gap: 6px; }
+  .event-title { flex-basis: 100%; white-space: normal; margin: 0 0 4px; }
+}
+.edit-title-btn {
+  background: none;
+  border: none;
+  color: var(--green);
+  font-size: 13px;
+  cursor: pointer;
+  padding: 4px 8px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.admin-btn {
+  background: var(--gray-100);
+  border: 1px solid var(--gray-200);
+  color: var(--gray-700);
+  font-size: 12px;
+  cursor: pointer;
+  padding: 5px 9px;
+  border-radius: var(--radius-sm);
+  white-space: nowrap;
+}
+.admin-btn.active {
+  background: var(--green-light);
+  border-color: var(--green);
+  color: var(--green-dark);
+  font-weight: 700;
+}
+.admin-only { display: none !important; }
+body.is-admin .admin-only { display: inline-flex !important; }
+body.is-admin .capacity-edit.admin-only { display: flex !important; }
+body.is-admin .summary-card.admin-only { display: block !important; }
+.owner-note {
+  font-size: 11px;
+  color: var(--green-dark);
+  margin-top: 3px;
+}
+.stats-row {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 6px;
+  padding-bottom: 12px;
+}
+.stat-chip {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  gap: 5px;
+  background: var(--gray-100);
+  border-radius: 20px;
+  padding: 5px 4px;
+  font-size: 11px;
+  color: var(--gray-700);
+}
+.stat-chip .dot {
+  width: 7px; height: 7px;
+  border-radius: 50%;
+}
+.stat-chip .dot.green { background: var(--green); }
+.stat-chip .dot.orange { background: var(--orange); }
+.stat-chip .dot.gray { background: var(--gray-300); }
+.stat-chip strong { font-weight: 700; color: var(--ink); }
+.venue-picker-wrap { padding: 12px; background: #efe8d8; border-bottom: 1px solid #dfd2b9; }
+.venue-picker-label { margin-bottom: 8px; color: var(--gray-700); font-size: 11px; font-weight: 900; letter-spacing: .08em; }
+.venue-picker { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.venue-card { display: grid; gap: 3px; min-width: 0; padding: 12px; border: 1px solid #d5c5aa; border-radius: 8px; background: #fffdf8; color: var(--ink); text-decoration: none; }
+.venue-card strong { font-size: 14px; line-height: 1.25; }
+.venue-card span { color: var(--gray-700); font-size: 11px; line-height: 1.4; }
+.venue-card.active { border-color: #006b3f; background: #0b3c2a; color: #fff; box-shadow: 0 5px 16px rgba(0,75,43,.18); }
+.venue-card.active span { color: rgba(255,255,255,.76); }
+
+/* ── Tabs ── */
+.tabs {
+  display: flex;
+  background: var(--white);
+  border-bottom: 1px solid var(--gray-200);
+  position: sticky;
+  top: 101px;
+  z-index: 150;
+}
+.tab-btn {
+  flex: 1;
+  background: none;
+  border: none;
+  padding: 11px 0;
+  font-size: 14px;
+  font-family: 'Noto Sans SC', sans-serif;
+  color: var(--gray-500);
+  cursor: pointer;
+  position: relative;
+  font-weight: 500;
+  transition: color 0.2s;
+}
+.tab-btn.active { color: var(--green); font-weight: 700; }
+.tab-btn.active::after {
+  content: '';
+  position: absolute;
+  bottom: 0; left: 20%; right: 20%;
+  height: 2.5px;
+  background: var(--green);
+  border-radius: 2px;
+}
+.tab-count {
+  display: inline-block;
+  background: var(--gray-200);
+  border-radius: 10px;
+  padding: 1px 6px;
+  font-size: 11px;
+  margin-left: 3px;
+}
+.tab-btn.active .tab-count { background: var(--green-light); color: var(--green-dark); }
+
+/* ── Content ── */
+.content { flex: 1; padding: 12px; }
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* ── Capacity bar ── */
+.capacity-bar-wrap {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 14px 16px;
+  margin-bottom: 12px;
+  box-shadow: var(--shadow);
+}
+.capacity-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 8px;
+}
+.capacity-label { font-size: 13px; color: var(--gray-700); }
+.capacity-nums { font-size: 13px; font-weight: 700; }
+.capacity-nums span { color: var(--green); }
+.bar-track {
+  height: 6px;
+  background: var(--gray-200);
+  border-radius: 3px;
+  overflow: hidden;
+}
+.bar-fill {
+  height: 100%;
+  background: linear-gradient(90deg, var(--green), #00DA6C);
+  border-radius: 3px;
+  transition: width 0.5s cubic-bezier(0.34,1.3,0.64,1);
+}
+.capacity-edit {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 10px;
+  border-top: 1px solid var(--gray-200);
+  padding-top: 10px;
+}
+.capacity-edit label { font-size: 12px; color: var(--gray-500); flex: 1; }
+.capacity-edit input {
+  width: 64px;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  padding: 5px 8px;
+  font-size: 14px;
+  font-family: inherit;
+  text-align: center;
+  outline: none;
+}
+.capacity-edit input:focus { border-color: var(--green); }
+.set-btn {
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: var(--radius-sm);
+  padding: 6px 14px;
+  font-size: 13px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+/* ── Person cards ── */
+.section-label {
+  font-size: 11px;
+  font-weight: 700;
+  color: var(--gray-500);
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 14px 0 8px 2px;
+}
+.level-section {
+  margin-bottom: 14px;
+}
+.level-section-title {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--green-dark);
+  background: var(--green-light);
+  border-radius: 999px;
+  padding: 7px 12px;
+  margin: 12px 0 8px;
+}
+.level-section-title span {
+  color: var(--gray-700);
+  font-size: 12px;
+  font-weight: 700;
+}
+.person-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  box-shadow: var(--shadow);
+  display: grid;
+  grid-template-columns: 22px 38px minmax(0,1fr);
+  align-items: start;
+  gap: 10px;
+  transition: transform 0.15s, opacity 0.15s;
+  position: relative;
+  overflow: hidden;
+}
+.person-card.promoting {
+  animation: promoteIn 0.5s cubic-bezier(0.34,1.4,0.64,1);
+}
+@keyframes promoteIn {
+  from { transform: scale(0.92) translateY(8px); opacity: 0; background: var(--green-light); }
+  to   { transform: scale(1) translateY(0); opacity: 1; }
+}
+.person-card.removing {
+  animation: removeOut 0.3s ease forwards;
+}
+@keyframes removeOut {
+  to { transform: translateX(60px); opacity: 0; max-height: 0; margin: 0; padding: 0; }
+}
+.rank-num {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-500);
+  min-width: 22px;
+  text-align: center;
+}
+.rank-num.top { color: var(--green); }
+.avatar {
+  width: 38px; height: 38px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 15px;
+  font-weight: 700;
+  flex-shrink: 0;
+  color: white;
+}
+.person-info { min-width: 0; }
+.person-name {
+  font-size: 15px;
+  font-weight: 600;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+.person-meta { font-size: 12px; color: var(--gray-500); margin-top: 2px; }
+.person-card>.rank-num{padding-top:10px}
+.person-card>.avatar{margin-top:3px}
+.person-status{display:flex;flex-wrap:wrap;align-items:center;gap:6px;margin-top:9px}
+.person-status .badge{min-height:32px;border-radius:4px;padding:5px 9px}
+.person-status .badge:disabled{opacity:1;cursor:default}
+.person-actions{grid-column:1/-1;display:grid;grid-template-columns:repeat(auto-fit,minmax(100px,1fr));gap:8px;padding-top:10px;border-top:1px solid var(--gray-200)}
+.person-actions .badge{display:flex;justify-content:center;align-items:center;min-height:40px;white-space:normal;overflow-wrap:anywhere;padding:7px 8px;border-radius:4px;line-height:1.4;background:#f4f6f4;color:#344c3d;border:1px solid #dce3dd}
+.person-actions .badge-cancel{background:transparent;color:#ad4848;border-color:#ead9d9}
+
+/* ── Status badges ── */
+.badges {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex-shrink: 0;
+}
+.badge {
+  border-radius: 20px;
+  padding: 4px 10px;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+  border: 1.5px solid transparent;
+  transition: all 0.15s;
+  white-space: nowrap;
+  user-select: none;
+}
+.badge:active { transform: scale(0.93); }
+.badge.locked {
+  cursor: not-allowed;
+  opacity: 0.55;
+}
+.badge.locked:active { transform: none; }
+
+.badge-confirm {
+  background: var(--green-light);
+  color: var(--green-dark);
+  border-color: var(--green-light);
+}
+.badge-confirm.off {
+  background: var(--gray-100);
+  color: var(--gray-500);
+  border-color: var(--gray-300);
+}
+.badge-paid {
+  background: var(--blue-light);
+  color: var(--blue);
+  border-color: var(--blue-light);
+}
+.badge-paid.off {
+  background: var(--gray-100);
+  color: var(--gray-500);
+  border-color: var(--gray-300);
+}
+.badge-paid.pending{background:var(--orange-light);color:#985600;border-color:#efc476}
+.badge-paid.package_pending{background:var(--orange-light);color:#985600;border-color:#efc476}
+.badge-paid.received{background:var(--green-light);color:var(--green-dark);border-color:#a8d7be}
+.payment-strip{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:12px 16px;background:#fffaf0;border-bottom:1px solid #e1d4b8;font-size:13px;line-height:1.6}
+.payment-strip strong{display:block;color:#143323;font-size:14px}
+.payment-strip button{flex:none;padding:8px 12px;border:1px solid #b4bfae;border-radius:4px;background:white;color:#143323;font:inherit;cursor:pointer}
+.payment-details{display:grid;gap:14px;margin:16px 0;font-size:14px;line-height:1.6}
+.payment-details label{display:block;margin-bottom:4px;color:#666;font-size:12px}
+.payment-details input,.payment-details select{width:100%;min-width:0;padding:10px;border:1px solid #ccc;border-radius:4px;background:#fff;font:inherit;color:#17241e}
+.payment-copy-row{display:flex;gap:8px;min-width:0}.payment-copy-row input{flex:1}.payment-copy-row button{flex:none;border:1px solid #ccc;background:#f7f7f7;padding:8px;font:inherit;border-radius:4px;cursor:pointer}
+.payment-notice{margin:0;color:#666;font-size:12px;line-height:1.6}
+.badge-cancel {
+  background: var(--red-light);
+  color: var(--red);
+  border-color: var(--red-light);
+}
+.badge-wait-promote {
+  background: var(--orange-light);
+  color: var(--orange);
+  border-color: var(--orange-light);
+}
+
+/* ── Delete swipe area ── */
+.delete-zone {
+  position: absolute;
+  right: 0; top: 0; bottom: 0;
+  width: 70px;
+  background: var(--red);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: white;
+  font-size: 13px;
+  font-weight: 700;
+  transform: translateX(100%);
+  transition: transform 0.25s;
+  cursor: pointer;
+  border-radius: 0 var(--radius) var(--radius) 0;
+}
+.person-card.swiped .delete-zone { transform: translateX(0); }
+
+/* ── Add person form ── */
+.add-form {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 14px;
+  margin-top: 14px;
+  box-shadow: var(--shadow);
+}
+.add-form-title {
+  font-size: 13px;
+  font-weight: 700;
+  color: var(--gray-700);
+  margin-bottom: 10px;
+}
+.form-row {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 8px;
+}
+.form-input {
+  flex: 1;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+  font-size: 14px;
+  font-family: inherit;
+  outline: none;
+  color: var(--ink);
+  background: var(--gray-100);
+  transition: border-color 0.2s, background 0.2s;
+}
+.form-input:focus {
+  border-color: var(--green);
+  background: white;
+}
+.form-input::placeholder { color: var(--gray-300); }
+.add-to-list-btn {
+  padding: 10px 16px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.add-to-list-btn:active { transform: scale(0.96); }
+.btn-main { background: var(--green); color: white; }
+.btn-wait { background: var(--orange-light); color: var(--orange); border: 1.5px solid var(--orange); }
+
+/* ── Waitlist ── */
+.waitlist-empty {
+  text-align: center;
+  padding: 40px 20px;
+  color: var(--gray-500);
+}
+.waitlist-empty .icon { font-size: 42px; margin-bottom: 10px; }
+.waitlist-empty p { font-size: 14px; line-height: 1.8; }
+
+.promote-all-btn {
+  width: 100%;
+  background: var(--green);
+  color: white;
+  border: none;
+  border-radius: var(--radius);
+  padding: 13px;
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 10px;
+  box-shadow: 0 4px 14px rgba(7,193,96,0.35);
+  transition: all 0.15s;
+}
+.promote-all-btn:active { transform: scale(0.97); }
+
+/* ── Summary tab ── */
+.summary-card {
+  background: var(--white);
+  border-radius: var(--radius);
+  padding: 16px;
+  margin-bottom: 10px;
+  box-shadow: var(--shadow);
+}
+.summary-card h3 {
+  font-size: 14px;
+  color: var(--gray-700);
+  margin-bottom: 12px;
+  font-weight: 700;
+}
+.summary-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+.summary-item {
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 12px;
+  text-align: center;
+}
+.summary-item .s-num {
+  font-size: 28px;
+  font-weight: 900;
+  line-height: 1;
+  margin-bottom: 4px;
+}
+.summary-item .s-label { font-size: 12px; color: var(--gray-500); }
+.s-green { color: var(--green); }
+.s-blue { color: var(--blue); }
+.s-red { color: var(--red); }
+.s-orange { color: var(--orange); }
+
+.copy-btn {
+  width: 100%;
+  background: var(--green-light);
+  color: var(--green-dark);
+  border: 1.5px solid var(--green);
+  border-radius: var(--radius);
+  padding: 13px;
+  font-size: 14px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  margin-top: 4px;
+  transition: all 0.15s;
+}
+.copy-btn:active { transform: scale(0.97); }
+
+.unpaid-list { margin-top: 10px; }
+.unpaid-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--gray-200);
+  font-size: 14px;
+}
+.unpaid-row:last-child { border-bottom: none; }
+.unpaid-name { font-weight: 600; }
+.unpaid-tag {
+  font-size: 11px;
+  background: var(--orange-light);
+  color: var(--orange);
+  border-radius: 10px;
+  padding: 2px 8px;
+  font-weight: 700;
+}
+.weekly-reset-note {
+  margin-top: 9px;
+  color: var(--gray-500);
+  font-size: 11px;
+  line-height: 1.6;
+}
+.admin-history-summary {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+.admin-history-metric {
+  background: var(--gray-100);
+  border-radius: var(--radius-sm);
+  padding: 10px 12px;
+}
+.admin-history-metric strong {
+  display: block;
+  color: var(--green-dark);
+  font-size: 20px;
+  line-height: 1.2;
+}
+.admin-history-metric span { color: var(--gray-500); font-size: 11px; }
+.admin-table-wrap {
+  overflow-x: auto;
+  border: 1px solid var(--gray-200);
+  border-radius: var(--radius-sm);
+}
+.admin-signup-table {
+  width: 100%;
+  min-width: 500px;
+  border-collapse: collapse;
+  font-size: 12px;
+}
+.admin-signup-table th,
+.admin-signup-table td {
+  padding: 9px 10px;
+  text-align: left;
+  border-bottom: 1px solid var(--gray-200);
+  white-space: nowrap;
+}
+.admin-signup-table th { color: var(--gray-500); background: var(--gray-100); }
+.admin-signup-table tr:last-child td { border-bottom: 0; }
+.signup-count { color: var(--green-dark); font-size: 16px; font-weight: 900; }
+.current-week-tag {
+  display: inline-block;
+  padding: 2px 7px;
+  border-radius: 10px;
+  color: var(--green-dark);
+  background: var(--green-light);
+  font-weight: 700;
+}
+.current-week-tag.waiting { color: var(--orange); background: var(--orange-light); }
+.archive-heading {
+  margin: 16px 0 8px;
+  color: var(--gray-700);
+  font-size: 12px;
+  font-weight: 700;
+}
+.archive-week { border-top: 1px solid var(--gray-200); padding: 9px 0; }
+.archive-week summary {
+  cursor: pointer;
+  color: var(--gray-700);
+  font-size: 12px;
+  font-weight: 700;
+}
+.archive-week-body {
+  margin-top: 8px;
+  color: var(--gray-500);
+  font-size: 12px;
+  line-height: 1.7;
+  overflow-wrap: anywhere;
+}
+.admin-data-empty { color: var(--gray-500); font-size: 12px; line-height: 1.7; padding: 8px 0; }
+
+/* ── Toast ── */
+#toast {
+  position: fixed;
+  bottom: 80px;
+  left: 50%;
+  transform: translateX(-50%) translateY(20px);
+  background: rgba(26,26,26,0.9);
+  color: white;
+  padding: 10px 20px;
+  border-radius: 24px;
+  font-size: 13px;
+  font-weight: 500;
+  opacity: 0;
+  transition: all 0.28s;
+  z-index: 9999;
+  white-space: nowrap;
+  pointer-events: none;
+  backdrop-filter: blur(8px);
+}
+#toast.show {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+#toast.green { background: rgba(7,193,96,0.92); }
+
+/* ── Modal ── */
+.modal-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.45);
+  z-index: 500;
+  align-items: flex-end;
+  justify-content: center;
+}
+.modal-overlay.open { display: flex; animation: fadein 0.2s; }
+@keyframes fadein { from { opacity: 0; } to { opacity: 1; } }
+.modal-sheet {
+  background: white;
+  border-radius: 18px 18px 0 0;
+  padding: 20px 20px 32px;
+  width: 100%;
+  max-width: 480px;
+  animation: slideup 0.28s cubic-bezier(0.34,1.2,0.64,1);
+}
+@keyframes slideup {
+  from { transform: translateY(80px); opacity: 0; }
+  to   { transform: translateY(0); opacity: 1; }
+}
+.modal-handle {
+  width: 36px; height: 4px;
+  background: var(--gray-300);
+  border-radius: 2px;
+  margin: 0 auto 16px;
+}
+.modal-title { font-size: 17px; font-weight: 700; margin-bottom: 14px; }
+.modal-input {
+  width: 100%;
+  border: 1.5px solid var(--gray-300);
+  border-radius: var(--radius-sm);
+  padding: 12px 14px;
+  font-size: 16px;
+  font-family: inherit;
+  outline: none;
+  margin-bottom: 14px;
+}
+.modal-input:focus { border-color: var(--green); }
+.modal-btns { display: flex; gap: 10px; }
+.modal-btn {
+  flex: 1;
+  padding: 13px;
+  border: none;
+  border-radius: var(--radius-sm);
+  font-size: 15px;
+  font-family: inherit;
+  font-weight: 700;
+  cursor: pointer;
+}
+.modal-btn.cancel { background: var(--gray-100); color: var(--gray-700); }
+.modal-btn.confirm { background: var(--green); color: white; }
+
+/* ── Floating add btn ── */
+.fab {
+  position: fixed;
+  bottom: 24px;
+  right: 20px;
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  background: var(--green);
+  color: white;
+  font-size: 26px;
+  border: none;
+  box-shadow: 0 4px 18px rgba(7,193,96,0.5);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+  transition: transform 0.15s, box-shadow 0.15s;
+  line-height: 1;
+}
+.fab:active { transform: scale(0.9); box-shadow: 0 2px 10px rgba(7,193,96,0.3); }
+</style>
+</head>
+<body>
+
+<!-- Header -->
+<div class="app-header">
+  <div class="header-top">
+    <div class="event-title" id="eventTitle">金鸽巡回赛 · 报名接龙</div>
+    <button class="edit-title-btn admin-only" onclick="editTitle()">✏️ 改名</button>
+    <button class="admin-btn" onclick="goPage('./')">首页</button>
+    <button class="admin-btn" onclick="goPage('courts.html')">场地</button>
+    <button class="admin-btn" onclick="goPage('scores.html')">到场</button>
+    <button class="admin-btn" onclick="goPage('events.html')">活动中心</button>
+    <button class="admin-btn" id="adminBtn" onclick="toggleAdmin()">Admin</button>
+    <button class="admin-btn admin-only" type="button" onclick="goPage('finance.html')">收款与套餐</button>
+  </div>
+  <div class="stats-row">
+    <div class="stat-chip">
+      <div class="dot green"></div>
+      名额 <strong><span id="statCap">—</span></strong>
+    </div>
+    <div class="stat-chip">
+      <div class="dot green"></div>
+      已报名 <strong id="statJoined">0</strong>
+    </div>
+    <div class="stat-chip">
+      <div class="dot orange"></div>
+      Waitlist <strong id="statWait">0</strong>
+    </div>
+    <div class="stat-chip">
+      <div class="dot gray"></div>
+      已收款 <strong id="statPaid">0</strong>
+    </div>
+  </div>
+</div>
+
+<section class="venue-picker-wrap" aria-label="选择本周场次">
+  <p id="nextSessionNotice" class="payment-notice" data-dove-no-translate></p>
+  <p id="venueLimitNotice" class="payment-notice" hidden>每个等级最多4人，总名额12人；等级满员后进入候补。</p>
+  <div class="venue-picker-label">选择本周场次</div>
+  <div class="venue-picker">
+    <a class="venue-card" id="venueMrtc" href="signup.html?venue=mrtc">
+      <strong>MRTC</strong><span>周六 5–7 PM · 最多 24 人</span>
+    </a>
+    <a class="venue-card" id="venueNyta" href="signup.html?venue=nyta-east">
+      <strong>NYTA East Bubble</strong><span>周六 9–11 PM · 最多 12 人</span>
+    </a>
+  </div>
+</section>
+
+<div class="payment-strip"><div><strong>单次 CAD $40 · 10次套餐 CAD $350</strong><span>Interac e-Transfer · 转账后由管理员核对到账</span></div><button type="button" onclick="openPayment()">付款信息</button></div>
+
+<!-- Tabs -->
+<div class="tabs">
+  <button class="tab-btn active" onclick="switchTab('joined')" id="tab-joined">
+    报名 <span class="tab-count" id="cnt-joined">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('waitlist')" id="tab-waitlist">
+    Waitlist <span class="tab-count" id="cnt-waitlist">0</span>
+  </button>
+  <button class="tab-btn" onclick="switchTab('summary')" id="tab-summary">
+    汇总
+  </button>
+</div>
+
+<!-- Content -->
+<div class="content">
+
+  <!-- Joined tab -->
+  <div class="tab-panel active" id="panel-joined">
+    <div class="capacity-bar-wrap">
+      <div class="capacity-header">
+        <span class="capacity-label">名额占用</span>
+        <span class="capacity-nums"><span id="barFilled">0</span> / <span id="barTotal">—</span></span>
+      </div>
+      <div class="bar-track"><div class="bar-fill" id="barFill" style="width:0%"></div></div>
+      <div class="capacity-edit admin-only">
+        <label>总名额上限</label>
+        <input type="number" id="capInput" placeholder="24" min="1" max="24">
+        <button class="set-btn" onclick="setCapacity()">设置</button>
+      </div>
+      <div class="weekly-reset-note">报名表每周六 23:00（多伦多时间）归档并更新为空。</div>
+    </div>
+    <div class="section-label">报名列表</div>
+    <div id="joinedList"></div>
+  </div>
+
+  <!-- Waitlist tab -->
+  <div class="tab-panel" id="panel-waitlist">
+    <div id="waitlistContent"></div>
+  </div>
+
+  <!-- Summary tab -->
+  <div class="tab-panel" id="panel-summary">
+    <div class="summary-card">
+      <h3>📊 报名概况</h3>
+      <div class="summary-grid">
+        <div class="summary-item">
+          <div class="s-num s-green" id="sum-joined">0</div>
+          <div class="s-label">已报名</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-num s-orange" id="sum-wait">0</div>
+          <div class="s-label">Waitlist</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-num s-blue" id="sum-paid">0</div>
+          <div class="s-label">已收款</div>
+        </div>
+        <div class="summary-item">
+          <div class="s-num s-red" id="sum-unpaid">0</div>
+          <div class="s-label">未收款</div>
+        </div>
+      </div>
+    </div>
+    <div class="summary-card" id="unpaidSection" style="display:none">
+      <h3>⏳ 未收款名单</h3>
+      <div class="unpaid-list" id="unpaidList"></div>
+    </div>
+    <div class="summary-card admin-only" id="adminHistorySection">
+      <h3>报名历史 · 仅管理员</h3>
+      <div id="adminHistoryContent" class="admin-data-empty">正在同步历史数据…</div>
+    </div>
+    <button class="copy-btn" onclick="copyList()">📋 复制接龙文本</button>
+  </div>
+
+</div>
+
+<!-- FAB -->
+<button class="fab" onclick="showAddModal()" aria-label="添加人员">＋</button>
+
+<!-- Toast -->
+<div id="toast"></div>
+
+<!-- Add modal -->
+<div class="modal-overlay" id="addModal" onclick="closeModal(event,'addModal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">➕ 添加人员</div>
+    <input class="modal-input" id="addName" placeholder="姓名 / 微信名" autocomplete="off">
+    <label for="addPhoneTail">手机尾号4位</label>
+    <input class="modal-input" id="addPhoneTail" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" placeholder="手机尾号4位" required aria-describedby="phoneTailNotice">
+    <p id="phoneTailNotice" class="payment-notice">仅填写最后4位，会显示在报名名单中。请勿填写完整手机号；尾号不用于身份验证。</p>
+    <select class="modal-input" id="addLevel">
+      <option value="u20">新手场 · 2.5-</option>
+      <option value="25_30">2.5-3.0</option>
+      <option value="30_plus">3.0-3.5</option>
+      <option value="35_plus">3.5+</option>
+    </select>
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeModalById('addModal')">取消</button>
+      <button class="modal-btn confirm" style="background:var(--orange);color:white" onclick="addPerson('waitlist')">加 Waitlist</button>
+      <button class="modal-btn confirm" onclick="addPerson('joined')">直接报名</button>
+    </div>
+  </div>
+</div>
+
+<!-- Edit title modal -->
+<div class="modal-overlay" id="editPhoneTailModal" onclick="closeModal(event,'editPhoneTailModal')" role="dialog" aria-modal="true" aria-labelledby="editPhoneTailTitle">
+  <form class="modal-sheet" onsubmit="event.preventDefault();savePhoneTail()">
+    <div class="modal-title" id="editPhoneTailTitle">补填手机尾号</div>
+    <p id="editPhoneTailName" data-dove-no-translate></p>
+    <label for="editPhoneTailInput">手机尾号4位</label>
+    <input class="modal-input" id="editPhoneTailInput" type="text" inputmode="numeric" pattern="[0-9]{4}" maxlength="4" autocomplete="off" required aria-describedby="editPhoneTailNotice editPhoneTailError">
+    <p class="payment-notice" id="editPhoneTailNotice">仅填写最后4位，会显示在报名名单中。请勿填写完整手机号；尾号不用于身份验证。</p>
+    <p id="editPhoneTailError" role="alert" data-dove-no-translate></p>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('editPhoneTailModal')">取消</button><button type="submit" class="modal-btn confirm" id="savePhoneTailButton">保存</button></div>
+  </form>
+</div>
+<div class="modal-overlay" id="exitHelpModal" onclick="closeModal(event,'exitHelpModal')" role="dialog" aria-modal="true" aria-labelledby="exitHelpTitle">
+  <div class="modal-sheet">
+    <div class="modal-title" id="exitHelpTitle">退出报名</div>
+    <p id="exitHelpText" class="payment-notice" data-dove-no-translate></p>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('exitHelpModal')">关闭</button><a id="exitHelpEmail" class="modal-btn confirm" href="mailto:GoldenDoveTour@outlook.com">联系管理员</a></div>
+  </div>
+</div>
+<div class="modal-overlay" id="paymentModal" onclick="closeModal(event,'paymentModal')" role="dialog" aria-modal="true" aria-labelledby="paymentTitle">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div><div class="modal-title" id="paymentTitle">付款信息</div>
+    <div class="payment-details">
+      <div><label for="paymentPlan">付款项目</label><select id="paymentPlan" onchange="updatePaymentChoice()"><option value="single">单次 · CAD $40 / 人</option><option value="package10">10次套餐 · CAD $350 / 人</option><option value="use_package">使用已有套餐</option></select></div>
+      <p id="packagePaymentNotice" class="payment-notice" hidden>套餐余额由管理员核实。本次无需转账，确认实际到场后才扣1次；报名不扣次。</p>
+      <div><label for="paymentEmail">EMT 收款邮箱</label><div class="payment-copy-row"><input id="paymentEmail" value="GoldenDoveTour@outlook.com" readonly aria-label="EMT 收款邮箱"><button type="button" onclick="copyPaymentField('paymentEmail')">复制</button></div></div>
+      <div><label for="paymentMemo">转账备注</label><div class="payment-copy-row"><input id="paymentMemo" readonly><button type="button" onclick="copyPaymentField('paymentMemo')">复制</button></div></div>
+      <p class="payment-notice">到账确认以管理员核对为准。套餐购买与剩余次数由管理员手动记录。</p>
+      <strong id="paymentStatusText"></strong>
+    </div>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('paymentModal')">关闭</button><button type="button" class="modal-btn confirm" id="paymentSubmit" onclick="submitTransfer()">我已转账</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="adminLoginModal" onclick="closeModal(event,'adminLoginModal')" role="dialog" aria-modal="true" aria-labelledby="adminLoginTitle">
+  <form class="modal-sheet" onsubmit="event.preventDefault();submitAdminLogin()">
+    <div class="modal-handle"></div><div class="modal-title" id="adminLoginTitle">管理员登录</div>
+    <label for="adminPasswordInput" style="display:block;margin-bottom:8px;font-size:13px">管理员密码</label>
+    <input class="modal-input" type="password" id="adminPasswordInput" autocomplete="current-password" required aria-describedby="adminLoginError">
+    <div id="adminLoginError" role="alert" style="min-height:24px;color:var(--red);font-size:13px;margin-bottom:10px"></div>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('adminLoginModal')">取消</button><button type="submit" class="modal-btn confirm">登录</button></div>
+  </form>
+</div>
+
+<div class="modal-overlay" id="attendanceModal" onclick="closeModal(event,'attendanceModal')" role="dialog" aria-modal="true" aria-labelledby="attendanceTitle">
+  <div class="modal-sheet"><div class="modal-handle"></div><div class="modal-title" id="attendanceTitle">到场登记</div>
+    <div class="payment-details"><strong id="attendanceName" data-dove-no-translate></strong><div><label for="attendanceDate">活动日期</label><input id="attendanceDate" type="date"></div><div><label for="attendanceMethod">本次方式</label><select id="attendanceMethod"><option value="attendance">单次到场 · 不扣套餐</option><option value="usage">套餐到场 · 扣1次</option></select></div><span id="attendanceBalance"></span><p class="payment-notice">本机预览记录，仅保存在当前浏览器。与线上到场统计分开。</p></div>
+    <div class="payment-details" id="attendancePackageField" hidden><div><label for="attendancePackageOwner">使用谁的套餐</label><select id="attendancePackageOwner" onchange="updateAttendancePackage(true)"></select></div><label id="attendanceShareField" hidden><input type="checkbox" id="attendanceShareConsent"> 已确认套餐持有人同意共享</label></div>
+    <div class="modal-btns"><button type="button" class="modal-btn cancel" onclick="closeModalById('attendanceModal')">取消</button><button type="button" class="modal-btn confirm" onclick="saveAttendance()">确认到场</button></div>
+  </div>
+</div>
+
+<div class="modal-overlay" id="titleModal" onclick="closeModal(event,'titleModal')">
+  <div class="modal-sheet">
+    <div class="modal-handle"></div>
+    <div class="modal-title">✏️ 修改活动名称</div>
+    <input class="modal-input" id="titleInput" placeholder="例：5月羽毛球活动" autocomplete="off">
+    <div class="modal-btns">
+      <button class="modal-btn cancel" onclick="closeModalById('titleModal')">取消</button>
+      <button class="modal-btn confirm" onclick="saveTitle()">保存</button>
+    </div>
+  </div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.13.2/firebase-database-compat.js"></script>
+<script>
+const COLORS = ['#07C160','#10AEFF','#FF8C00','#FA5151','#9B59B6','#E67E22','#2ECC71','#E74C3C','#3498DB','#1ABC9C'];
+const ADMIN_PASSWORD = '8888';
+const SITE_VERSION = '35';
+const WAITLIST_CAPACITY = 24;
+const VENUE_KEY = window.DoveVenues.keyFromQuery(location.search);
+const ACTIVE_VENUE = window.DoveVenues.get(VENUE_KEY);
+const DEFAULT_CAPACITY = ACTIVE_VENUE.capacity;
+const LEVEL_GROUPS = window.DoveTourLevels.groups;
+const LEGACY_LEVEL_MAP = window.DoveTourLevels.legacy;
+const DATA_STORAGE = `signup_v3_${VENUE_KEY}`;
+const DB_PATH = ACTIVE_VENUE.databasePath;
+const SIGNUP_STATS_DB_PATH = 'doveCupWaitlistSystem/signupStats';
+const SIGNUP_HISTORY_DB_PATH = 'doveCupWaitlistSystem/signupHistory';
+const FIREBASE_CONFIG = {
+  apiKey: 'AIzaSyBPTwRAkfHjCA_RCQu5t2udzllF3Rz_CCo',
+  authDomain: 'dovecupdatabase.firebaseapp.com',
+  databaseURL: 'https://dovecupdatabase-default-rtdb.firebaseio.com/',
+  projectId: 'dovecupdatabase',
+  storageBucket: 'dovecupdatabase.firebasestorage.app',
+  messagingSenderId: '814970094950',
+  appId: '1:814970094950:web:c061c00eaceed40125b4a7'
+};
+const USER_KEY_STORAGE = 'signup_user_key';
+const USER_NAME_STORAGE = 'signup_user_name';
+const ADMIN_STORAGE = 'signup_is_admin';
+
+let state = {
+  title: '🎉 活动接龙',
+  capacity: DEFAULT_CAPACITY,
+  joined: [],   // {id, name, ownerKey, confirmed, paid, ts}
+  waitlist: []  // {id, name, ownerKey, ts}
+};
+
+let idSeq = 1;
+let remoteRef = null;
+let remoteReady = false;
+let applyingRemote = false;
+let remoteSaveTimer = null;
+let adminStatsRef = null;
+let adminHistoryRef = null;
+let adminSignupStats = {};
+let adminSignupHistory = {};
+let adminStatsLoaded = false;
+let adminHistoryLoaded = false;
+let currentUserKey = localStorage.getItem(USER_KEY_STORAGE);
+if (!currentUserKey) {
+  currentUserKey = `${Date.now()}-${Math.random().toString(36).slice(2)}`;
+  localStorage.setItem(USER_KEY_STORAGE, currentUserKey);
+}
+let currentUserName = localStorage.getItem(USER_NAME_STORAGE) || '';
+let isAdminMode = sessionStorage.getItem(ADMIN_STORAGE) === '1';
+let paymentReviewLocated=false;
+
+function goPage(page) {
+  const venuePages = new Set(['signup.html', 'courts.html']);
+  location.href = venuePages.has(page)
+    ? window.DoveVenues.href(page, VENUE_KEY, location.search)
+    : page;
+}
+if (new URLSearchParams(location.search).has('v')) {
+  const cleanParams = new URLSearchParams(location.search);
+  cleanParams.delete('v');
+  history.replaceState(null, '', `${location.pathname}${cleanParams.size ? `?${cleanParams}` : ''}${location.hash}`);
+}
+function newId() { return idSeq++; }
+function hasFirebaseConfig() {
+  return Boolean(
+    FIREBASE_CONFIG.apiKey &&
+    FIREBASE_CONFIG.databaseURL &&
+    FIREBASE_CONFIG.projectId &&
+    FIREBASE_CONFIG.appId
+  );
+}
+function remotePayload() {
+  return {
+    state,
+    idSeq,
+    updatedAt: Date.now()
+  };
+}
+function defaultState() {
+  return { title: `${ACTIVE_VENUE.name} · 报名接龙`, capacity: DEFAULT_CAPACITY, joined: [], waitlist: [] };
+}
+function normalizeState(input) {
+  const next = Object.assign(defaultState(), input || {});
+  if (next.title === '金鸽杯报名接龙' || next.title === '🎉 活动接龙' || (VENUE_KEY === 'nyta-east' && next.title === '金鸽巡回赛 · 报名接龙')) next.title = `${ACTIVE_VENUE.name} · 报名接龙`;
+  next.capacity = Math.min(DEFAULT_CAPACITY, Number(next.capacity) > 0 ? Number(next.capacity) : DEFAULT_CAPACITY);
+  next.joined = Array.isArray(next.joined) ? next.joined.map(p => ({ ...p, name: DovePlayerIdentity.canonicalName(p.name) })) : [];
+  next.waitlist = Array.isArray(next.waitlist) ? next.waitlist.map(p => ({ ...p, name: DovePlayerIdentity.canonicalName(p.name) })) : [];
+  return enforceTotalCapacityForState(next);
+}
+function normalizePersonName(name) {
+  return DovePlayerIdentity.key(name);
+}
+function levelKeyOf(p) {
+  const raw = p && p.levelGroup;
+  if (LEVEL_GROUPS.some(group => group.key === raw)) return raw;
+  return window.DoveTourLevels.normalize(raw);
+}
+function levelLabelOf(p) {
+  const key = levelKeyOf(p);
+  return (LEVEL_GROUPS.find(g => g.key === key) || LEVEL_GROUPS[0]).label;
+}
+function groupedByLevel(list) {
+  return LEVEL_GROUPS.map(group => ({
+    ...group,
+    people: list.filter(p => levelKeyOf(p) === group.key)
+  }));
+}
+function enforceTotalCapacityForState(nextState) {
+  return DoveSignupCapacity.rebalance(nextState, ACTIVE_VENUE);
+}
+function openSignupSlots() {
+  return Math.max(0, (state.capacity || DEFAULT_CAPACITY) - state.joined.length);
+}
+function canJoinSignup(levelGroup) {
+  return DoveSignupCapacity.canJoin(state, ACTIVE_VENUE, levelGroup);
+}
+function waitlistIndexForOpenSlot() {
+  return state.waitlist.findIndex(p => canJoinSignup(levelKeyOf(p)));
+}
+function escapeHtml(v) {
+  return String(v).replace(/[&<>"']/g, ch => ({
+    '&': '&amp;',
+    '<': '&lt;',
+    '>': '&gt;',
+    '"': '&quot;',
+    "'": '&#39;'
+  }[ch]));
+}
+function ownsPerson(p) {
+  return DoveSignupOwnership.owns(p, currentUserKey, localStorage, currentUserName);
+}
+function canEditPerson(p) {
+  return isAdminMode || ownsPerson(p);
+}
+function rememberUser(name) {
+  DoveSignupOwnership.remember(localStorage, name, currentUserName);
+  if (!currentUserName) {
+    currentUserName = name;
+    localStorage.setItem(USER_NAME_STORAGE, name);
+  }
+}
+function requireAdmin() {
+  if (isAdminMode) return true;
+  showToast('只有管理员可以操作');
+  return false;
+}
+function requireOwner(p) {
+  if (canEditPerson(p)) return true;
+  showToast('你只能修改自己的状态');
+  return false;
+}
+function avatarColor(name) {
+  let h = 0;
+  for (let c of name) h = ((h << 5) - h) + c.charCodeAt(0);
+  return COLORS[Math.abs(h) % COLORS.length];
+}
+function initials(name) {
+  const trimmed = name.trim();
+  // Handle emoji-containing names
+  const clean = trimmed.replace(/[\u{1F000}-\u{1FFFF}]/gu, '').trim();
+  if (!clean) return trimmed[0] || '?';
+  // Chinese: first char; Latin: first letters of up to 2 words
+  if (/[\u4e00-\u9fff]/.test(clean[0])) return clean[0];
+  const parts = clean.split(/\s+/);
+  return (parts[0][0] + (parts[1] ? parts[1][0] : '')).toUpperCase();
+}
+
+function save() {
+  if (applyingRemote) return;
+  if (remoteRef) {
+    clearTimeout(remoteSaveTimer);
+    remoteSaveTimer = setTimeout(() => {
+      remoteRef.set(remotePayload()).catch(() => {
+        showToast('云端保存失败，请检查网络');
+      });
+    }, 80);
+    return;
+  }
+  try { sessionStorage.setItem(DATA_STORAGE, JSON.stringify({state, idSeq})); } catch(e){}
+}
+function load() {
+  try {
+    const raw = sessionStorage.getItem(DATA_STORAGE);
+    if (!raw) return;
+    const d = JSON.parse(raw);
+    state = normalizeState(d.state);
+    idSeq = d.idSeq || 100;
+  } catch(e){}
+}
+
+function initRealtimeDatabase() {
+  if (!hasFirebaseConfig()) {
+    showToast('需要配置 Firebase 才能多人实时共享');
+    return;
+  }
+  if (!window.firebase || !firebase.database) {
+    showToast('Firebase SDK 加载失败，请刷新页面');
+    return;
+  }
+
+  try {
+    if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+    remoteRef = firebase.database().ref(DB_PATH);
+    remoteRef.on('value', snapshot => {
+      applyingRemote = true;
+      const data = snapshot.val();
+      if (data && data.state) {
+        state = normalizeState(data.state);
+        idSeq = data.idSeq || 1;
+      } else {
+        state = defaultState();
+        idSeq = 1;
+        remoteRef.set(remotePayload());
+      }
+      remoteReady = true;
+      render();
+      applyingRemote = false;
+    }, () => {
+      showToast('无法连接实时数据库');
+    });
+    if (isAdminMode) startAdminDataSync();
+  } catch(e) {
+    showToast('Firebase 配置无效');
+  }
+}
+
+function startAdminDataSync() {
+  if (!isAdminMode || adminStatsRef || !window.firebase || !firebase.database) return;
+  if (!firebase.apps.length) firebase.initializeApp(FIREBASE_CONFIG);
+  adminStatsLoaded = false;
+  adminHistoryLoaded = false;
+  adminStatsRef = firebase.database().ref(SIGNUP_STATS_DB_PATH);
+  adminHistoryRef = firebase.database().ref(SIGNUP_HISTORY_DB_PATH);
+  adminStatsRef.on('value', snapshot => {
+    const value = snapshot.val();
+    adminSignupStats = value && typeof value === 'object' ? value : {};
+    adminStatsLoaded = true;
+    renderAdminHistory();
+  });
+  adminHistoryRef.on('value', snapshot => {
+    const value = snapshot.val();
+    adminSignupHistory = value && typeof value === 'object' ? value : {};
+    adminHistoryLoaded = true;
+    renderAdminHistory();
+  });
+}
+
+function stopAdminDataSync() {
+  if (adminStatsRef) adminStatsRef.off();
+  if (adminHistoryRef) adminHistoryRef.off();
+  adminStatsRef = null;
+  adminHistoryRef = null;
+  adminSignupStats = {};
+  adminSignupHistory = {};
+  adminStatsLoaded = false;
+  adminHistoryLoaded = false;
+}
+
+// ── Render ──
+function render() {
+  renderVenuePicker();
+  renderAuth();
+  renderJoined();
+  renderWaitlist();
+  renderSummary();
+  renderStats();
+  renderAdminHistory();
+  replaceLegacyLevelText();
+  save();
+}
+
+function renderVenuePicker() {
+  const review=new URLSearchParams(location.search).get('review');
+  if(review&&!paymentReviewLocated){
+    const list=['joined','waitlist'].find(key=>state[key].some(p=>String(p.id)===review));
+    if(list){paymentReviewLocated=true;switchTab(list==='joined'?'joined':'waitlist');requestAnimationFrame(()=>document.getElementById(`card-${review}`)?.scrollIntoView({block:'center'}));}
+  }
+  document.getElementById('venueLimitNotice').hidden = !ACTIVE_VENUE.levelCapacity;
+  for (const person of [...state.joined, ...state.waitlist]) {
+    if (person.ownerKey === currentUserKey) DoveSignupOwnership.remember(localStorage, person.name, currentUserName);
+  }
+  const english = window.DoveLanguage?.getLanguage() === 'en';
+  const paused = currentSessionDate() === DoveVenues.resumeFrom;
+  document.getElementById('nextSessionNotice').textContent = english
+    ? `Next session: ${currentSessionDate()}${paused ? ' · No events on October 17, 24 or 31.' : ''}`
+    : `下一场：${currentSessionDate()}${paused ? ' · 10月17日、24日、31日暂停活动。' : ''}`;
+  const mrtc = document.getElementById('venueMrtc');
+  const nyta = document.getElementById('venueNyta');
+  mrtc.href = window.DoveVenues.href('signup.html', 'mrtc', location.search);
+  nyta.href = window.DoveVenues.href('signup.html', 'nyta-east', location.search);
+  mrtc.classList.toggle('active', VENUE_KEY === 'mrtc');
+  nyta.classList.toggle('active', VENUE_KEY === 'nyta-east');
+  mrtc.setAttribute('aria-current', VENUE_KEY === 'mrtc' ? 'page' : 'false');
+  nyta.setAttribute('aria-current', VENUE_KEY === 'nyta-east' ? 'page' : 'false');
+}
+
+function renderAuth() {
+  document.body.classList.toggle('is-admin', isAdminMode);
+  const btn = document.getElementById('adminBtn');
+  if (btn) {
+    btn.textContent = isAdminMode ? 'Admin 已登录' : 'Admin';
+    btn.classList.toggle('active', isAdminMode);
+  }
+}
+
+function renderStats() {
+  document.getElementById('eventTitle').textContent = state.title;
+  const cap = state.capacity;
+  document.getElementById('statCap').textContent = cap ?? '不限';
+  document.getElementById('statJoined').textContent = state.joined.length;
+  document.getElementById('statWait').textContent = state.waitlist.length;
+  document.getElementById('statPaid').textContent = state.joined.filter(p=>DovePayments.status(p)==='received').length;
+  document.getElementById('cnt-joined').textContent = state.joined.length;
+  document.getElementById('cnt-waitlist').textContent = `${state.waitlist.length}/${WAITLIST_CAPACITY}`;
+
+  // Bar
+  document.getElementById('barFilled').textContent = state.joined.length;
+  document.getElementById('barTotal').textContent = cap ?? '∞';
+  const pct = cap ? Math.min(100, state.joined.length / cap * 100) : 0;
+  document.getElementById('barFill').style.width = pct + '%';
+  const capInput = document.getElementById('capInput');
+  capInput.max = DEFAULT_CAPACITY;
+  capInput.placeholder = String(DEFAULT_CAPACITY);
+  if (cap) capInput.value = cap;
+}
+
+function renderJoined() {
+  const el = document.getElementById('joinedList');
+  if (!state.joined.length) {
+    el.innerHTML = `<div class="waitlist-empty"><div class="icon">📋</div><p>还没有人报名<br>点击右下角 + 添加</p></div>`;
+    return;
+  }
+  let rank = 1;
+  el.innerHTML = groupedByLevel(state.joined).map(group => {
+    const cards = group.people.length
+      ? group.people.map(p => personCard(p, rank++, 'joined')).join('')
+      : `<div class="waitlist-empty"><p>暂无报名</p></div>`;
+    return `
+      <section class="level-section">
+        <div class="level-section-title">${group.label}<span>${group.people.length}${ACTIVE_VENUE.levelCapacity ? ` / ${ACTIVE_VENUE.levelCapacity}` : ''} 人</span></div>
+        ${cards}
+      </section>`;
+  }).join('');
+}
+
+function renderWaitlist() {
+  const el = document.getElementById('waitlistContent');
+  const slots = openSignupSlots();
+
+  if (!state.waitlist.length) {
+    el.innerHTML = `<div class="waitlist-empty"><div class="icon">⏳</div><p>Waitlist 暂时为空<br>${ACTIVE_VENUE.levelCapacity ? '每个等级最多4人，总名额12人；等级满员后进入候补。' : `四个分级共享 ${state.capacity || DEFAULT_CAPACITY} 个名额，满员后新报名会进入候补`}</p></div>`;
+    return;
+  }
+
+  let html = `<div class="section-label">等待补位 · ${state.waitlist.length} / ${WAITLIST_CAPACITY} 人</div>`;
+
+  if (isAdminMode && slots > 0 && waitlistIndexForOpenSlot() !== -1) {
+    html += `<button class="promote-all-btn" onclick="promoteAll()">🎉 有 ${slots} 个空位！一键补位前 ${Math.min(slots, state.waitlist.length)} 人</button>`;
+  }
+
+  html += state.waitlist.map((p, i) => personCard(p, i+1, 'waitlist')).join('');
+  el.innerHTML = html;
+}
+
+function renderSummary() {
+  const joined = state.joined.length;
+  const wait = state.waitlist.length;
+  const paid = state.joined.filter(p=>DovePayments.status(p)==='received').length;
+  const unpaid = joined - paid;
+  document.getElementById('sum-joined').textContent = joined;
+  document.getElementById('sum-wait').textContent = wait;
+  document.getElementById('sum-paid').textContent = paid;
+  document.getElementById('sum-unpaid').textContent = unpaid;
+
+  const unpaidPeople = state.joined.filter(p=>DovePayments.status(p)!=='received');
+  const sec = document.getElementById('unpaidSection');
+  if (unpaidPeople.length) {
+    sec.style.display = '';
+    document.getElementById('unpaidList').innerHTML = unpaidPeople.map(p =>
+      `<div class="unpaid-row">
+        <span class="unpaid-name">${escapeHtml(p.name)}</span>
+        <span class="unpaid-tag">${DovePayments.label(p)}</span>
+      </div>`
+    ).join('');
+  } else {
+    sec.style.display = 'none';
+  }
+}
+
+function formatAdminDate(timestamp) {
+  if (!Number(timestamp)) return '—';
+  return new Date(Number(timestamp)).toLocaleDateString('zh-CN', {
+    timeZone: 'America/Toronto',
+    year: 'numeric',
+    month: 'short',
+    day: 'numeric'
+  });
+}
+
+function renderAdminHistory() {
+  const el = document.getElementById('adminHistoryContent');
+  if (!el || !isAdminMode) return;
+  if (!adminStatsLoaded || !adminHistoryLoaded) {
+    el.className = 'admin-data-empty';
+    el.textContent = '正在同步历史数据…';
+    return;
+  }
+
+  const players = new Map();
+  Object.values(adminSignupStats).forEach(player => {
+    if (!player || !player.name) return;
+    const normalizedName = player.normalizedName || normalizePersonName(player.name);
+    players.set(normalizedName, {
+      name: player.name,
+      archivedCount: Number(player.signupCount) || 0,
+      waitlistCount: Number(player.waitlistCount) || 0,
+      lastSignupAt: Number(player.lastSignupAt) || 0,
+      current: ''
+    });
+  });
+
+  state.joined.forEach(person => {
+    const key = normalizePersonName(person.name);
+    const row = players.get(key) || { name: person.name, archivedCount: 0, waitlistCount: 0, lastSignupAt: 0, current: '' };
+    row.name = person.name;
+    row.current = 'joined';
+    row.currentAt = Number(person.ts) || 0;
+    players.set(key, row);
+  });
+  state.waitlist.forEach(person => {
+    const key = normalizePersonName(person.name);
+    const row = players.get(key) || { name: person.name, archivedCount: 0, waitlistCount: 0, lastSignupAt: 0, current: '' };
+    row.name = person.name;
+    if (!row.current) row.current = 'waitlist';
+    row.currentAt = Number(person.ts) || 0;
+    players.set(key, row);
+  });
+
+  const playerRows = Array.from(players.values()).map(player => ({
+    ...player,
+    totalCount: player.archivedCount + (player.current === 'joined' ? 1 : 0)
+  })).sort((a, b) => b.totalCount - a.totalCount || a.name.localeCompare(b.name, 'zh-CN'));
+  const archives = Object.entries(adminSignupHistory).map(([storageKey, archive]) => ({ ...archive, storageKey }))
+    .filter(archive => archive && archive.resetId)
+    .sort((a, b) => String(b.resetId).localeCompare(String(a.resetId)));
+
+  const rowsHtml = playerRows.length ? `
+    <div class="admin-table-wrap">
+      <table class="admin-signup-table">
+        <thead><tr><th>姓名</th><th>报名次数</th><th>本周</th><th>最近报名</th><th>Waitlist 周次</th></tr></thead>
+        <tbody>${playerRows.map(player => `
+          <tr>
+            <td><strong>${escapeHtml(player.name)}</strong></td>
+            <td><span class="signup-count">${player.totalCount}</span></td>
+            <td>${player.current === 'joined'
+              ? '<span class="current-week-tag">已报名</span>'
+              : player.current === 'waitlist'
+                ? '<span class="current-week-tag waiting">Waitlist</span>'
+                : '—'}</td>
+            <td>${formatAdminDate(player.currentAt || player.lastSignupAt)}</td>
+            <td>${player.waitlistCount}</td>
+          </tr>`).join('')}</tbody>
+      </table>
+    </div>` : '<div class="admin-data-empty">还没有可统计的报名记录。</div>';
+
+  const archiveHtml = archives.length ? archives.slice(0, 12).map(archive => {
+    const joinedNames = (Array.isArray(archive.joined) ? archive.joined : []).map(person => escapeHtml(person.name)).join('、') || '无';
+    const waitlistNames = (Array.isArray(archive.waitlist) ? archive.waitlist : []).map(person => escapeHtml(person.name)).join('、') || '无';
+    const payments = (Array.isArray(archive.joined) ? archive.joined : []).map((person, index) => `<div class="unpaid-row"><span>${escapeHtml(person.name)}</span><span>${DovePayments.label(person)}${person.paymentAmount ? ` · CAD $${Number(person.paymentAmount)}` : ''}</span>${DovePayments.status(person) === 'pending' ? `<button type="button" class="admin-btn" data-archive-key="${escapeHtml(archive.storageKey)}" data-person-index="${index}" onclick="verifyArchivedPayment(this)">确认收款</button>` : ''}</div>`).join('');
+    return `<details class="archive-week">
+      <summary>${escapeHtml(archive.resetId)} · ${escapeHtml(archive.venue || 'MRTC')} · 报名 ${Number(archive.joinedCount) || 0} 人 · Waitlist ${Number(archive.waitlistCount) || 0} 人</summary>
+      <div class="archive-week-body"><strong>报名：</strong>${joinedNames}<br><strong>Waitlist：</strong>${waitlistNames}${payments}</div>
+    </details>`;
+  }).join('') : '<div class="admin-data-empty">第一次周六归档后，历史名单会显示在这里。</div>';
+
+  el.className = '';
+  el.innerHTML = `
+    <div class="admin-history-summary">
+      <div class="admin-history-metric"><strong>${playerRows.length}</strong><span>累计记录人数</span></div>
+      <div class="admin-history-metric"><strong>${archives.length}</strong><span>已归档场次</span></div>
+    </div>
+    ${rowsHtml}
+    <div class="archive-heading">场次历史名单</div>
+    ${archiveHtml}`;
+}
+
+async function verifyArchivedPayment(button) {
+  if (!requireAdmin() || !adminHistoryRef || !confirm('确认已核实这笔转账到账？')) return;
+  const key = button.dataset.archiveKey;
+  const index = Number(button.dataset.personIndex);
+  if (!Object.hasOwn(adminSignupHistory, key) || !Number.isInteger(index) || index < 0) return;
+  try {
+    const result = await adminHistoryRef.child(key).child('joined').child(String(index)).transaction(person => {
+      if (!person || DovePayments.status(person) !== 'pending') return;
+      return DovePayments.verify(person, true);
+    });
+    if (result.committed) {
+      const archive = adminSignupHistory[key];
+      try { await DoveFinanceStore.recordPayment(result.snapshot.val(), { date: archive.resetId, venueKey: archive.venueKey || 'mrtc' }); }
+      catch (error) { showToast('收款已确认，但本机账本保存失败'); return; }
+    }
+    showToast('已确认收款', 'green');
+  } catch (error) { showToast('云端保存失败，请检查网络'); }
+}
+
+function copyList() {
+  const title = state.title;
+  const cap = state.capacity ? `（名额 ${state.joined.length}/${state.capacity}）` : `（共 ${state.joined.length} 人）`;
+  let text = `${title} ${cap}\n\n`;
+  text += `📋 报名名单：\n`;
+  groupedByLevel(state.joined).forEach(group => {
+    text += `\n【${group.label}】${group.people.length} 人\n`;
+    group.people.forEach((p, i) => {
+      const confirm = p.confirmed ? '✅' : '❓';
+      const paid = DovePayments.status(p) === 'received' ? '💰' : DovePayments.status(p) === 'pending' ? '[待核实]' : '  ';
+      text += `${i+1}. ${p.name} ${confirm}${paid}\n`;
+    });
+  });
+  if (state.waitlist.length) {
+    text += `\n⏳ Waitlist：\n`;
+    groupedByLevel(state.waitlist).forEach(group => {
+      if (!group.people.length) return;
+      text += `\n【${group.label}】${group.people.length} 人\n`;
+      group.people.forEach((p, i) => {
+        text += `${i+1}. ${p.name}\n`;
+      });
+    });
+  }
+  text += `\n✅=已确认  💰=已付款`;
+
+  if (navigator.clipboard) {
+    navigator.clipboard.writeText(text).then(() => showToast('📋 已复制到剪贴板！', 'green'));
+  } else {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    document.body.appendChild(ta);
+    ta.select();
+    document.execCommand('copy');
+    document.body.removeChild(ta);
+    showToast('📋 已复制到剪贴板！', 'green');
+  }
+}
+
+// ── UI helpers ──
+function switchTab(name) {
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.getElementById('tab-'+name).classList.add('active');
+  document.getElementById('panel-'+name).classList.add('active');
+}
+
+function showAddModal() {
+  document.getElementById('addModal').classList.add('open');
+  setTimeout(() => document.getElementById('addName').focus(), 200);
+}
+function closeModal(e, id) {
+  if (e.target === document.getElementById(id)) closeModalById(id);
+}
+function closeModalById(id) {
+  document.getElementById(id).classList.remove('open');
+}
+
+let toastTimer;
+function showToast(msg, type='') {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.className = type === 'green' ? 'show green' : 'show';
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { t.className = ''; }, 2200);
+}
+
+function toggleAdmin() {
+  if (isAdminMode) {
+    isAdminMode = false;
+    sessionStorage.removeItem(ADMIN_STORAGE);
+    stopAdminDataSync();
+    showToast('管理员已退出');
+    render();
+    return;
+  }
+  document.getElementById('adminPasswordInput').value = '';
+  document.getElementById('adminLoginError').textContent = '';
+  document.getElementById('adminLoginModal').classList.add('open');
+  setTimeout(() => document.getElementById('adminPasswordInput').focus(), 200);
+}
+
+function submitAdminLogin() {
+  const pass = document.getElementById('adminPasswordInput').value;
+  if (pass === ADMIN_PASSWORD) {
+    isAdminMode = true;
+    sessionStorage.setItem(ADMIN_STORAGE, '1');
+    closeModalById('adminLoginModal');
+    document.getElementById('adminPasswordInput').value = '';
+    startAdminDataSync();
+    showToast('管理员已登录', 'green');
+    render();
+  } else {
+    document.getElementById('adminLoginError').textContent = '管理员密码错误';
+    document.getElementById('adminPasswordInput').select();
+  }
+}
+
+function personCard(p, rank, list) {
+  const av = avatarColor(p.name);
+  const init = initials(p.name);
+  const isJoined = list === 'joined';
+  const safeName = escapeHtml(p.name);
+  const canEdit = canEditPerson(p);
+  const ownerNote = ownsPerson(p) ? '<div class="owner-note">这是你</div>' : '';
+  const phoneEdit = canEdit ? `<button type="button" class="badge" onclick="openPhoneTail(${p.id},'${list}')">${DovePhoneTail.normalize(p.phoneLast4) ? '修改尾号' : '补填手机尾号'}</button>` : '';
+  const statuses = isJoined ? `
+    <div class="person-status">
+      <button type="button" class="badge badge-confirm ${p.confirmed ? '' : 'off'}" ${canEdit ? `onclick="toggleConfirm(${p.id})"` : 'disabled'}>${p.confirmed ? '已确认' : '待确认'}</button>
+      <button type="button" class="badge badge-paid ${DovePayments.status(p)} ${DovePayments.status(p)==='unpaid'?'off':''}" ${canEdit && (DovePayments.status(p)==='unpaid' || isAdminMode) ? `onclick="togglePaid(${p.id})"` : 'disabled'}>${DovePayments.label(p)}</button>
+    </div>` : '';
+  const actions = canEdit ? `<div class="person-actions">
+      ${phoneEdit}
+      ${isAdminMode ? isJoined ? `<button type="button" class="badge" onclick="openAttendance(${p.id})">到场登记</button>` : `<button type="button" class="badge badge-wait-promote" onclick="promoteOne(${p.id})">补位</button>` : ''}
+      <button type="button" class="badge badge-cancel" onclick="requestExit(${p.id},'${list}')">${isAdminMode ? '管理员移除' : '退出'}</button>
+    </div>` : '';
+
+  return `
+  <div class="person-card" id="card-${p.id}" ontouchstart="" >
+    <span class="rank-num ${rank <= 3 ? 'top' : ''}">${rank}</span>
+    <div class="avatar" style="background:${av}">${init}</div>
+    <div class="person-info">
+      <div class="person-name">${safeName}</div>
+      ${ownerNote}
+      <div class="person-meta">${isJoined ? levelLabelOf(p) : `${levelLabelOf(p)} · 排队中`}</div>
+      <div class="person-meta" data-dove-no-translate>${DovePhoneTail.normalize(p.phoneLast4) ? `${window.DoveLanguage?.getLanguage() === 'en' ? 'Phone ending' : '手机尾号'} · ${p.phoneLast4}` : (window.DoveLanguage?.getLanguage() === 'en' ? 'Phone ending: not provided' : '手机尾号：待补填')}</div>
+      ${statuses}
+    </div>
+    ${actions}
+  </div>`;
+}
+
+let phoneTailTarget = null;
+let phoneTailSaving = false;
+function openPhoneTail(id, list) {
+  if (!['joined', 'waitlist'].includes(list)) return;
+  const person = state[list].find(p => p.id === id);
+  if (!person || !requireOwner(person)) return;
+  phoneTailTarget = { id, list };
+  document.getElementById('editPhoneTailName').textContent = `${person.name} · ${ACTIVE_VENUE.name}`;
+  document.getElementById('editPhoneTailInput').value = DovePhoneTail.normalize(person.phoneLast4) || '';
+  document.getElementById('editPhoneTailError').textContent = '';
+  document.getElementById('editPhoneTailModal').classList.add('open');
+  document.getElementById('editPhoneTailInput').focus();
+}
+async function savePhoneTail() {
+  if (!phoneTailTarget || phoneTailSaving) return;
+  const { id, list } = phoneTailTarget;
+  const person = state[list].find(p => p.id === id);
+  if (!person || !requireOwner(person)) return;
+  const english = window.DoveLanguage?.getLanguage() === 'en';
+  const tail = DovePhoneTail.normalize(document.getElementById('editPhoneTailInput').value);
+  if (!tail) { document.getElementById('editPhoneTailError').textContent = english ? 'Enter exactly 4 digits.' : '请输入手机尾号4位数字'; return; }
+  phoneTailSaving = true;
+  document.getElementById('savePhoneTailButton').disabled = true;
+  try {
+    if (remoteRef) {
+      if (!remoteReady) throw new Error(english ? 'Wait for the registration list to finish loading.' : '请等待报名名单同步完成');
+      const result = await remoteRef.transaction(data => {
+        const people = data?.state?.[list];
+        if (!Array.isArray(people)) return;
+        const index = people.findIndex(p => p?.id === id);
+        if (index < 0 || !canEditPerson(people[index])) return;
+        people[index] = DovePhoneTail.updatePerson(people[index], tail, true);
+        data.updatedAt = Date.now();
+        return data;
+      });
+      if (!result.committed) throw new Error(english ? 'Registration changed. Refresh and try again.' : '报名记录已变动，请刷新后重试');
+    } else {
+      Object.assign(person, DovePhoneTail.updatePerson(person, tail, canEditPerson(person)));
+      render();
+    }
+    closeModalById('editPhoneTailModal');
+    showToast(english ? 'Phone ending saved' : '手机尾号已保存', 'green');
+  } catch (error) { document.getElementById('editPhoneTailError').textContent = error.message; }
+  finally { phoneTailSaving = false; document.getElementById('savePhoneTailButton').disabled = false; }
+}
+function addPerson(list) {
+  const name = DovePlayerIdentity.canonicalName(document.getElementById('addName').value);
+  const phoneLast4 = DovePhoneTail.normalize(document.getElementById('addPhoneTail').value);
+  const selectedLevel = document.getElementById('addLevel').value;
+  const levelGroup = window.DoveTourLevels.normalize(selectedLevel);
+  if (!name) { showToast('请输入姓名'); return; }
+  if (!phoneLast4) { showToast('请输入手机尾号4位数字'); document.getElementById('addPhoneTail').focus(); return; }
+  if ([...state.joined, ...state.waitlist].some(p => normalizePersonName(p.name) === normalizePersonName(name))) {
+    showToast('你已经在本场次报名或候补名单中');
+    return;
+  }
+
+  if (list === 'joined' && !canJoinSignup(levelGroup)) {
+    if (state.waitlist.length >= WAITLIST_CAPACITY) {
+      showToast(`名额已满，Waitlist 也已满（最多 ${WAITLIST_CAPACITY} 人）`);
+      return;
+    }
+    showToast(ACTIVE_VENUE.levelCapacity ? '该等级或总名额已满，已加入候补' : '总名额已满，已加入 Waitlist');
+    list = 'waitlist';
+  }
+
+  if (list === 'waitlist' && state.waitlist.length >= WAITLIST_CAPACITY) {
+    showToast(`Waitlist 已满（最多 ${WAITLIST_CAPACITY} 人）`);
+    return;
+  }
+
+  rememberUser(name);
+  const person = { id: newId(), name, phoneLast4, levelGroup, ownerKey: currentUserKey, confirmed: false, paid: false, ts: Date.now() };
+  if (list === 'joined') {
+    state.joined.push(person);
+    showToast(`${name} 已报名`, 'green');
+  } else {
+    state.waitlist.push({ id: person.id, name, phoneLast4, levelGroup, ownerKey: currentUserKey, ts: person.ts });
+    showToast(`${name} 已加入 Waitlist`);
+  }
+
+  closeModalById('addModal');
+  document.getElementById('addName').value = '';
+  document.getElementById('addPhoneTail').value = '';
+  document.getElementById('addLevel').value = 'u20';
+  render();
+  switchTab(list === 'joined' ? 'joined' : 'waitlist');
+  if (list === 'joined') openPayment(person.id);
+}
+
+function toggleConfirm(id) {
+  const p = state.joined.find(x=>x.id===id);
+  if (!p || !requireOwner(p)) return;
+  p.confirmed = !p.confirmed;
+  showToast(p.confirmed ? `${p.name} 已确认参加` : `${p.name} 取消确认`, p.confirmed ? 'green' : '');
+  render();
+}
+
+function togglePaid(id) {
+  const p = state.joined.find(x=>x.id===id);
+  if (!p || !requireOwner(p)) return;
+  if (DovePayments.status(p) === 'unpaid') { openPayment(id); return; }
+  if (!isAdminMode) return;
+  if (['pending', 'package_pending'].includes(DovePayments.status(p))) {
+    openPayment(id);
+    return;
+  } else {
+    if (!confirm('将这条记录恢复为未付款？')) return;
+    const next = DovePayments.reset(p, true);
+    state.joined[state.joined.indexOf(p)] = next;
+  }
+  render();
+}
+
+let paymentTargetId = null;
+function openPayment(id = null) {
+  paymentTargetId = id;
+  document.getElementById('paymentEmail').value = DovePayments.email;
+  const person = state.joined.find(p => p.id === id);
+  const namePlaceholder = window.DoveLanguage?.getLanguage() === 'en' ? 'Registration Name' : '报名姓名';
+  document.getElementById('paymentMemo').value = `${person?.name || currentUserName || namePlaceholder} · ${currentSessionDate()} · ${ACTIVE_VENUE.name}`;
+  document.getElementById('paymentPlan').value = person?.paymentPlan || 'single';
+  document.getElementById('paymentPlan').disabled = Boolean(person && DovePayments.status(person) !== 'unpaid');
+  document.getElementById('paymentStatusText').textContent = person ? DovePayments.label(person) : '';
+  const canSubmit = person && canEditPerson(person) && (DovePayments.status(person) === 'unpaid' || (isAdminMode && DovePayments.status(person) === 'pending'));
+  document.getElementById('paymentSubmit').hidden = !canSubmit;
+  document.getElementById('paymentSubmit').textContent = person && DovePayments.status(person) === 'pending' ? '确认收款' : '我已转账';
+  document.getElementById('paymentModal').classList.add('open');
+  updatePaymentChoice();
+}
+function updatePaymentChoice() {
+  const person = state.joined.find(p => p.id === paymentTargetId);
+  const usingPackage = document.getElementById('paymentPlan').value === 'use_package';
+  document.getElementById('packagePaymentNotice').hidden = !usingPackage;
+  for (const id of ['paymentEmail', 'paymentMemo']) document.getElementById(id).closest('.payment-details > div').hidden = usingPackage;
+  const pendingPackage = person && DovePayments.status(person) === 'package_pending';
+  document.getElementById('paymentSubmit').hidden = !person || !canEditPerson(person) || pendingPackage || !['unpaid', 'pending'].includes(DovePayments.status(person)) || (DovePayments.status(person) === 'pending' && !isAdminMode);
+  document.getElementById('paymentSubmit').textContent = usingPackage ? '提交套餐核实' : person && DovePayments.status(person) === 'pending' ? '确认收款' : '我已转账';
+}
+async function submitTransfer() {
+  const person = state.joined.find(p => p.id === paymentTargetId);
+  if (!person || !requireOwner(person)) return;
+  const verifying = DovePayments.status(person) === 'pending';
+  if (verifying && (!isAdminMode || !confirm('确认已核实这笔转账到账？'))) return;
+  const next = verifying ? DovePayments.verify(person, isAdminMode) : DovePayments.submit(person, document.getElementById('paymentPlan').value, true);
+  if (next === person) return;
+  if (verifying) {
+    try { await DoveFinanceStore.recordPayment(next, { date: next.paymentEventDate || currentSessionDate(), venueKey: VENUE_KEY }); }
+    catch (error) { showToast('本机账本保存失败，请导出备份并检查浏览器存储'); return; }
+  } else next.paymentEventDate = currentSessionDate();
+  Object.assign(person, next);
+  closeModalById('paymentModal');
+  showToast(verifying ? '已确认收款' : next.paymentStatus === 'package_pending' ? '套餐待核实' : '已提交，等待管理员核实');
+  render();
+}
+
+function currentSessionDate() {
+  return DoveVenues.nextSessionDate();
+}
+let attendanceTargetId = null;
+function openAttendance(id) {
+  if (!requireAdmin()) return;
+  const person = state.joined.find(p => p.id === id);
+  if (!person) return;
+  try {
+    const balance = DoveFinance.summary(DoveFinanceStore.read(), person.name).remaining;
+    attendanceTargetId = id;
+    document.getElementById('attendanceName').textContent = `${person.name} · ${ACTIVE_VENUE.name}`;
+    document.getElementById('attendanceDate').value = currentSessionDate();
+    document.getElementById('attendanceMethod').value = balance > 0 ? 'usage' : 'attendance';
+    const owners=DoveFinance.members(DoveFinanceStore.read()).filter(m=>m.remaining>0);
+    if(!owners.some(m=>DovePlayerIdentity.key(m.name)===DovePlayerIdentity.key(person.name)))owners.unshift({name:person.name,remaining:balance});
+    document.getElementById('attendancePackageOwner').innerHTML=owners.map(m=>`<option value="${escapeHtml(m.name)}">${escapeHtml(m.name)} · ${m.remaining}</option>`).join('');
+    document.getElementById('attendancePackageOwner').value=DovePlayerIdentity.canonicalName(person.name);
+    document.getElementById('attendanceShareConsent').checked=false;
+    const english = window.DoveLanguage?.getLanguage() === 'en';
+    document.getElementById('attendanceBalance').textContent = english ? `Package visits remaining: ${balance}` : `套餐剩余：${balance} 次`;
+    document.getElementById('attendanceModal').classList.add('open');
+    updateAttendancePackage();
+  } catch (error) { showToast(error.message); }
+}
+async function saveAttendance() {
+  if (!requireAdmin()) return;
+  const person = state.joined.find(p => p.id === attendanceTargetId);
+  if (!person) return;
+  try {
+    const usingPackage=document.getElementById('attendanceMethod').value==='usage';
+    const packageOwner=document.getElementById('attendancePackageOwner').value;
+    const shared=usingPackage&&DovePlayerIdentity.key(packageOwner)!==DovePlayerIdentity.key(person.name);
+    if(shared&&!document.getElementById('attendanceShareConsent').checked){showToast('请先确认套餐持有人同意共享');return;}
+    await DoveFinanceStore.add({ id: crypto.randomUUID(), name: person.name, date: document.getElementById('attendanceDate').value,
+      venueKey: VENUE_KEY, type: document.getElementById('attendanceMethod').value,
+      ...(usingPackage?{packageOwner}:{}), ...(shared?{note:'管理员已确认共享授权'}:{}) });
+    closeModalById('attendanceModal');
+    showToast('到场已记录到本机账本', 'green');
+  } catch (error) { showToast(error.message); }
+}
+function updateAttendancePackage(resetConsent=false){
+  const usingPackage=document.getElementById('attendanceMethod').value==='usage';
+  document.getElementById('attendancePackageField').hidden=!usingPackage;
+  const person=state.joined.find(p=>p.id===attendanceTargetId);
+  const owner=document.getElementById('attendancePackageOwner').value;
+  const shared=person&&DovePlayerIdentity.key(owner)!==DovePlayerIdentity.key(person.name);
+  document.getElementById('attendanceShareField').hidden=!shared;
+  if(resetConsent)document.getElementById('attendanceShareConsent').checked=false;
+  const balance=DoveFinance.summary(DoveFinanceStore.read(),owner).remaining;
+  const english=window.DoveLanguage?.getLanguage()==='en';
+  document.getElementById('attendanceBalance').textContent=usingPackage?(english?`${owner} · ${balance} visits remaining`:`${owner} · 套餐剩余 ${balance} 次`):'';
+}
+document.getElementById('attendanceMethod').addEventListener('change',()=>updateAttendancePackage(true));
+async function copyPaymentField(id) {
+  const input = document.getElementById(id);
+  try {
+    if (navigator.clipboard) await navigator.clipboard.writeText(input.value);
+    else { input.select(); if (!document.execCommand('copy')) throw new Error('Copy failed'); }
+    showToast('已复制', 'green');
+  } catch (error) { input.focus(); input.select(); showToast('请长按复制'); }
+}
+
+function requestExit(id, list) {
+  const person = state[list]?.find(p => p.id === id);
+  if (!person) return;
+  if (!canEditPerson(person)) {
+    const english = window.DoveLanguage?.getLanguage() === 'en';
+    document.getElementById('exitHelpText').textContent = english
+      ? `This browser cannot verify that this is your registration. Open the original registration browser, or contact the organizer at ${DovePayments.email} with your name and venue to cancel. Do not register again.`
+      : `当前浏览器无法确认这条报名属于你。请使用报名时的原浏览器，或联系管理员 ${DovePayments.email}，提供姓名和场地办理退出，请勿重复报名。`;
+    document.getElementById('exitHelpEmail').href = `mailto:${DovePayments.email}?subject=${encodeURIComponent('Cancel registration / 退出报名')}&body=${encodeURIComponent(`${person.name} · ${ACTIVE_VENUE.name} · ${currentSessionDate()}`)}`;
+    document.getElementById('exitHelpModal').classList.add('open');
+    return;
+  }
+  if (!confirm(window.DoveLanguage?.getLanguage() === 'en' ? `Cancel registration for ${person.name}?` : `确认退出 ${person.name} 的报名？`)) return;
+  if (list === 'joined') removeJoined(id); else removeFromWaitlist(id);
+}
+function removeJoined(id) {
+  const idx = state.joined.findIndex(x=>x.id===id);
+  if (idx === -1 || !requireOwner(state.joined[idx])) return;
+  const name = state.joined[idx].name;
+  state.joined.splice(idx, 1);
+  autoPromote();
+  showToast(`${name} 已退出`);
+  render();
+}
+
+function removeFromWaitlist(id) {
+  const idx = state.waitlist.findIndex(x=>x.id===id);
+  if (idx === -1 || !requireOwner(state.waitlist[idx])) return;
+  const name = state.waitlist[idx].name;
+  state.waitlist.splice(idx, 1);
+  showToast(`${name} 已从 Waitlist 移除`);
+  render();
+}
+
+function promoteOne(id) {
+  if (!requireAdmin()) return;
+  const idx = state.waitlist.findIndex(x=>x.id===id);
+  if (idx === -1) return;
+  const w = state.waitlist[idx];
+  if (!canJoinSignup(levelKeyOf(w))) {
+    showToast(ACTIVE_VENUE.levelCapacity ? '该等级或总名额已满，无法补位' : '总名额已满，无法补位');
+    return;
+  }
+  state.waitlist.splice(idx, 1);
+  state.joined.push({ ...w, levelGroup: levelKeyOf(w) });
+  showToast(`${w.name} 已补位成功`, 'green');
+  render();
+  switchTab('joined');
+}
+
+function promoteAll() {
+  if (!requireAdmin()) return;
+  const slots = openSignupSlots();
+  if (slots <= 0) { showToast('名额已满'); return; }
+  let promoted = 0;
+  let idx = waitlistIndexForOpenSlot();
+  while (idx !== -1 && promoted < slots) {
+    const w = state.waitlist.splice(idx, 1)[0];
+    state.joined.push({ ...w, levelGroup: levelKeyOf(w) });
+    promoted += 1;
+    idx = waitlistIndexForOpenSlot();
+  }
+  showToast(`${promoted} 人已成功补位`, 'green');
+  render();
+  switchTab('joined');
+}
+
+function autoPromote() {
+  if (state.waitlist.length === 0) return;
+  const idx = waitlistIndexForOpenSlot();
+  if (idx === -1) return;
+  const w = state.waitlist.splice(idx, 1)[0];
+  state.joined.push({ ...w, levelGroup: levelKeyOf(w) });
+  showToast(`${w.name} 自动补位成功`, 'green');
+}
+
+function setCapacity() {
+  if (!requireAdmin()) return;
+  const val = parseInt(document.getElementById('capInput').value);
+  if (isNaN(val) || val < 1 || val > DEFAULT_CAPACITY) { showToast(`请输入 1-${DEFAULT_CAPACITY} 的总名额`); return; }
+  state.capacity = val;
+  let moved = 0;
+  if (state.joined.length > val) {
+    const overflow = state.joined.splice(val);
+    moved = overflow.length;
+    if (state.waitlist.length + moved > WAITLIST_CAPACITY) {
+      state.joined = state.joined.concat(overflow);
+      showToast(`设置后 Waitlist 会超过 ${WAITLIST_CAPACITY} 人，请先移除部分 Waitlist`);
+      return;
+    }
+    state.waitlist = overflow.map(p => ({
+      id: p.id,
+      name: p.name,
+      levelGroup: levelKeyOf(p),
+      ownerKey: p.ownerKey,
+      phoneLast4: DovePhoneTail.normalize(p.phoneLast4),
+      ts: Date.now()
+    })).concat(state.waitlist);
+  }
+  showToast(moved ? `名额已设为 ${val} 人，${moved} 人已转入 Waitlist` : `名额上限设置为 ${val} 人`, 'green');
+  render();
+}
+
+function editTitle() {
+  if (!requireAdmin()) return;
+  document.getElementById('titleInput').value = state.title;
+  document.getElementById('titleModal').classList.add('open');
+  setTimeout(() => document.getElementById('titleInput').focus(), 200);
+}
+
+function saveTitle() {
+  if (!requireAdmin()) return;
+  const v = document.getElementById('titleInput').value.trim();
+  if (!v) return;
+  state.title = v;
+  closeModalById('titleModal');
+  render();
+}
+
+function replaceLegacyLevelText() {
+  document.querySelectorAll('option, .level-section-title, .person-meta').forEach(el => {
+    el.childNodes.forEach(node => {
+      if (node.nodeType !== Node.TEXT_NODE) return;
+      node.nodeValue = node.nodeValue
+        .replace(/和平鸽/g, '2.0-2.5')
+        .replace(/猛禽/g, '3.0+')
+        .replace(/3\.0\s*以下/g, '2.0-2.5')
+        .replace(/3\.0\s*以上/g, '3.0+');
+    });
+  });
+}
+
+// Enter key support
+document.getElementById('addName').addEventListener('keydown', e => {
+  if (e.key === 'Enter') addPerson('joined');
+});
+document.getElementById('titleInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') saveTitle();
+});
+document.getElementById('capInput').addEventListener('keydown', e => {
+  if (e.key === 'Enter') setCapacity();
+});
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModalById('adminLoginModal');
+});
+
+load();
+render();
+initRealtimeDatabase();
+</script>
+</body>
+</html>

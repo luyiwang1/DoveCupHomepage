@@ -4,7 +4,7 @@ import bcrypt from 'bcryptjs';
 
 export const LEVELS = ['u20','25_30','30_plus','35_plus'];
 export const VENUES = [
-  {id:'mrtc',name:'MRTC',city:'Aurora',time:'5:00–7:00 PM',capacity:32,levelCapacity:0},
+  {id:'mrtc',name:'MRTC',city:'Aurora',time:'5:00–7:00 PM',capacity:24,levelCapacity:0},
   {id:'nyta-east',name:'NYTA East Bubble',city:'North York',time:'9:00–11:00 PM',capacity:12,levelCapacity:4}
 ];
 export class AppError extends Error { constructor(code,status=400){super(code);this.code=code;this.status=status;} }
@@ -41,7 +41,7 @@ export async function createDomain(path=':memory:',{seed=true}={}){
   const run=(sql,...args)=>db.prepare(sql).run(...args);
   function tx(fn){db.exec('BEGIN IMMEDIATE');try{const result=fn();db.exec('COMMIT');return result;}catch(error){db.exec('ROLLBACK');throw error;}}
   function audit(actor,action,target,details={}){run('INSERT INTO audit VALUES(?,?,?,?,?,?)',id(),actor||null,action,target||null,JSON.stringify(details),now());}
-  const member = memberId => get('SELECT * FROM members WHERE id=?',memberId);
+  const member = memberId => typeof memberId==='string'&&memberId?get('SELECT * FROM members WHERE id=?',memberId):null;
   function event(eventId){const e=get('SELECT * FROM events WHERE id=?',text(eventId));requireValue(e,'event_missing',404);return {...e,venue:VENUES.find(v=>v.id===e.venue_id)};}
   function admin(actor){requireValue(member(actor)?.role==='admin','admin_required',403);}
   const balance = packageId => Number(get('SELECT COALESCE(SUM(visits),0) AS balance FROM ledger WHERE package_id=?',packageId).balance);
@@ -64,7 +64,7 @@ export async function createDomain(path=':memory:',{seed=true}={}){
   function events(){return all('SELECT * FROM events ORDER BY date,venue_id').map(e=>({...e,venue:VENUES.find(v=>v.id===e.venue_id),counts:all("SELECT level,COUNT(*) count FROM bookings WHERE event_id=? AND status='joined' GROUP BY level",e.id),joined:Number(get("SELECT COUNT(*) n FROM bookings WHERE event_id=? AND status='joined'",e.id).n),waiting:Number(get("SELECT COUNT(*) n FROM bookings WHERE event_id=? AND status='waitlist'",e.id).n)}));}
   function book(actor,input){return tx(()=>{const e=event(input.eventId);requireValue(e.status==='open','event_closed',409);requireValue(LEVELS.includes(input.level),'invalid_level',422);requireValue(['single','package10','use_package'].includes(input.paymentMode),'invalid_plan',422);requireValue(!get("SELECT 1 FROM bookings WHERE event_id=? AND member_id=? AND status!='cancelled'",e.id,actor),'already_booked',409);
     let packageId=null;if(input.paymentMode==='use_package'){packageId=text(input.packageId);requireValue(canUse(packageId,actor),'package_forbidden',403);requireValue(balance(packageId)>0,'no_visits',409);}
-    const bookingId=id(),status=hasSlot(e,input.level)?'joined':'waitlist';run('INSERT INTO bookings VALUES(?,?,?,?,?,?,?,?,?)',bookingId,e.id,actor,input.level,status,input.paymentMode,packageId,now(),null);audit(actor,'booking.created',bookingId,{status});return get('SELECT * FROM bookings WHERE id=?',bookingId);
+    const bookingId=id(),status=input.preferWaitlist===true?'waitlist':hasSlot(e,input.level)?'joined':'waitlist';requireValue(status!=='waitlist'||Number(get("SELECT COUNT(*) n FROM bookings WHERE event_id=? AND status='waitlist'",e.id).n)<24,'waitlist_full',409);run('INSERT INTO bookings VALUES(?,?,?,?,?,?,?,?,?)',bookingId,e.id,actor,input.level,status,input.paymentMode,packageId,now(),null);audit(actor,'booking.created',bookingId,{status});return get('SELECT * FROM bookings WHERE id=?',bookingId);
   });}
   function cancel(actor,bookingId){return tx(()=>{const b=get('SELECT * FROM bookings WHERE id=?',bookingId);requireValue(b,'booking_missing',404);requireValue(b.member_id===actor||member(actor).role==='admin','not_owner',403);requireValue(event(b.event_id).status==='open','event_closed',409);requireValue(!get('SELECT 1 FROM attendance WHERE event_id=? AND member_id=? AND reversed_at IS NULL',b.event_id,b.member_id),'already_attended',409);if(b.status==='cancelled')return b;run("UPDATE bookings SET status='cancelled',cancelled_at=? WHERE id=?",now(),bookingId);audit(actor,'booking.cancelled',bookingId);promote(b.event_id);return get('SELECT * FROM bookings WHERE id=?',bookingId);});}
   function updateBooking(actor,bookingId,input){return tx(()=>{const b=get('SELECT * FROM bookings WHERE id=?',bookingId);requireValue(b,'booking_missing',404);requireValue(b.member_id===actor,'not_owner',403);const e=event(b.event_id);requireValue(e.status==='open'&&b.status!=='cancelled','event_closed',409);requireValue(!get('SELECT 1 FROM attendance WHERE event_id=? AND member_id=? AND reversed_at IS NULL',b.event_id,actor),'already_attended',409);requireValue(LEVELS.includes(input.level),'invalid_level',422);if(b.level===input.level)return b;run("UPDATE bookings SET status='waitlist',level=? WHERE id=?",input.level,b.id);promote(b.event_id);audit(actor,'booking.level_changed',b.id,{level:input.level});return get('SELECT * FROM bookings WHERE id=?',b.id);});}
