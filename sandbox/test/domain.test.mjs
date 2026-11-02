@@ -14,6 +14,19 @@ test('fixed member identity survives login; duplicate usernames and privilege in
   await assert.rejects(d.authenticate('new_player','wrong'),e=>e.code==='login_failed');
   await assert.rejects(d.register({username:'short_pw',displayName:'Other',phoneTail:'1234',password:'123'}),e=>e.code==='password_length');
 });
+test('six-character passwords work for registration, change and recovery; five are rejected',async t=>{
+  const {d}=await fixture(t);
+  await assert.rejects(d.register({username:'too_short',phoneTail:'1234',password:'abc12'}),e=>e.code==='password_length');
+  const registered=await d.register({username:'six_chars',phoneTail:'1234',password:'abc123'});
+  assert.equal((await d.authenticate('six_chars','abc123')).id,registered.user.id);
+  await assert.rejects(d.changePassword(registered.user.id,'abc123','12345'),e=>e.code==='password_length');
+  await d.changePassword(registered.user.id,'abc123','def456');
+  assert.equal((await d.authenticate('six_chars','def456')).id,registered.user.id);
+  await assert.rejects(d.recover('six_chars',registered.recoveryCode,'12345'),e=>e.code==='password_length');
+  await d.recover('six_chars',registered.recoveryCode,'ghi789');
+  assert.equal((await d.authenticate('six_chars','ghi789')).id,registered.user.id);
+});
+
 test('registration uses one name while preserving existing separate display names',async t=>{
   const {d,nina}=await fixture(t);
   const result=await d.register({username:'New_Player',phoneTail:'0012',password:'LongTest!2026'});

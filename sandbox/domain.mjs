@@ -13,7 +13,7 @@ const hash = value => createHash('sha256').update(value).digest('hex');
 const now = () => new Date().toISOString();
 const id = () => randomUUID();
 export function text(value,min=1,max=80){requireValue(typeof value==='string'&&value.trim().length>=min&&value.trim().length<=max,'invalid_input',422);return value.trim();}
-function password(value){requireValue(typeof value==='string'&&value.length>=10&&value.length<=64&&Buffer.byteLength(value)<=72,'password_length',422);return value;}
+function password(value){requireValue(typeof value==='string'&&value.length>=6&&value.length<=64&&Buffer.byteLength(value)<=72,'password_length',422);return value;}
 export const publicMember = row => row ? {id:row.id,username:row.username,displayName:row.display_name,phoneTail:row.phone_tail,role:row.role} : null;
 
 export async function createDomain(path=':memory:',{seed=true}={}){
