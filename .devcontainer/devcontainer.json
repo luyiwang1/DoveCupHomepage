@@ -1,0 +1,11 @@
+{
+  "name":"Dove Cup Full QA - Username Accounts",
+  "image":"mcr.microsoft.com/devcontainers/javascript-node:5.2.5-24-bookworm",
+  "hostRequirements":{"cpus":2,"memory":"4gb"},
+  "forwardPorts":[4187],
+  "portsAttributes":{"4187":{"label":"Dove Cup Full QA","onAutoForward":"notify","protocol":"http"}},
+  "otherPortsAttributes":{"onAutoForward":"ignore"},
+  "postCreateCommand":"npm install --prefix sandbox --omit=dev --ignore-scripts --package-lock=false",
+  "postStartCommand":"node sandbox/scripts/codespaces-start.mjs",
+  "remoteUser":"node"
+}

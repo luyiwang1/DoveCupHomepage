@@ -18,26 +18,30 @@ class SQLiteSessionStore extends session.Store {
   touch(key,value,callback){this.set(key,value,callback);}
 }
 const token=()=>randomBytes(32).toString('base64url');
-const equal=(a,b)=>typeof a==='string'&&typeof b==='string'&&a.length===b.length&&timingSafeEqual(Buffer.from(a),Buffer.from(b));
+const equal=(a,b)=>{if(typeof a!=='string'||typeof b!=='string')return false;const left=Buffer.from(a),right=Buffer.from(b);return left.length===right.length&&timingSafeEqual(left,right);};
 const saveSession=req=>new Promise((resolve,reject)=>req.session.save(e=>e?reject(e):resolve()));
 const regenerate=req=>new Promise((resolve,reject)=>req.session.regenerate(e=>e?reject(e):resolve()));
 
-export async function createApp({database=':memory:',seed=true,secret=token(),test=false}={}){
+export async function createApp({database=':memory:',seed=true,secret=token(),test=false,publicOrigin=null,ownerSetupToken=null}={}){
+  if(publicOrigin){const url=new URL(publicOrigin);if(url.protocol!=='https:'||url.origin!==publicOrigin||!url.hostname.endsWith('.app.github.dev'))throw new Error('Only an exact HTTPS Codespaces QA origin is allowed');if(seed)throw new Error('Hosted QA must not seed public demo credentials');}
   const domain=await createDomain(database,{seed}),app=express();
   const operations=createOperations(domain);
   app.disable('x-powered-by');
+  if(publicOrigin)app.set('trust proxy',1);
   app.use((req,res,next)=>{
-    if(!['localhost','127.0.0.1','::1','[::1]'].includes(req.hostname))return res.status(403).json({error:'sandbox_host_only'});
+    if(!['localhost','127.0.0.1','::1','[::1]',...(publicOrigin?[new URL(publicOrigin).hostname]:[])].includes(req.hostname))return res.status(403).json({error:'sandbox_host_only'});
+    if(publicOrigin&&!req.secure&&req.path!=='/_qa/health')return res.status(426).json({error:'https_required'});
     res.set('X-Dove-Environment','isolated-member-sandbox');next();
   });
+  app.get('/_qa/health',(_req,res)=>res.json({environment:'isolated-member-sandbox',ready:true}));
   app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'","'unsafe-inline'"],scriptSrcAttr:["'unsafe-inline'"],styleSrc:["'self'","'unsafe-inline'"],imgSrc:["'self'",'data:'],mediaSrc:["'self'"],fontSrc:["'self'",'data:'],connectSrc:["'self'"],formAction:["'self'"],frameAncestors:["'none'"],upgradeInsecureRequests:null}},crossOriginEmbedderPolicy:false}));
   app.use(express.json({limit:'128kb',type:'application/json'}));
-  app.use(session({name:'dove_sandbox_session',secret,store:new SQLiteSessionStore(domain),resave:false,saveUninitialized:false,rolling:true,cookie:{httpOnly:true,sameSite:'lax',secure:false,maxAge:30*86400000}}));
+  app.use(session({name:'dove_sandbox_session',secret,store:new SQLiteSessionStore(domain),resave:false,saveUninitialized:false,rolling:true,cookie:{httpOnly:true,sameSite:'lax',secure:!!publicOrigin,maxAge:30*86400000}}));
   const authLimiter=rateLimit({windowMs:15*60000,limit:test?10000:20,standardHeaders:'draft-8',legacyHeaders:false,handler:(_req,res)=>res.status(429).json({error:'too_many_attempts'})});
   app.use('/api',(_req,res,next)=>{res.set('Cache-Control','no-store');next();});
   app.use('/api',(req,res,next)=>{
     if(['GET','HEAD','OPTIONS'].includes(req.method))return next();
-    if(req.get('origin')){try{if(new URL(req.get('origin')).host!==req.get('host'))return res.status(403).json({error:'csrf_invalid'});}catch(_){return res.status(403).json({error:'csrf_invalid'});}}
+    if(req.get('origin')){try{if(publicOrigin?new URL(req.get('origin')).origin!==publicOrigin:new URL(req.get('origin')).host!==req.get('host'))return res.status(403).json({error:'csrf_invalid'});}catch(_){return res.status(403).json({error:'csrf_invalid'});}}
     if(!equal(req.get('x-csrf-token'),req.session.csrf))return res.status(403).json({error:'csrf_invalid'});
     next();
   });
@@ -45,6 +49,11 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
   const admin=(req,res,next)=>login(req,res,()=>req.user.role==='admin'?next():res.status(403).json({error:'admin_required'}));
   async function establish(req,result){await regenerate(req);req.session.userId=result.user.id;req.session.authVersion=domain.member(result.user.id).auth_version;req.session.csrf=token();await saveSession(req);return {...result,csrf:req.session.csrf};}
   app.get('/api/bootstrap',async(req,res)=>{req.session.csrf||=token();const u=req.session.userId?domain.member(req.session.userId):null;const valid=u&&req.session.authVersion===u.auth_version;if(!valid)delete req.session.userId;await saveSession(req);res.json({environment:'sandbox',csrf:req.session.csrf,user:publicMember(valid?u:null)});});
+  app.post('/api/setup-owner',authLimiter,async(req,res)=>{
+    if(!ownerSetupToken||!equal(req.body.setupToken,ownerSetupToken))throw new AppError('setup_not_authorized',403);
+    const result=await domain.register(req.body,'admin',true);
+    res.status(201).json(await establish(req,result));
+  });
   app.post('/api/auth/register',authLimiter,async(req,res)=>{res.status(201).json(await establish(req,await domain.register(req.body)));});
   app.post('/api/auth/login',authLimiter,async(req,res)=>res.json(await establish(req,{user:await domain.authenticate(req.body.username,req.body.password)})));
   app.post('/api/auth/recover',authLimiter,async(req,res)=>res.json(await establish(req,await domain.recover(req.body.username,req.body.recoveryCode,req.body.password))));
@@ -146,6 +155,7 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
     res.type('html').send(html);
   });
   app.get(['/account.html','/login.html','/finance.html'],(_req,res)=>res.sendFile(resolve(here,'public','app.html')));
+  app.get('/owner-setup.html',(_req,res)=>res.sendFile(resolve(here,'public','owner-setup.html')));
   app.use((req,res,next)=>{
     if(req.path.startsWith('/sandbox')||!['.js','.css','.webp','.jpg','.jpeg','.png','.svg','.mp4','.woff','.woff2'].includes(extname(req.path).toLowerCase()))return next();
     express.static(root,{dotfiles:'deny',index:false,fallthrough:true})(req,res,next);
@@ -156,10 +166,17 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
 }
 
 if(process.argv[1]===fileURLToPath(import.meta.url)){
+  const hosted=process.env.DOVE_QA_CODESPACES==='1';
+  if(hosted&&process.env.CODESPACES!=='true')throw new Error('Hosted QA requires an actual Codespace');
   if(process.env.NODE_ENV==='production')throw new Error('This sandbox is not a production deployment.');
-  const data=resolve(process.env.DOVE_SANDBOX_DATA||resolve(here,'.data'));mkdirSync(data,{recursive:true});
-  const secretFile=resolve(data,'session.secret');if(!existsSync(secretFile))writeFileSync(secretFile,token(),{flag:'wx'});
-  const {app,domain}=await createApp({database:resolve(data,'members.sqlite'),secret:readFileSync(secretFile,'utf8')});
-  const port=Number(process.env.PORT||4187),server=app.listen(port,'127.0.0.1',()=>console.log(`DOVE SANDBOX http://127.0.0.1:${port}/ (independent database; production writes blocked)`));
+  const port=Number(process.env.PORT||4187);
+  let publicOrigin=null;
+  if(hosted){const name=process.env.CODESPACE_NAME,domain=process.env.GITHUB_CODESPACES_PORT_FORWARDING_DOMAIN||'app.github.dev';if(!/^[a-z0-9-]+$/.test(name||'')||domain!=='app.github.dev')throw new Error('Invalid Codespaces forwarding configuration');publicOrigin=`https://${name}-${port}.${domain}`;}
+  const data=resolve(process.env.DOVE_SANDBOX_DATA||resolve(here,'.data',...(hosted?['cloud-qa']:[])));mkdirSync(data,{recursive:true});
+  const secretFile=resolve(data,'session.secret');if(!existsSync(secretFile))writeFileSync(secretFile,token(),{flag:'wx',mode:0o600});
+  const ownerFile=resolve(data,'owner-setup-code');if(hosted&&!existsSync(ownerFile))writeFileSync(ownerFile,token(),{flag:'wx',mode:0o600});
+  const {app,domain}=await createApp({database:resolve(data,'members.sqlite'),secret:readFileSync(secretFile,'utf8'),seed:!hosted,publicOrigin,ownerSetupToken:hosted?readFileSync(ownerFile,'utf8'):null});
+  if(hosted&&!domain.get('SELECT id FROM events LIMIT 1')){const date=new Intl.DateTimeFormat('en-CA',{timeZone:'America/Toronto',year:'numeric',month:'2-digit',day:'2-digit'}).format(new Date()),first=new Date(date+'T12:00:00Z');first.setUTCDate(first.getUTCDate()+(6-first.getUTCDay()+7)%7);for(let i=0;i<2;i++){const next=new Date(first);next.setUTCDate(next.getUTCDate()+7*i);const day=next.toISOString().slice(0,10);for(const venue of ['mrtc','nyta-east'])domain.run('INSERT INTO events VALUES(?,?,?,?)',`${day}-${venue}`,venue,day,'open');}}
+  const server=app.listen(port,hosted?'0.0.0.0':'127.0.0.1',()=>{console.log(`DOVE SANDBOX ${publicOrigin||`http://127.0.0.1:${port}`}/ (independent database; production writes blocked)`);if(hosted&&!domain.get("SELECT id FROM members WHERE role='admin' LIMIT 1"))console.log(`Owner setup: ${publicOrigin}/owner-setup.html\nPrivate setup code: ${readFileSync(ownerFile,'utf8')}`);});
   const shutdown=()=>server.close(()=>{domain.close();process.exit(0);});process.on('SIGTERM',shutdown);process.on('SIGINT',shutdown);
 }

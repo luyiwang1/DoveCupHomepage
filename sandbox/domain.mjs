@@ -78,12 +78,11 @@ export async function createDomain(path=':memory:',{seed=true}={}){
   function hasSlot(e,level){const joined=all("SELECT level FROM bookings WHERE event_id=? AND status='joined'",e.id);return joined.length<e.venue.capacity&&(!e.venue.levelCapacity||joined.filter(p=>p.level===level).length<e.venue.levelCapacity);}
   function promote(eventId){const e=event(eventId);if(e.status!=='open')return;for(const b of all("SELECT * FROM bookings WHERE event_id=? AND status='waitlist' ORDER BY created_at,id",eventId))if(hasSlot(e,b.level)){run("UPDATE bookings SET status='joined' WHERE id=?",b.id);audit(null,'booking.promoted',b.id);}}
   function ledger(row){run('INSERT INTO ledger VALUES(?,?,?,?,?,?,?,?,?,?,?)',row.id||id(),row.kind,row.memberId,row.packageId||null,row.attendanceId||null,row.paymentId||null,row.amount||0,row.visits||0,row.reverses||null,row.actor,now());}
-  async function register(input,role='member'){
+  async function register(input,role='member',firstAdmin=false){
     const username=text(input.username,3,32).toLowerCase();requireValue(/^[a-z0-9_]+$/.test(username),'username_format',422);
     const displayName=text(input.displayName??input.username,1,40),phoneTail=text(input.phoneTail,4,4);requireValue(/^\d{4}$/.test(phoneTail),'phone_tail',422);
     const encrypted=await bcrypt.hash(password(input.password),12),recoveryCode=randomBytes(24).toString('base64url'),memberId=id();
-    try{run('INSERT INTO members(id,username,display_name,phone_tail,password_hash,recovery_hash,role,created_at) VALUES(?,?,?,?,?,?,?,?)',memberId,username,displayName,phoneTail,encrypted,hash(recoveryCode),role,now());}catch(error){if(String(error.message).includes('UNIQUE'))throw new AppError('username_taken',409);throw error;}
-    audit(memberId,'member.registered',memberId);
+    try{tx(()=>{if(firstAdmin)requireValue(!get("SELECT id FROM members WHERE role='admin' LIMIT 1"),'owner_already_configured',409);run('INSERT INTO members(id,username,display_name,phone_tail,password_hash,recovery_hash,role,created_at) VALUES(?,?,?,?,?,?,?,?)',memberId,username,displayName,phoneTail,encrypted,hash(recoveryCode),role,now());audit(memberId,'member.registered',memberId);});}catch(error){if(String(error.message).includes('UNIQUE'))throw new AppError('username_taken',409);throw error;}
     return {user:publicMember(member(memberId)),recoveryCode};
   }
   const dummy=await bcrypt.hash(randomBytes(24).toString('hex'),12);
