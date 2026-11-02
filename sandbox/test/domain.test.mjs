@@ -37,6 +37,25 @@ test('registration uses one name while preserving existing separate display name
   await assert.rejects(d.register({username:'new_player',phoneTail:'0012',password:'LongTest!2026'}),e=>e.code==='username_taken');
 });
 
+test('Chinese usernames support login, recovery, uniqueness and package sharing',async t=>{
+  const {d,nina}=await fixture(t);
+  const input={username:'王鸽',phoneTail:'2910',password:'abc123'};
+  const registered=await d.register(input);
+  assert.equal(registered.user.displayName,'王鸽');
+  assert.equal((await d.authenticate('王鸽','abc123')).id,registered.user.id);
+  await assert.rejects(d.register(input),e=>e.code==='username_taken');
+  const mixed=await d.register({...input,username:'球友ABC_8'});
+  assert.equal((await d.authenticate('球友abc_8','abc123')).id,mixed.user.id);
+  await assert.rejects(d.register({...input,username:'球友abc_8'}),e=>e.code==='username_taken');
+  await d.recover('王鸽',registered.recoveryCode,'def456');
+  assert.equal((await d.authenticate('王鸽','def456')).id,registered.user.id);
+  const pkg=d.profile(nina.id).packages[0];
+  assert.equal(d.share(nina.id,pkg.id,'王鸽').member.id,registered.user.id);
+  for(const username of ['王','球 友','球友<script>','球友😀','王'.repeat(33)]){
+    await assert.rejects(d.register({...input,username}));
+  }
+});
+
 test('Nina and Vivi share one package; separate attendance, reversal, refunds and receipt idempotency',async t=>{
   const {d,admin,nina,vivi}=await fixture(t);const pkg=d.profile(nina.id).packages[0],eventId='2026-11-07-nyta-east';
   const payment=d.profile(nina.id).payments[0];d.verifyPayment(admin.id,payment.id);assert.equal(d.adminData(admin.id).ledger.filter(x=>x.kind==='payment').length,1);
