@@ -42,3 +42,21 @@ html[lang="en"] body.member-profile{font-family:"Segoe UI","Microsoft YaHei",san
 @media(prefers-reduced-motion:reduce){.member-profile *{scroll-behavior:auto;transition:none}}
 .profile-stat>span,.profile-stat>small,.profile-session-info p,.profile-session-date>span,.profile-pass>div span,.profile-pass>p span,.profile-progress-caption,.profile-progress-count small,.profile-pass-empty p,.profile-empty-session p,.profile-empty-activity p{color:#69796c}
 .profile-achievements span,.profile-achievements small{color:#697663}.profile-achievements .earned small{color:#857039}
+.member-profile .profile-tabs button{position:relative;border-bottom-color:transparent;transition:color .2s ease}
+.member-profile .profile-tabs button:after{content:"";position:absolute;bottom:0;left:0;right:0;height:2px;background:#1b6240;transform:scaleX(0);transform-origin:left;transition:transform .25s cubic-bezier(.2,.7,.2,1)}
+.member-profile .profile-tabs button.active{border-bottom-color:transparent}.member-profile .profile-tabs button.active:after{transform:scaleX(1)}
+.member-profile :is(button,a,input,select):focus-visible{outline:2px solid #628b6e;outline-offset:4px}.member-profile .player-hero :is(button,a):focus-visible{outline-color:#dfd2a4}
+@media(hover:hover) and (pointer:fine){
+ .member-profile :is(.profile-hero-button,.profile-hero-logout,.profile-text-button,.registration-link,.profile-session-end a,.profile-empty-session a,.profile-tab-content button){transition:color .2s ease,background-color .2s ease,border-color .2s ease,box-shadow .2s ease}
+ .member-profile .profile-hero-button:hover{background:#304b38;border-color:#c6d4bd;color:#fffdf0;box-shadow:0 3px 12px #00000018}
+ .member-profile .profile-hero-logout:hover{color:#fffdf0;border-bottom-color:#d9c88d}
+ .member-profile .profile-tabs button:hover{color:#185d3d}.member-profile .profile-tabs button:hover:after{transform:scaleX(1)}
+ .member-profile :is(.profile-session,.profile-pass,.profile-activity li){transition:background-color .25s ease,box-shadow .25s ease}
+ .member-profile :is(.profile-session,.profile-pass,.profile-activity li):hover{background:#edf2ec;box-shadow:10px 0 #edf2ec,-10px 0 #edf2ec}
+ .member-profile :is(.profile-text-button,.registration-link,.profile-session-end a,.profile-empty-session a):hover{color:#123d27;border-bottom-color:#185d3d}
+ .member-profile .profile-tab-content .profile-text-button:hover{background:transparent;border-bottom-color:#185d3d;color:#123d27}
+ .member-profile .profile-tab-content button.primary:hover{background:#12492f;border-color:#12492f;box-shadow:0 3px 10px #163e251a}
+ .member-profile .package{transition:border-color .25s ease,box-shadow .25s ease}.member-profile .package:hover{border-color:#9ab29e;box-shadow:0 4px 14px #233d290a}
+ .member-profile tbody tr{transition:background-color .2s ease}.member-profile tbody tr:hover{background:#edf2ec}
+}
+@media(prefers-reduced-motion:reduce){.member-profile *,.member-profile *:before,.member-profile *:after{scroll-behavior:auto;transition:none!important}}
