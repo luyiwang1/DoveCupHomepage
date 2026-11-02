@@ -1,0 +1,6 @@
+{
+  "environment":"staging",
+  "basePath":"/DoveCupHomepage/test/",
+  "region":"northamerica-northeast1",
+  "firebase":{"apiKey":"REPLACE_WITH_TEST_WEB_API_KEY","authDomain":"REPLACE_TEST_PROJECT.firebaseapp.com","projectId":"REPLACE_TEST_PROJECT","appId":"REPLACE_WITH_TEST_APP_ID"}
+}

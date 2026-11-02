@@ -1,0 +1,10 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {firebaseConfig} from '../web/config.js';
+import {validateDate} from '../web/finance.mjs';
+const read=file=>readFileSync(new URL('../'+file,import.meta.url),'utf8');
+test('cloud QA uses only its own project and no paid deployment products',()=>{assert.equal(firebaseConfig.projectId,'dovecupdatabase---qa');const config=JSON.parse(read('firebase.json'));assert.equal(config.functions,undefined);assert.equal(config.hosting,undefined);assert.equal(config.storage,undefined);assert.equal(config.firestore.rules,'spark.rules');});
+test('browser code uses Firebase Auth, not local passwords or production Firebase',()=>{const app=read('web/app.mjs');assert.match(app,/createUserWithEmailAndPassword/);assert.match(app,/signInWithEmailAndPassword/);assert.match(app,/sendPasswordResetEmail/);assert.match(app,/reauthenticateWithCredential/);assert.doesNotMatch(app,/localStorage\.setItem\([^\n]*(password|token)/);assert.doesNotMatch(app,/dovecupdatabase-default-rtdb/);assert.match(app,/No visits remaining/);});
+test('QA HTML is bilingual, noindex, isolated, and keeps native password managers',()=>{const html=read('web/index.html'),app=read('web/app.mjs');assert.match(html,/noindex,nofollow/);assert.match(html,/firebase\/auth/);assert.match(app,/autocomplete="new-password"/);assert.match(app,/minlength="6"/);assert.match(app,/QA TEST ENVIRONMENT/);});
+test('calendar validation rejects impossible dates before storing attendance',()=>{assert.equal(validateDate('2026-11-07'),'2026-11-07');for(const date of ['2026-02-30','2026-13-01','not-a-date'])assert.throws(()=>validateDate(date));});

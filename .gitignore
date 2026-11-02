@@ -2,3 +2,10 @@ signup-site.zip
 sandbox/node_modules/
 sandbox/.data/
 sandbox/test-artifacts/
+firebase-staging/functions/node_modules/
+firebase-staging/node_modules/
+firebase-staging/.firebase/
+firebase-staging/dist/
+firebase-staging/config.local.json
+firebase-staging/*debug.log
+firebase-staging/functions/.env*
