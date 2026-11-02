@@ -1,0 +1,33 @@
+import test from 'node:test';
+import assert from 'node:assert/strict';
+import {createRequire} from 'node:module';
+import {firebaseStore,dumpState} from './state.mjs';
+import {createDomain} from '../sandbox/domain.mjs';
+import {createOperations} from '../sandbox/operations.mjs';
+if(process.env.FIREBASE_DATABASE_EMULATOR_HOST!=='127.0.0.1:9005')throw Error('Only the isolated local RTDB emulator is allowed');
+const require=createRequire(new URL('./dist/functions/package.json',import.meta.url));
+const {initializeApp,deleteApp}=require('firebase-admin/app'),{getDatabase}=require('firebase-admin/database');
+const app=initializeApp({projectId:'demo-dovecup-qa',databaseURL:'https://demo-dovecup-qa-default-rtdb.firebaseio.com'});
+const database=getDatabase(app);
+test('actual RTDB emulator enforces private rules and compare-and-swap without lost writes',async t=>{
+  t.after(()=>deleteApp(app));
+  const domain=await createDomain();createOperations(domain);t.after(()=>domain.close());
+  const ref=database.ref('memberSystemQA/state'),store=firebaseStore(database),initial={...dumpState(domain),revision:1};
+  assert.equal(await store.initialize(initial),true);
+  assert.equal(await store.initialize({...initial,payload:'overwrite-attempt'}),false);
+  const anonymous=await fetch('http://127.0.0.1:9005/memberSystemQA/state.json?ns=demo-dovecup-qa-default-rtdb');
+  assert.equal(anonymous.status,401);
+  const anonymousWrite=await fetch('http://127.0.0.1:9005/memberSystemQA/state.json?ns=demo-dovecup-qa-default-rtdb',{method:'PUT',body:'null'});
+  assert.equal(anonymousWrite.status,401);
+  assert.equal((await store.read()).payload,initial.payload);
+  const one=await store.commit(1,{schema:1,payload:initial.payload});
+  assert.equal(one,true);assert.equal(await store.commit(1,{schema:1,payload:'bad'}),false);
+  assert.equal((await store.read()).revision,2);assert.equal((await store.read()).payload,initial.payload);
+  // Concurrent contenders share the same revision; exactly one can commit.
+  const first=store.commit(2,{schema:1,payload:initial.payload});
+  const second=store.commit(2,{schema:1,payload:initial.payload});
+  const results=[await first,await second];assert.equal(results.filter(Boolean).length,1);
+  for(let i=0;i<20;i++)assert.equal(await store.allowAttempt('isolated-test',0),true);
+  assert.equal(await store.allowAttempt('isolated-test',0),false);
+  await database.ref('memberSystemQA').remove();
+});

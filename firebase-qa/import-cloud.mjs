@@ -1,0 +1,15 @@
+import {readFile} from 'node:fs/promises';
+import {resolve,dirname} from 'node:path';
+import {fileURLToPath} from 'node:url';
+const root=resolve(dirname(fileURLToPath(import.meta.url)),'..');
+const file=process.argv[2];
+if(!file)throw Error('Provide the private file created by prepare-import.mjs');
+const target=resolve(file),privateRoot=resolve(root,'firebase-qa/private');
+if(!target.startsWith(privateRoot+'/')&&!target.startsWith(privateRoot+'\\'))throw Error('Only a private QA import file is allowed');
+const state=JSON.parse(await readFile(target,'utf8'));
+const token=(await readFile(resolve(root,'sandbox/.data/cloud-qa/owner-setup-code'),'utf8')).trim();
+if(token.length<32)throw Error('Missing private QA migration secret');
+const response=await fetch('https://dovecupdatabase---qa.web.app/api/qa-initialize',{method:'POST',redirect:'error',headers:{'Content-Type':'application/json'},body:JSON.stringify({token,state})});
+const result=await response.json();
+if(response.status!==201)throw Error(`QA import not completed: HTTP ${response.status} ${result.error||'unknown'}. Do not overwrite an initialized cloud database.`);
+console.log('QA import completed. Original IDs, password hashes and administrator preserved; all users must sign in again.');

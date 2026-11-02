@@ -22,8 +22,8 @@ const equal=(a,b)=>{if(typeof a!=='string'||typeof b!=='string')return false;con
 const saveSession=req=>new Promise((resolve,reject)=>req.session.save(e=>e?reject(e):resolve()));
 const regenerate=req=>new Promise((resolve,reject)=>req.session.regenerate(e=>e?reject(e):resolve()));
 
-export async function createApp({database=':memory:',seed=true,secret=token(),test=false,publicOrigin=null,ownerSetupToken=null}={}){
-  if(publicOrigin){const url=new URL(publicOrigin);if(url.protocol!=='https:'||url.origin!==publicOrigin||!url.hostname.endsWith('.app.github.dev'))throw new Error('Only an exact HTTPS Codespaces QA origin is allowed');if(seed)throw new Error('Hosted QA must not seed public demo credentials');}
+export async function createApp({database=':memory:',seed=true,secret=token(),test=false,publicOrigin=null,ownerSetupToken=null,firebaseQA=false}={}){
+  if(publicOrigin){const url=new URL(publicOrigin),firebaseHosts=['dovecupdatabase---qa.web.app','dovecupdatabase---qa.firebaseapp.com'];if(url.protocol!=='https:'||url.origin!==publicOrigin||!(firebaseQA?firebaseHosts.includes(url.hostname):url.hostname.endsWith('.app.github.dev')))throw new Error('Only an exact HTTPS isolated QA origin is allowed');if(seed)throw new Error('Hosted QA must not seed public demo credentials');}
   const domain=await createDomain(database,{seed}),app=express();
   const operations=createOperations(domain);
   app.disable('x-powered-by');
@@ -36,7 +36,8 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
   app.get('/_qa/health',(_req,res)=>res.json({environment:'isolated-member-sandbox',ready:true}));
   app.use(helmet({contentSecurityPolicy:{directives:{defaultSrc:["'self'"],scriptSrc:["'self'","'unsafe-inline'"],scriptSrcAttr:["'unsafe-inline'"],styleSrc:["'self'","'unsafe-inline'"],imgSrc:["'self'",'data:'],mediaSrc:["'self'"],fontSrc:["'self'",'data:'],connectSrc:["'self'"],formAction:["'self'"],frameAncestors:["'none'"],upgradeInsecureRequests:null}},crossOriginEmbedderPolicy:false}));
   app.use(express.json({limit:'128kb',type:'application/json'}));
-  app.use(session({name:'dove_sandbox_session',secret,store:new SQLiteSessionStore(domain),resave:false,saveUninitialized:false,rolling:true,cookie:{httpOnly:true,sameSite:'lax',secure:!!publicOrigin,maxAge:30*86400000}}));
+  const cookieName=firebaseQA?'__session':'dove_sandbox_session';
+  app.use(session({name:cookieName,secret,store:new SQLiteSessionStore(domain),resave:false,saveUninitialized:false,rolling:true,cookie:{httpOnly:true,sameSite:'lax',secure:!!publicOrigin,maxAge:30*86400000}}));
   const authLimiter=rateLimit({windowMs:15*60000,limit:test?10000:20,standardHeaders:'draft-8',legacyHeaders:false,handler:(_req,res)=>res.status(429).json({error:'too_many_attempts'})});
   app.use('/api',(_req,res,next)=>{res.set('Cache-Control','no-store');next();});
   app.use('/api',(req,res,next)=>{
@@ -72,8 +73,8 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
   app.post('/api/auth/register',authLimiter,async(req,res)=>{res.status(201).json(await establish(req,await domain.register(req.body)));});
   app.post('/api/auth/login',authLimiter,async(req,res)=>res.json(await establish(req,{user:await domain.authenticate(req.body.username,req.body.password)})));
   app.post('/api/auth/recover',authLimiter,async(req,res)=>res.json(await establish(req,await domain.recover(req.body.username,req.body.recoveryCode,req.body.password))));
-  app.post('/api/auth/logout',login,async(req,res)=>{await new Promise((resolve,reject)=>req.session.destroy(e=>e?reject(e):resolve()));res.clearCookie('dove_sandbox_session');res.json({ok:true});});
-  app.post('/api/auth/password',authLimiter,login,async(req,res)=>{await domain.changePassword(req.user.id,req.body.oldPassword,req.body.password);await new Promise((resolve,reject)=>req.session.destroy(e=>e?reject(e):resolve()));res.clearCookie('dove_sandbox_session');res.json({ok:true});});
+  app.post('/api/auth/logout',login,async(req,res)=>{await new Promise((resolve,reject)=>req.session.destroy(e=>e?reject(e):resolve()));res.clearCookie(cookieName);res.json({ok:true});});
+  app.post('/api/auth/password',authLimiter,login,async(req,res)=>{await domain.changePassword(req.user.id,req.body.oldPassword,req.body.password);await new Promise((resolve,reject)=>req.session.destroy(e=>e?reject(e):resolve()));res.clearCookie(cookieName);res.json({ok:true});});
   app.get('/api/events',(_req,res)=>{if(!test)operations.archiveDue();res.json(domain.events());});
   app.get('/api/signup/:eventId',(req,res)=>res.json(operations.signupState(req.params.eventId,req.session.userId)));
   app.patch('/api/signup/bookings/:id/confirmation',login,(req,res)=>res.json(operations.confirmSignup(req.user.id,req.params.id,req.body.confirmed)));
@@ -94,7 +95,7 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
     if(req.body.confirmed!==true)throw new AppError('confirmation_required',422);
     await domain.deleteAccount(req.user.id,req.body.password);
     await new Promise((resolve,reject)=>req.session.destroy(e=>e?reject(e):resolve()));
-    res.clearCookie('dove_sandbox_session');res.json({ok:true});
+    res.clearCookie(cookieName);res.json({ok:true});
   });
   app.patch('/api/me',login,(req,res)=>{const name=text(req.body.displayName,1,40),tail=text(req.body.phoneTail,4,4);if(!/^\d{4}$/.test(tail))throw new AppError('phone_tail',422);domain.run('UPDATE members SET display_name=?,phone_tail=? WHERE id=?',name,tail,req.user.id);res.json(publicMember(domain.member(req.user.id)));});
   app.post('/api/bookings',login,(req,res)=>res.status(201).json(domain.book(req.user.id,req.body)));

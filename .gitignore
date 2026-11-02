@@ -9,3 +9,10 @@ firebase-staging/dist/
 firebase-staging/config.local.json
 firebase-staging/*debug.log
 firebase-staging/functions/.env*
+firebase-qa/dist/
+firebase-qa/.firebase/
+firebase-qa/*debug.log
+firebase-qa/.env*
+firebase-qa/private/
+/database-debug.log
+/firebase-debug.log
