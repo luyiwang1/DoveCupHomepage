@@ -41,8 +41,23 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
   app.use('/api',(_req,res,next)=>{res.set('Cache-Control','no-store');next();});
   app.use('/api',(req,res,next)=>{
     if(['GET','HEAD','OPTIONS'].includes(req.method))return next();
-    if(req.get('origin')){try{if(publicOrigin?new URL(req.get('origin')).origin!==publicOrigin:new URL(req.get('origin')).host!==req.get('host'))return res.status(403).json({error:'csrf_invalid'});}catch(_){return res.status(403).json({error:'csrf_invalid'});}}
-    if(!equal(req.get('x-csrf-token'),req.session.csrf))return res.status(403).json({error:'csrf_invalid'});
+    if(req.get('origin')){
+      let accepted=false;
+      try{
+        const origin=new URL(req.get('origin'));
+        accepted=publicOrigin?origin.origin===publicOrigin:origin.host===req.get('host');
+        if(publicOrigin&&!accepted){
+          // Codespaces rewrites same-origin requests to the forwarded loopback port.
+          const port=new URL(publicOrigin).hostname.match(/-(\d+)\.app\.github\.dev$/)?.[1];
+          const loopback=['localhost','127.0.0.1','[::1]'].includes(origin.hostname);
+          const site=req.get('sec-fetch-site');
+          accepted=!!port&&loopback&&['http:','https:'].includes(origin.protocol)&&origin.port===port&&req.secure
+            &&(!site||site==='same-origin')&&new URL(req.get('referer')||'about:blank').origin===publicOrigin;
+        }
+      }catch{}
+      if(!accepted)return res.status(403).json({error:'csrf_invalid',reason:'origin'});
+    }
+    if(!equal(req.get('x-csrf-token'),req.session.csrf))return res.status(403).json({error:'csrf_invalid',reason:'token'});
     next();
   });
   const login=(req,res,next)=>{const u=req.session.userId&&domain.member(req.session.userId);if(!u||req.session.authVersion!==u.auth_version)return res.status(401).json({error:'login_required'});req.user=u;next();};

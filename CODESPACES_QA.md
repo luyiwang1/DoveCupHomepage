@@ -96,7 +96,32 @@ The local default remains loopback-only and unchanged. Public setup needs both a
 unexposed high-entropy setup code and a session CSRF token. The first-admin insert
 is serialized so two simultaneous requests cannot create multiple owners.
 
-34 Node tests passed, including hosted HTTPS/cookies/Host/Origin checks,
+38 Node tests passed, including hosted HTTPS/cookies/Host/Origin checks,
 first-owner races, normal-user role injection denial and full route parity.
 Actual Codespace creation, container startup and remote preview still require the
 owner's GitHub authorization and have not been verified from this computer.
+
+## Update a Running Codespace
+
+The owner has since created a Codespace and shown the full homepage. A registration
+screenshot showed `csrf_invalid`. Codespaces can rewrite a same-origin `Origin`
+header to the forwarded loopback port while leaving the public Referer intact.
+The hosted server now accepts that rewrite only for the exact forwarded port, HTTPS,
+same-origin Fetch Metadata (when supplied), matching public Referer and a valid CSRF
+token. Cross-site requests and arbitrary loopback origins remain rejected.
+
+The account client can refresh a stale CSRF token once before retrying a rejected
+mutation. It never retries origin errors, server errors, completed mutations or a
+request after the signed-in identity has changed. Lost cookies cannot cause a loop.
+
+Pull the updated test branch in the Codespace terminal, then restart only this server:
+
+```sh
+git pull --ff-only
+node sandbox/scripts/codespaces-restart.mjs
+```
+
+The restart helper matches the current user's Node process, exact script path and
+working directory, refuses ambiguous matches, and requests graceful shutdown. It
+does not delete the SQLite database, recreate the Codespace, or reset any accounts.
+Remote registration still needs the owner to verify after pulling this update.

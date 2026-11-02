@@ -48,3 +48,18 @@ test('full hosted surface is the local application, with no Firebase email trans
   const config=JSON.parse(readFileSync(new URL('../../.devcontainer/devcontainer.json',import.meta.url),'utf8'));
   assert.equal(config.hostRequirements.cpus,2);assert.deepEqual(config.forwardPorts,[4187]);assert.doesNotMatch(JSON.stringify(config),/public|defaultPassword|8888/);
 });
+
+test('Codespaces rewritten Origin is accepted only for the exact port, secure proxy, matching Referer and valid CSRF',async t=>{
+  const {app,domain}=await createApp({seed:false,publicOrigin:origin,test:true});t.after(()=>domain.close());
+  const boot=await request(app).get('/api/bootstrap').set(headers).expect(200),cookie=boot.headers['set-cookie'][0].split(';')[0];
+  const body={username:'proxy_user',password:'abc123',phoneTail:'1234'};
+  const post=(o='http://localhost:4187',referer=origin+'/login.html',site='same-origin',csrf=boot.body.csrf)=>{
+    let r=request(app).post('/api/auth/register').set(headers).set('Cookie',cookie).set('X-CSRF-Token',csrf).set('Origin',o).set('Sec-Fetch-Site',site);if(referer)r=r.set('Referer',referer);return r.send(body);
+  };
+  for(const [o,ref,site] of [['http://localhost:9999',origin,'same-origin'],['http://localhost:4187','https://attacker.example','same-origin'],['http://localhost:4187',null,'same-origin'],['http://localhost:4187',origin,'cross-site'],['https://other-4187.app.github.dev',origin,'same-origin']]){
+    const rejected=await post(o,ref,site).expect(403);assert.equal(rejected.body.reason,'origin');
+  }
+  const missing=await post('http://localhost:4187',origin,'same-origin','wrong').expect(403);assert.equal(missing.body.reason,'token');
+  assert.equal(domain.get('SELECT COUNT(*) n FROM members').n,0);
+  const result=await post().expect(201);assert.equal(result.body.user.role,'member');assert.equal(result.body.user.username,'proxy_user');
+});

@@ -15,7 +15,18 @@ const badge=value=>`<span class="status ${esc(value)}">${esc(labels[value]?.()||
 const errors={login_required:['请先登录','Please sign in'],admin_required:['仅管理员可操作','Administrator access required'],not_owner:['不能修改他人的报名','You cannot change another member’s registration'],login_failed:['用户名或密码不正确','Incorrect username or password'],username_taken:['用户名已被使用','Username is already taken'],username_format:['用户名只能用小写字母、数字和下划线','Use lowercase letters, numbers and underscores'],password_length:['密码需6至64位，UTF-8长度不超过72字节','Password must have 6–64 characters and at most 72 UTF-8 bytes'],phone_tail:['只填写手机尾号4位数字','Enter exactly the last 4 phone digits'],already_booked:['本场已有报名，不用重复添加','You already have a registration for this session'],event_closed:['此场次已归档，不能再修改','This session is archived'],package_forbidden:['此会员未获授权使用该套餐','This member is not authorized to use this package'],no_visits:['套餐剩余次数不足','Insufficient package visits'],not_joined:['只有正式报名者可以登记到场','Only registered players can be checked in'],payment_not_verified:['请先核实付款，或选择可用套餐','Verify payment first, or select an available package'],already_attended:['已有到场记录，请先核对或撤销','An attendance record exists; review or reverse it first'],package_used:['套餐已有扣次，先核对并撤销相关到场才能整笔退款','Reverse package attendance before a full refund'],member_missing:['没有找到该会员用户名','Member username not found'],legacy_unavailable:['旧记录已被关联或不存在','Legacy record is unavailable'],recovery_failed:['用户名或恢复码不正确','Incorrect username or recovery code'],claim_not_pending:['申请已处理，请刷新','This claim has already been processed'],payment_not_pending:['该付款已处理，不能直接改金额','Payment was already processed and cannot be edited'],csrf_invalid:['页面凭证已更新，请刷新后重试','Session token changed. Refresh and retry'],too_many_attempts:['尝试次数过多，请稍后重试','Too many attempts. Try again later'],invalid_input:['请检查输入内容','Please check your input'],invalid_plan:['请选择付款项目','Select a payment plan'],invalid_level:['请选择等级','Select a division'],invalid_share:['不能将套餐重复共享给持有人','The owner already has access'],server_error:['服务暂时出错，请稍后重试','Server error. Try again shortly']};
 function errorText(error){return errors[error.code]?.[language==='en'?1:0]||error.message||t('操作失败','Operation failed');}
 function toast(message){$('toast').textContent=message;$('toast').hidden=false;clearTimeout(toast.timer);toast.timer=setTimeout(()=>$('toast').hidden=true,5000);}
-async function api(path,method='GET',body){const response=await fetch(`/api${path}`,{method,headers:{...(body?{'Content-Type':'application/json'}:{}),...(method!=='GET'?{'X-CSRF-Token':state.csrf}:{})},body:body?JSON.stringify(body):undefined});const data=await response.json();if(!response.ok){const e=new Error(data.error);e.code=data.error;e.status=response.status;throw e;}return data;}
+async function api(path,method='GET',body,retried=false){
+  const response=await fetch(`/api${path}`,{method,credentials:'same-origin',cache:'no-store',headers:{...(body?{'Content-Type':'application/json'}:{}),...(method!=='GET'?{'X-CSRF-Token':state.csrf}:{})},body:body?JSON.stringify(body):undefined});
+  const data=await response.json();
+  if(!response.ok){
+    if(!retried&&method!=='GET'&&response.status===403&&data.error==='csrf_invalid'&&data.reason==='token'){
+      const boot=await api('/bootstrap');
+      if((boot.user?.id||null)===(state.user?.id||null)){state.csrf=boot.csrf;return api(path,method,body,true);}
+    }
+    const e=new Error(data.error);e.code=data.error;e.status=response.status;throw e;
+  }
+  return data;
+}
 async function refresh(){
   const boot=await api('/bootstrap');state.user=boot.user;state.csrf=boot.csrf;
   state.events=await api('/events');
