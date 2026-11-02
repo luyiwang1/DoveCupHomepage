@@ -1,4 +1,5 @@
 body.member-profile{--ink:#17251f;--muted:#6c7b72;--line:#dde5df;--green:#185d3d;--gold:#a79154;--paper:#f6f8f6;background:#f6f8f6;color:var(--ink);font-family:"Segoe UI","Microsoft YaHei",sans-serif}
+.member-profile #deleteAccountForm{max-width:420px}.member-profile #deleteAccountForm button.danger{background:#fff;color:#8c3434;border-color:#d9b9b9}.member-profile #deleteAccountForm button.danger:hover{background:#faeeee;border-color:#ae7575}
 html[lang="en"] body.member-profile{font-family:"Segoe UI","Microsoft YaHei",sans-serif}
 .member-profile .app-nav{background:#13241c;border-color:#ffffff1c;padding-top:12px;padding-bottom:12px}
 .member-profile .brand{color:#fff9e9}.member-profile .app-nav .account-name{color:#e7eee7;background:transparent;border-color:#65776b;font:12px "Segoe UI",sans-serif}

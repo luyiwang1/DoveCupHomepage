@@ -36,12 +36,41 @@ export async function createDomain(path=':memory:',{seed=true}={}){
     CREATE TABLE IF NOT EXISTS audit(id TEXT PRIMARY KEY,actor_id TEXT,action TEXT NOT NULL,target_id TEXT,details TEXT NOT NULL,created_at TEXT NOT NULL);
     CREATE TABLE IF NOT EXISTS sessions(id TEXT PRIMARY KEY,value TEXT NOT NULL,expires INTEGER NOT NULL);`);
   if(!db.prepare('PRAGMA table_info(members)').all().some(column=>column.name==='auth_version'))db.exec('ALTER TABLE members ADD COLUMN auth_version INTEGER NOT NULL DEFAULT 0');
+  if(!db.prepare('PRAGMA table_info(members)').all().some(column=>column.name==='deleted_at'))db.exec('ALTER TABLE members ADD COLUMN deleted_at TEXT');
   const get=(sql,...args)=>db.prepare(sql).get(...args);
   const all=(sql,...args)=>db.prepare(sql).all(...args);
   const run=(sql,...args)=>db.prepare(sql).run(...args);
   function tx(fn){db.exec('BEGIN IMMEDIATE');try{const result=fn();db.exec('COMMIT');return result;}catch(error){db.exec('ROLLBACK');throw error;}}
   function audit(actor,action,target,details={}){run('INSERT INTO audit VALUES(?,?,?,?,?,?)',id(),actor||null,action,target||null,JSON.stringify(details),now());}
   const member = memberId => typeof memberId==='string'&&memberId?get('SELECT * FROM members WHERE id=?',memberId):null;
+  async function deleteAccount(actor,currentPassword){
+    const original=member(actor);
+    requireValue(original&&!original.deleted_at,'login_required',401);
+    requireValue(original.role!=='admin','delete_admin',409);
+    requireValue(typeof currentPassword==='string'&&Buffer.byteLength(currentPassword)<=72&&await bcrypt.compare(currentPassword,original.password_hash),'login_failed',401);
+    return tx(()=>{
+      const user=member(actor);
+      requireValue(user&&!user.deleted_at&&user.password_hash===original.password_hash,'login_required',401);
+      requireValue(user.role!=='admin','delete_admin',409);
+      requireValue(!get("SELECT 1 FROM bookings JOIN events ON events.id=event_id WHERE member_id=? AND bookings.status!='cancelled' AND events.status='open'",actor),'delete_bookings',409);
+      requireValue(!get("SELECT 1 FROM payments WHERE member_id=? AND status='pending'",actor),'delete_payments',409);
+      requireValue(!all('SELECT id FROM packages WHERE owner_id=?',actor).some(p=>balance(p.id)!==0),'delete_balance',409);
+      requireValue(!get("SELECT 1 FROM claims WHERE member_id=? AND status='pending'",actor),'delete_claims',409);
+      const documents=get("SELECT 1 FROM sqlite_master WHERE type='table' AND name='operation_documents'")?all('SELECT * FROM operation_documents'):[];
+      for(const doc of documents){
+        const data=JSON.parse(doc.data),entries=data.registration?.entries||data.registrations||[];
+        requireValue(!entries.some(e=>e.ownerKey===actor)||!(data.registration?.open||data.status==='active'),'delete_bookings',409);
+        let changed=false;
+        function anonymize(value){if(!value||typeof value!=='object')return;if(value.ownerKey===actor){value.name='Deleted member';value.ownerKey='';changed=true;}for(const child of Object.values(value))anonymize(child);}
+        anonymize(data);if(changed)run('UPDATE operation_documents SET data=?,revision=revision+1 WHERE id=?',JSON.stringify(data),doc.id);
+      }
+      run("UPDATE members SET username=?,display_name='Deleted member',phone_tail='',password_hash='',recovery_hash='',auth_version=auth_version+1,deleted_at=? WHERE id=?",'deleted_'+actor,now(),actor);
+      run('UPDATE grants SET active=0 WHERE member_id=? OR package_id IN (SELECT id FROM packages WHERE owner_id=?)',actor,actor);
+      for(const s of all('SELECT id,value FROM sessions'))if(JSON.parse(s.value).userId===actor)run('DELETE FROM sessions WHERE id=?',s.id);
+      audit(actor,'member.deleted',actor);
+      return {ok:true};
+    });
+  }
   function event(eventId){const e=get('SELECT * FROM events WHERE id=?',text(eventId));requireValue(e,'event_missing',404);return {...e,venue:VENUES.find(v=>v.id===e.venue_id)};}
   function admin(actor){requireValue(member(actor)?.role==='admin','admin_required',403);}
   const balance = packageId => Number(get('SELECT COALESCE(SUM(visits),0) AS balance FROM ledger WHERE package_id=?',packageId).balance);
@@ -51,7 +80,7 @@ export async function createDomain(path=':memory:',{seed=true}={}){
   function ledger(row){run('INSERT INTO ledger VALUES(?,?,?,?,?,?,?,?,?,?,?)',row.id||id(),row.kind,row.memberId,row.packageId||null,row.attendanceId||null,row.paymentId||null,row.amount||0,row.visits||0,row.reverses||null,row.actor,now());}
   async function register(input,role='member'){
     const username=text(input.username,3,32).toLowerCase();requireValue(/^[a-z0-9_]+$/.test(username),'username_format',422);
-    const displayName=text(input.displayName,1,40),phoneTail=text(input.phoneTail,4,4);requireValue(/^\d{4}$/.test(phoneTail),'phone_tail',422);
+    const displayName=text(input.displayName??input.username,1,40),phoneTail=text(input.phoneTail,4,4);requireValue(/^\d{4}$/.test(phoneTail),'phone_tail',422);
     const encrypted=await bcrypt.hash(password(input.password),12),recoveryCode=randomBytes(24).toString('base64url'),memberId=id();
     try{run('INSERT INTO members(id,username,display_name,phone_tail,password_hash,recovery_hash,role,created_at) VALUES(?,?,?,?,?,?,?,?)',memberId,username,displayName,phoneTail,encrypted,hash(recoveryCode),role,now());}catch(error){if(String(error.message).includes('UNIQUE'))throw new AppError('username_taken',409);throw error;}
     audit(memberId,'member.registered',memberId);
@@ -96,5 +125,5 @@ export async function createDomain(path=':memory:',{seed=true}={}){
     const pkg=get('SELECT id FROM packages WHERE owner_id=?',nina).id;share(nina,pkg,'vivi_test');book(vivi,{eventId:'2026-11-07-nyta-east',level:'u20',paymentMode:'use_package',packageId:pkg});
     const ib=book(irene,{eventId:'2026-11-07-mrtc',level:'25_30',paymentMode:'single'});submitPayment(irene,ib.id,'single');
   }
-  return {db,get,all,run,tx,register,authenticate,recover,changePassword,member,events,book,cancel,updateBooking,submitPayment,correctPayment,verifyPayment,share,checkIn,reverseAttendance,refund,profile,adminData,claim,approveClaim,balance,canUse,legacy:()=>all('SELECT id,event_id,display_name,created_at FROM legacy WHERE claimed_by IS NULL'),close:()=>db.close()};
+  return {db,get,all,run,tx,register,authenticate,recover,changePassword,deleteAccount,member,events,book,cancel,updateBooking,submitPayment,correctPayment,verifyPayment,share,checkIn,reverseAttendance,refund,profile,adminData,claim,approveClaim,balance,canUse,legacy:()=>all('SELECT id,event_id,display_name,created_at FROM legacy WHERE claimed_by IS NULL'),close:()=>db.close()};
 }

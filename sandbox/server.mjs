@@ -66,6 +66,12 @@ export async function createApp({database=':memory:',seed=true,secret=token(),te
   app.put('/api/team',login,(req,res)=>res.json(operations.saveTeam(req.user.id,req.body)));
   app.get('/api/events/:eventId/roster',(req,res)=>{res.json(domain.all("SELECT bookings.id,bookings.level,bookings.status,members.display_name FROM bookings JOIN members ON members.id=bookings.member_id WHERE bookings.event_id=? AND bookings.status!='cancelled' ORDER BY bookings.created_at",req.params.eventId).map(r=>({...r,mine:!!req.session.userId&&!!domain.get('SELECT id FROM bookings WHERE id=? AND member_id=?',r.id,req.session.userId)})));});
   app.get('/api/me',login,(req,res)=>res.json(operations.memberProfile(req.user.id)));
+  app.post('/api/me/delete',authLimiter,login,async(req,res)=>{
+    if(req.body.confirmed!==true)throw new AppError('confirmation_required',422);
+    await domain.deleteAccount(req.user.id,req.body.password);
+    await new Promise((resolve,reject)=>req.session.destroy(e=>e?reject(e):resolve()));
+    res.clearCookie('dove_sandbox_session');res.json({ok:true});
+  });
   app.patch('/api/me',login,(req,res)=>{const name=text(req.body.displayName,1,40),tail=text(req.body.phoneTail,4,4);if(!/^\d{4}$/.test(tail))throw new AppError('phone_tail',422);domain.run('UPDATE members SET display_name=?,phone_tail=? WHERE id=?',name,tail,req.user.id);res.json(publicMember(domain.member(req.user.id)));});
   app.post('/api/bookings',login,(req,res)=>res.status(201).json(domain.book(req.user.id,req.body)));
   app.patch('/api/bookings/:id',login,(req,res)=>res.json(domain.updateBooking(req.user.id,req.params.id,req.body)));

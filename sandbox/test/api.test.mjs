@@ -6,6 +6,51 @@ import { tmpdir } from 'node:os';
 import { join,resolve,sep } from 'node:path';
 import { createApp } from '../server.mjs';
 async function client(app,username){const agent=request.agent(app);let boot=await agent.get('/api/bootstrap').expect(200);let csrf=boot.body.csrf;const login=await agent.post('/api/auth/login').set('X-CSRF-Token',csrf).send({username,password:'DoveTest!2026'}).expect(200);csrf=login.body.csrf;return {agent,csrf,user:login.body.user,post:(path,body={})=>agent.post(path).set('X-CSRF-Token',csrf).send(body)};}
+test('account deletion requires password and confirmation, revokes all sessions and retains anonymous records',async t=>{
+  const {app,domain}=await createApp({test:true});t.after(()=>domain.close());
+  const registered=await domain.register({username:'delete_me',phoneTail:'4567',password:'DoveTest!2026'});
+  const first=await client(app,'delete_me'),second=await client(app,'delete_me');
+  const oldSession=domain.all('SELECT * FROM sessions').find(s=>JSON.parse(s.value).userId===registered.user.id);
+  await first.post('/api/me/delete',{password:'DoveTest!2026'}).expect(422);
+  await first.post('/api/me/delete',{password:'wrong',confirmed:true}).expect(401);
+  const admin=await client(app,'admin_test');await admin.post('/api/me/delete',{password:'DoveTest!2026',confirmed:true}).expect(409);
+  const booking=domain.book(registered.user.id,{eventId:'2026-11-07-mrtc',level:'u20',paymentMode:'single'});
+  await first.post('/api/me/delete',{password:'DoveTest!2026',confirmed:true}).expect(409);
+  domain.cancel(registered.user.id,booking.id);
+  const past=domain.book(registered.user.id,{eventId:'2026-11-14-mrtc',level:'u20',paymentMode:'single'});
+  const receipt=domain.submitPayment(registered.user.id,past.id,'single');
+  domain.verifyPayment(admin.user.id,receipt.id);
+  domain.run("UPDATE events SET status='archived' WHERE id=?",past.event_id);
+  const before=domain.all('SELECT * FROM ledger');
+  await first.post('/api/me/delete',{password:'DoveTest!2026',confirmed:true}).expect(200);
+  await second.agent.get('/api/me').expect(401);
+  domain.run('INSERT INTO sessions VALUES(?,?,?)',oldSession.id,oldSession.value,oldSession.expires);
+  await second.agent.get('/api/me').expect(401);
+  assert.deepEqual(domain.all('SELECT * FROM ledger'),before);
+  const tombstone=domain.member(registered.user.id);
+  assert.ok(tombstone.deleted_at);assert.equal(tombstone.phone_tail,'');assert.equal(tombstone.display_name,'Deleted member');
+  assert.equal(tombstone.password_hash,'');assert.equal(tombstone.recovery_hash,'');
+  assert.equal(domain.get('SELECT member_id FROM bookings WHERE id=?',booking.id).member_id,registered.user.id);
+  await assert.rejects(domain.authenticate('delete_me','DoveTest!2026'),e=>e.code==='login_failed');
+  await assert.rejects(domain.recover('delete_me',registered.recoveryCode,'NextTest!2026'),e=>e.code==='recovery_failed');
+});
+
+test('deletion blockers protect pending receipts, remaining owned visits and active shared access',async t=>{
+  const {app,domain}=await createApp({test:true});t.after(()=>domain.close());
+  const nina=await client(app,'nina_test'),irene=await client(app,'irene_test');
+  for(const user of [nina,irene])for(const booking of domain.profile(user.user.id).bookings)domain.cancel(user.user.id,booking.id);
+  const pending=await irene.post('/api/me/delete',{password:'DoveTest!2026',confirmed:true}).expect(409);
+  assert.equal(pending.body.error,'delete_payments');
+  const remaining=await nina.post('/api/me/delete',{password:'DoveTest!2026',confirmed:true}).expect(409);
+  assert.equal(remaining.body.error,'delete_balance');
+  assert.equal(domain.profile(nina.user.id).packages[0].remaining,10);
+  const vivi=await client(app,'vivi_test');
+  for(const booking of domain.profile(vivi.user.id).bookings)domain.cancel(vivi.user.id,booking.id);
+  await vivi.post('/api/me/delete',{password:'DoveTest!2026',confirmed:true}).expect(200);
+  assert.equal(domain.get('SELECT active FROM grants WHERE member_id=?',vivi.user.id).active,0);
+  assert.equal(domain.profile(nina.user.id).packages[0].remaining,10);
+});
+
 test('anonymous visitors can view rosters but cannot join, edit or cancel even with valid CSRF',async t=>{
   const {app,domain}=await createApp({test:true});t.after(()=>domain.close());
   const guest=request.agent(app),boot=await guest.get('/api/bootstrap').expect(200);

@@ -14,6 +14,16 @@ test('fixed member identity survives login; duplicate usernames and privilege in
   await assert.rejects(d.authenticate('new_player','wrong'),e=>e.code==='login_failed');
   await assert.rejects(d.register({username:'short_pw',displayName:'Other',phoneTail:'1234',password:'123'}),e=>e.code==='password_length');
 });
+test('registration uses one name while preserving existing separate display names',async t=>{
+  const {d,nina}=await fixture(t);
+  const result=await d.register({username:'New_Player',phoneTail:'0012',password:'LongTest!2026'});
+  assert.equal(result.user.username,'new_player');
+  assert.equal(result.user.displayName,'New_Player');
+  assert.equal((await d.authenticate('NEW_PLAYER','LongTest!2026')).id,result.user.id);
+  assert.equal(d.member(nina.id).display_name,'Nina · 测试');
+  await assert.rejects(d.register({username:'new_player',phoneTail:'0012',password:'LongTest!2026'}),e=>e.code==='username_taken');
+});
+
 test('Nina and Vivi share one package; separate attendance, reversal, refunds and receipt idempotency',async t=>{
   const {d,admin,nina,vivi}=await fixture(t);const pkg=d.profile(nina.id).packages[0],eventId='2026-11-07-nyta-east';
   const payment=d.profile(nina.id).payments[0];d.verifyPayment(admin.id,payment.id);assert.equal(d.adminData(admin.id).ledger.filter(x=>x.kind==='payment').length,1);
