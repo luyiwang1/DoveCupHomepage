@@ -1,0 +1,11 @@
+<!doctype html>
+<html lang="zh-CN"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex,nofollow"><title>Dove Cup QA</title>
+<link rel="stylesheet" href="./app.css"><link rel="stylesheet" href="./profile.css"><link rel="stylesheet" href="./admin.css"><link rel="stylesheet" href="./qa.css">
+<script type="importmap">{"imports":{"firebase/app":"https://www.gstatic.com/firebasejs/13.1.0/firebase-app.js","firebase/auth":"https://www.gstatic.com/firebasejs/13.1.0/firebase-auth.js","firebase/firestore":"https://www.gstatic.com/firebasejs/13.1.0/firebase-firestore.js"}}</script>
+<script type="module" src="./app.mjs"></script></head><body class="guest-account">
+<div class="environment" id="environment">QA 测试环境 · 不接收真实转账 · 与正式站数据独立</div>
+<header class="app-nav"><a class="brand" href="./"><img src="./golden-dove-mark.webp" alt="Golden Dove Cup"><span>GOLDEN DOVE CUP <small>QA</small></span></a><div class="nav-actions" id="headerActions"></div></header>
+<main id="app" aria-live="polite"><div class="loading">正在连接 QA 会员系统…</div></main>
+<div class="qa-languages" id="languages"></div><div id="toast" role="status" hidden></div>
+<dialog id="confirmDialog"><h2 id="confirmTitle"></h2><p id="confirmBody"></p><div class="dialog-actions"><button id="cancelConfirm" type="button"></button><button id="acceptConfirm" type="button" class="primary"></button></div></dialog>
+</body></html>
