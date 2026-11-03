@@ -1,7 +1,6 @@
 import assert from 'node:assert/strict';
 import { access, readFile } from 'node:fs/promises';
 import test from 'node:test';
-import vm from 'node:vm';
 
 const root = new URL('../', import.meta.url);
 const homepage = await readFile(new URL('index.html', root), 'utf8');
@@ -11,7 +10,7 @@ const siteNav = await readFile(new URL('site-nav.js', root), 'utf8');
 const momentsData = await readFile(new URL('moments-data.js', root), 'utf8');
 
 test('puts the complete photo archive on its own page', () => {
-  assert.match(homepage, /site-nav\.js\?v=2/);
+  assert.match(homepage, /site-nav\.js\?v=3/);
   assert.match(siteNav, /href: 'moments\.html'/);
   assert.match(momentsPage, /assets\/moments\/event-17\.webp/);
   assert.match(momentsPage, /mountArchive\('momentArchiveList','momentArchiveCount'\)/);
@@ -26,13 +25,8 @@ test('keeps the invitation court photo on the homepage only', () => {
   assert.match(homepage, /assets\/home\/invitation-court\.jpg/);
   assert.match(homepage, /assets\/home\/invitation-court-02\.jpg/);
   assert.match(homepage, /intro-copy-panel-primary/);
-  assert.match(homepage, /intro-copy-panel-secondary/);
-  assert.match(homepage, /intro-scene-primary 24s ease-in-out infinite/);
-  assert.match(homepage, /intro-copy-primary 24s ease-in-out infinite/);
-  assert.match(homepage, /intro-copy-secondary 24s ease-in-out infinite/);
-  assert.match(homepage, /intro-surface 24s ease-in-out infinite/);
-  assert.match(homepage, /id="format" class="intro-anchor"/);
-  assert.doesNotMatch(homepage, /<section id="format" class="format">/);
+  assert.match(homepage, /intro-scene-secondary 24s ease-in-out infinite/);
+  assert.doesNotMatch(homepage, /intro-copy-panel-secondary|id="format"|mountIntroScenes/);
   assert.match(homepage, /prefers-reduced-motion:reduce/);
   assert.doesNotMatch(momentsData, /invitation-court\.jpg/);
   assert.doesNotMatch(momentsData, /invitation-court-02\.jpg/);
@@ -47,51 +41,9 @@ test('uses the net-side social photo only as the events hero', async () => {
   await access(new URL('assets/events/events-hero-net-social.webp', root));
 });
 
-test('starts the merged section on the requested scene without desynchronizing photos', () => {
-  const script = homepage.match(/\(function mountIntroScenes\(\)\{[\s\S]*?\n\}\(\)\);/)[0];
-  const animations = Array.from({ length: 5 }, () => ({ currentTime: 5000 }));
-  const handlers = {};
-  const location = { hash: '#about' };
-  let onVisible;
-  let disconnected = false;
-  vm.runInNewContext(script, {
-    location,
-    window: { addEventListener: (name, callback) => { handlers[name] = callback; } },
-    document: {
-      getElementById: () => ({ getAnimations: () => animations }),
-      addEventListener: (name, callback) => { handlers[name] = callback; }
-    },
-    IntersectionObserver: class {
-      constructor(callback) { onVisible = callback; }
-      observe() {}
-      disconnect() { disconnected = true; }
-    }
-  });
-  onVisible([{ isIntersecting: true }]);
-  assert.ok(disconnected);
-  assert.ok(animations.every(animation => animation.currentTime === 0));
-  location.hash = '#format';
-  handlers.hashchange();
-  assert.ok(animations.every(animation => animation.currentTime === 12000));
-  animations.forEach(animation => { animation.currentTime = 20000; });
-  handlers.click({ target: { closest: () => ({ hash: '#format' }) } });
-  assert.ok(animations.every(animation => animation.currentTime === 12000));
-  location.hash = '#about';
-  handlers.hashchange();
-  assert.ok(animations.every(animation => animation.currentTime === 0));
-});
-
-test('places the second scene photo left of its copy while keeping mobile full width', () => {
-  assert.match(homepage, /\.intro-copy-panel-secondary\{inset:0 0 0 auto/);
+test('keeps both photos on the same side while keeping mobile full width', () => {
   assert.match(homepage, /\.intro-photo-frame-primary\{right:0/);
-  assert.match(homepage, /\.intro-photo-frame-secondary\{left:0/);
-  assert.match(homepage, /linear-gradient\(270deg,transparent 0%,#000 clamp\(120px,14vw,200px\)\)/);
+  assert.match(homepage, /\.intro-photo-frame-secondary\{right:0/);
   assert.match(homepage, /\.intro-copy-panel\{inset:0;width:100%;display:flex/);
   assert.match(homepage, /\.intro-photo-frame\{inset:0;width:100%;background-position:center 48%/);
-});
-
-test('centers the format copy within the right half on desktop', () => {
-  const desktopStyles = homepage.match(/@media\(min-width:861px\)\{[^\n]+/)[0];
-  assert.match(desktopStyles, /\.intro-copy-panel-secondary\{width:50%;grid-template-columns:minmax\(0,550px\);justify-content:center/);
-  assert.match(desktopStyles, /padding-left:clamp\(32px,4vw,64px\);padding-right:clamp\(32px,4vw,64px\)/);
 });

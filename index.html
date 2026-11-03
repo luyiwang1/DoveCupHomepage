@@ -17,11 +17,11 @@
 })();
 </script>
 <link rel="stylesheet" href="language.css?v=1">
-<link rel="stylesheet" href="site-nav.css?v=2">
+<link rel="stylesheet" href="site-nav.css?v=3">
 <link rel="stylesheet" href="gallery.css?v=3">
 <script src="language.js?v=52"></script>
 <script src="venue-config.js?v=4"></script>
-<script src="site-nav.js?v=2" defer></script>
+<script src="site-nav.js?v=3" defer></script>
 <title>金鸽杯 Golden Dove Cup</title>
 <meta name="description" content="金鸽杯 Golden Dove Cup 是一场复古俱乐部气质的网球社交杯赛。">
 <style>
@@ -145,34 +145,22 @@ section{padding:clamp(58px,8vw,108px) clamp(18px,5vw,72px)}
 .event-empty{display:grid;grid-template-columns:minmax(0,1fr) auto;align-items:end;gap:24px;margin-top:20px;padding:clamp(24px,4vw,38px);border-top:1px solid var(--line);border-bottom:1px solid var(--line);background:rgba(255,248,231,.54)}.event-empty h3{margin:9px 0 8px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(30px,4vw,46px);font-weight:500}.event-empty p{margin:0;color:rgba(23,36,30,.68);font-size:14px}.event-empty .event-cta{align-self:center;margin:0}
 .moments{padding-top:clamp(32px,4vw,52px);padding-bottom:clamp(32px,4vw,52px);color:var(--ivory);background:#10271e}.moments-inner{max-width:1320px;margin:0 auto}.moments-head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px}.moments-head .kicker{color:#d5ab55}.moments-head h2{max-width:850px;margin:10px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:clamp(38px,5.5vw,72px);font-weight:500;line-height:1}.moments-note{max-width:360px;margin:0;color:rgba(248,239,215,.66);font-size:13px;line-height:1.7}.moments-layout{display:grid;grid-template-columns:minmax(0,1.6fr) minmax(300px,.75fr);align-items:stretch;margin-top:34px;border-top:1px solid rgba(248,239,215,.2);border-bottom:1px solid rgba(248,239,215,.2)}.moments-media{position:relative;min-height:420px;overflow:hidden}.moments-media img{display:block;width:100%;height:100%;min-height:420px;object-fit:cover}.moments-media:after{position:absolute;inset:0;background:linear-gradient(180deg,transparent 54%,rgba(8,24,17,.78));content:""}.moments-stamp{position:absolute;left:18px;bottom:16px;z-index:1;padding:7px 9px;color:var(--green);background:var(--ivory);font-size:10px;font-weight:900;text-transform:uppercase}.moments-copy{display:grid;align-content:center;padding:clamp(28px,4vw,52px);border-left:1px solid rgba(248,239,215,.2)}.moments-copy h3{margin:13px 0 16px;font-family:Georgia,"Times New Roman",serif;font-size:clamp(31px,4vw,52px);font-weight:500;line-height:1}.moments-copy p{margin:0;color:rgba(248,239,215,.7);font-size:14px;line-height:1.75}.moments-meta{display:grid;grid-template-columns:1fr 1fr;gap:1px;margin-top:24px;background:rgba(248,239,215,.18)}.moments-meta div{padding:12px;background:#10271e}.moments-meta span{display:block;color:#d5ab55;font-size:9px;font-weight:900;text-transform:uppercase}.moments-meta strong{display:block;margin-top:6px;font-family:Georgia,"Times New Roman",serif;font-size:16px;font-weight:500}.moments-link{display:inline-flex;justify-content:center;margin-top:22px;padding:12px 14px;color:var(--green);background:var(--ivory);font-size:10px;font-weight:900;text-transform:uppercase}
 .moments-media img{object-position:40% 100%;transform:scale(1.5);transform-origin:40% 100%}
-.intro{position:relative;display:block;padding:0;background:var(--paper);overflow:hidden;animation:intro-surface 24s ease-in-out infinite}
-.intro-anchor{position:absolute;inset:0 auto auto 0;width:1px;height:1px;pointer-events:none}
+.intro{position:relative;display:block;padding:0;background:var(--paper);overflow:hidden}
 .intro-copy{position:relative;z-index:2;min-height:clamp(620px,62vw,780px)}
 .intro-copy-panel{position:absolute;inset:0 auto 0 0;width:60%;display:grid;align-content:center;gap:clamp(22px,2.5vw,32px);padding:clamp(58px,7vw,92px) clamp(18px,5vw,72px);will-change:opacity}
-.intro-copy-panel-primary{color:var(--ink);animation:intro-copy-primary 24s ease-in-out infinite}
-.intro-copy-panel-secondary{inset:0 0 0 auto;color:var(--ivory);opacity:0;visibility:hidden;animation:intro-copy-secondary 24s ease-in-out infinite}
+.intro-copy-panel-primary{color:var(--ink)}
 .intro-photo{position:absolute;inset:0;isolation:isolate;overflow:hidden;pointer-events:none}
 .intro-photo-frame{position:absolute;top:0;bottom:0;width:calc(40% + clamp(110px,13vw,190px));z-index:0;background-position:center 54%;background-size:cover;background-repeat:no-repeat;will-change:opacity}
-.intro-photo-frame-primary{right:0;background-image:url("assets/home/invitation-court.jpg");-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 clamp(120px,14vw,200px));mask-image:linear-gradient(90deg,transparent 0%,#000 clamp(120px,14vw,200px));animation:intro-scene-primary 24s ease-in-out infinite}
-.intro-photo-frame-secondary{left:0;background-image:url("assets/home/invitation-court-02.jpg");-webkit-mask-image:linear-gradient(270deg,transparent 0%,#000 clamp(120px,14vw,200px));mask-image:linear-gradient(270deg,transparent 0%,#000 clamp(120px,14vw,200px));opacity:0;animation:intro-scene-secondary 24s ease-in-out infinite}
-.intro-photo-frame:after{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 68%,rgba(8,24,17,.22));pointer-events:none;content:""}
-@keyframes intro-scene-primary{0%,37.5%{opacity:1}50%,87.5%{opacity:0}100%{opacity:1}}
+.intro-photo-frame-primary{right:0;background-image:url("assets/home/invitation-court.jpg");-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 clamp(120px,14vw,200px));mask-image:linear-gradient(90deg,transparent 0%,#000 clamp(120px,14vw,200px))}
+.intro-photo-frame-secondary{right:0;background-image:url("assets/home/invitation-court-02.jpg");-webkit-mask-image:linear-gradient(90deg,transparent 0%,#000 clamp(120px,14vw,200px));mask-image:linear-gradient(90deg,transparent 0%,#000 clamp(120px,14vw,200px));opacity:0;animation:intro-scene-secondary 24s ease-in-out infinite}
+.intro-photo:after{position:absolute;inset:0;z-index:1;background:linear-gradient(180deg,transparent 68%,rgba(8,24,17,.22));pointer-events:none;content:""}
 @keyframes intro-scene-secondary{0%,37.5%{opacity:0}50%,87.5%{opacity:1}100%{opacity:0}}
-@keyframes intro-copy-primary{0%,37.5%{opacity:1;visibility:visible}43.75%,93.75%{opacity:0;visibility:hidden}100%{opacity:1;visibility:visible}}
-@keyframes intro-copy-secondary{0%,43.75%{opacity:0;visibility:hidden}50%,87.5%{opacity:1;visibility:visible}93.75%,100%{opacity:0;visibility:hidden}}
-@keyframes intro-surface{0%,37.5%{background-color:var(--paper)}50%,87.5%{background-color:var(--green)}100%{background-color:var(--paper)}}
 .intro h2{max-width:660px;margin:12px 0 0;font-family:Georgia,"Times New Roman",serif;font-size:64px;font-weight:500;line-height:1.04}
 .intro-copy-panel>p{max-width:640px;margin:0 0 0 clamp(44px,5vw,64px);color:rgba(23,36,30,.7);font-size:15px;line-height:1.8}
 .quote{max-width:620px;margin-left:clamp(44px,5vw,64px);padding:0;color:var(--green);background:transparent;border:0;border-radius:0;box-shadow:none}
 .quote p{margin:0;color:var(--green);font-family:Georgia,"Times New Roman",serif;font-size:35px;line-height:1.22}
-.intro-copy-panel-secondary .kicker{color:#d5ab55}.intro-copy-panel-secondary h2{max-width:550px;font-size:48px}
-.intro-format-list{display:grid;max-width:550px;gap:0;margin-top:2px}
-.intro-format-step{display:grid;grid-template-columns:54px minmax(0,1fr);gap:16px;align-items:start;padding:15px 0;border-top:1px solid rgba(248,239,215,.18)}
-.intro-format-step:last-child{border-bottom:1px solid rgba(248,239,215,.18)}
-.intro-format-step .num{color:var(--gold);font-family:Georgia,"Times New Roman",serif;font-size:30px;line-height:1}
-.intro-format-step h3{margin:1px 0 6px;font-family:Georgia,"Times New Roman",serif;font-size:20px;font-weight:500}.intro-format-step p{margin:0;color:rgba(248,239,215,.7);font-size:12px;line-height:1.55}
-@media(min-width:861px){.intro-copy-panel{padding-left:clamp(92px,10vw,156px);padding-right:clamp(28px,4vw,64px)}.intro-copy-panel-secondary{width:50%;grid-template-columns:minmax(0,550px);justify-content:center;padding-left:clamp(32px,4vw,64px);padding-right:clamp(32px,4vw,64px)}}
-@media(min-width:861px) and (max-width:1200px){.intro h2{font-size:48px}.intro .quote p{font-size:28px}.intro-copy-panel-secondary h2{font-size:40px}.intro-format-step{grid-template-columns:36px minmax(0,1fr);gap:12px;padding:12px}.intro-format-step h3{font-size:18px}}
+@media(min-width:861px){.intro-copy-panel{padding-left:clamp(92px,10vw,156px);padding-right:clamp(28px,4vw,64px)}}
+@media(min-width:861px) and (max-width:1200px){.intro h2{font-size:48px}.intro .quote p{font-size:28px}}
 .faq{background:#efe0bf}
 .faq-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:28px}
 details{padding:18px 20px;background:rgba(255,250,240,.66);border:1px solid var(--line);border-radius:8px}
@@ -199,18 +187,15 @@ body *{letter-spacing:0!important}
   .moments{padding-top:30px;padding-bottom:30px}.moments-head{align-items:flex-start;flex-direction:column}.moments-layout{margin-top:24px}.moments-media,.moments-media img{min-height:280px}.moments-media img{transform:scale(1.35)}.moments-copy{border-top:1px solid rgba(248,239,215,.2);border-left:0}
   .intro{min-height:800px;color:var(--ivory)}
   .intro-photo-frame{inset:0;width:100%;background-position:center 48%;-webkit-mask-image:none;mask-image:none}
-  .intro-photo-frame:after{background:linear-gradient(180deg,rgba(8,24,17,.08) 12%,rgba(8,24,17,.32) 43%,rgba(8,24,17,.94) 78%)}
+  .intro-photo:after{background:linear-gradient(180deg,rgba(8,24,17,.08) 12%,rgba(8,24,17,.32) 43%,rgba(8,24,17,.94) 78%)}
   .intro-copy{z-index:1;min-height:800px}
   .intro-copy-panel{inset:0;width:100%;display:flex;min-height:800px;flex-direction:column;justify-content:flex-end;gap:20px;padding:230px 18px 40px;background:transparent}
   .intro .kicker{color:#e3bc65}.intro h2{color:var(--ivory);font-size:44px}
   .intro-copy-panel>p{margin-left:0;color:rgba(248,239,215,.82);font-size:14px;line-height:1.7}
   .intro .quote{margin-left:0;padding:20px;background:rgba(20,51,35,.86);box-shadow:none;backdrop-filter:blur(8px)}.intro .quote p{color:var(--ivory);font-size:28px}
-  .intro-copy-panel-secondary{padding-top:150px}.intro-copy-panel-secondary h2{font-size:36px}
-  .intro-format-list{width:100%;margin-top:0;backdrop-filter:blur(8px)}
-  .intro-format-step{grid-template-columns:38px minmax(0,1fr);gap:10px;padding:10px 12px;background:rgba(20,51,35,.88)}.intro-format-step .num{font-size:23px}.intro-format-step h3{font-size:17px}.intro-format-step p{font-size:11px;line-height:1.42}
   footer{flex-direction:column}
 }
-@media(prefers-reduced-motion:reduce){.intro,.intro-photo-frame,.intro-copy-panel{animation:none!important}.intro-photo-frame-primary,.intro-copy-panel-primary{opacity:1;visibility:visible}.intro-photo-frame-secondary,.intro-copy-panel-secondary{opacity:0;visibility:hidden}body:has(#format:target) .intro{background-color:var(--green)}body:has(#format:target) .intro-photo-frame-primary,body:has(#format:target) .intro-copy-panel-primary{opacity:0;visibility:hidden}body:has(#format:target) .intro-photo-frame-secondary,body:has(#format:target) .intro-copy-panel-secondary{opacity:1;visibility:visible}}
+@media(prefers-reduced-motion:reduce){.intro-photo-frame-secondary{animation:none}}
 </style>
 <style>@media(max-width:700px){.hero{min-height:40svh;padding-top:64px;padding-bottom:24px}.hero-copy{display:none}.hero .eyebrow{margin-bottom:12px}.hero .actions{gap:8px;margin-top:18px}.hero .button{padding:10px 12px;font-size:10px}}</style>
 <link rel="stylesheet" href="moments.css?v=9">
@@ -284,23 +269,11 @@ body *{letter-spacing:0!important}
       <div class="quote"><p>Health is wealth. Every rally is an investment in yourself.</p></div>
       <p>金鸽杯为想认真打球、也想认识同频朋友的人设计。你可以带搭档，也可以单人报名；现场会安排轻竞技轮转、分级对局、合影和赛后交流，让比赛有张力，周末有余韵。</p>
     </article>
-    <article class="intro-copy-panel intro-copy-panel-secondary">
-      <div>
-        <span class="kicker">Cup format</span>
-        <h2>复古一点，讲究一点，也好玩一点。</h2>
-      </div>
-      <div class="intro-format-list">
-        <div class="intro-format-step"><span class="num">01</span><div><h3>Sign Up</h3><p>报名系统独立运行，支持名额上限、waitlist、付款确认和名单复制。主页只负责介绍，报名页负责行动。</p></div></div>
-        <div class="intro-format-step"><span class="num">02</span><div><h3>Golden Sets</h3><p>比赛当天进入场地页，读取报名名单，生成三轮升降级赛程。管理员可以调整场地、录入比分。</p></div></div>
-        <div class="intro-format-step"><span class="num">03</span><div><h3>Dove Attendance</h3><p>每周名单归档后自动记录实际到场次数，不计算胜局和积分，长期参加一目了然。</p></div></div>
-      </div>
-    </article>
   </div>
   <div class="intro-photo" role="img" aria-label="MRTC 室内网球场上的金鸽巡回赛现场照片轮播">
     <span class="intro-photo-frame intro-photo-frame-primary" aria-hidden="true"></span>
     <span class="intro-photo-frame intro-photo-frame-secondary" aria-hidden="true"></span>
   </div>
-  <span id="format" class="intro-anchor" aria-hidden="true"></span>
 </section>
 
 <section class="faq">
@@ -322,29 +295,6 @@ body *{letter-spacing:0!important}
 <script src="gallery.js?v=3"></script>
 <script src="moments.js?v=10"></script>
 <script>
-(function mountIntroScenes(){
-  const intro=document.getElementById('about');
-  if(!intro||typeof intro.getAnimations!=='function')return;
-  const selectScene=hash=>{
-    const time=hash==='#format'?12000:0;
-    intro.getAnimations({subtree:true}).forEach(animation=>{animation.currentTime=time});
-  };
-  window.addEventListener('hashchange',()=>{
-    if(location.hash==='#about'||location.hash==='#format')selectScene(location.hash);
-  });
-  document.addEventListener('click',event=>{
-    const link=event.target.closest('a[href="./#about"],a[href="./#format"]');
-    if(link&&link.hash===location.hash)selectScene(link.hash);
-  });
-  if(typeof IntersectionObserver==='function'){
-    const observer=new IntersectionObserver(entries=>{
-      if(!entries.some(entry=>entry.isIntersecting))return;
-      selectScene(location.hash);
-      observer.disconnect();
-    },{threshold:.15});
-    observer.observe(intro);
-  }else selectScene(location.hash);
-}());
 (function renderFeaturedEvent(){
   const activeEvents=(window.DOVE_EVENTS||[]).filter(item=>window.DoveEventStatus.forEvent(item)!=='已结束');
   const event=activeEvents.find(item=>item.featured)||activeEvents[0];
